@@ -11,7 +11,13 @@
         "dev": "nodemon --exec tsx src/backend/server.ts",
         "dev:build": "tsc --watch",
         "clean": "rm -rf dist",
-        "type-check": "tsc --noEmit"
+        "clean:deep": "rm -rf dist node_modules package-lock.json && npm install",
+        "type-check": "tsc --noEmit",
+        "lint": "echo 'Linting not configured yet'",
+        "test": "echo 'Tests not configured yet'",
+        "validate": "npm run type-check && npm run lint && npm run test",
+        "prebuild": "npm run validate",
+        "docker:build": "docker build -t text-template ."
     },
     "author": "",
     "license": "ISC",
