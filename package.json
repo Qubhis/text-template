@@ -1,0 +1,12 @@
+{
+    "name": "text-template",
+    "version": "1.0.0",
+    "description": "text template app",
+    "private": true,
+    "scripts": {
+        "start": "",
+        "build": "tsc"
+    },
+    "author": "",
+    "license": "ISC"
+}
