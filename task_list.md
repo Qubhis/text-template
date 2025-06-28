@@ -8,7 +8,7 @@
 - [x] **T1.2** - Set up Express server with basic middleware
 - [x] **T1.3** - Create project folder structure
 - [x] **T1.4** - Configure build scripts and development workflow
-- [ ] **T1.5** - Create Dockerfile and docker-compose for development
+- [x] **T1.5** - Create Dockerfile and docker-compose for development
 
 ### 2. Data Layer Foundation
 
