@@ -8,6 +8,7 @@
         "build:backend": "tsc",
         "build:frontend": "cp -r src/frontend/styles src/frontend/index.html ./dist/frontend",
         "start": "node dist/backend/server.js",
+        "start:prod": "NODE_ENV=production node dist/backend/server.js",
         "dev": "nodemon --exec tsx src/backend/server.ts",
         "dev:build": "tsc --watch",
         "clean": "rm -rf dist",
