@@ -4,9 +4,9 @@
 
 ### 1. Project Infrastructure
 
-- [ ] **T1.1** - Initialize Node.js project with TypeScript configuration
-- [ ] **T1.2** - Set up Express server with basic middleware
-- [ ] **T1.3** - Create project folder structure
+- [x] **T1.1** - Initialize Node.js project with TypeScript configuration
+- [x] **T1.2** - Set up Express server with basic middleware
+- [x] **T1.3** - Create project folder structure
 - [ ] **T1.4** - Configure build scripts and development workflow
 - [ ] **T1.5** - Create Dockerfile and docker-compose for development
 

@@ -4,9 +4,28 @@
     "description": "text template app",
     "private": true,
     "scripts": {
-        "start": "",
-        "build": "tsc"
+        "build": "npm run build:backend && npm run build:frontend",
+        "build:backend": "tsc",
+        "build:frontend": "cp -r src/frontend/styles src/frontend/index.html ./dist/frontend",
+        "start": "node dist/backend/server.js",
+        "dev": "nodemon --exec tsx src/backend/server.ts",
+        "dev:build": "tsc --watch",
+        "clean": "rm -rf dist",
+        "type-check": "tsc --noEmit"
     },
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^5.1.0",
+        "typescript": "^5.8.3"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.0.7",
+        "nodemon": "^3.1.10",
+        "prettier": "^3.6.2",
+        "tsx": "^4.20.3"
+    }
 }
