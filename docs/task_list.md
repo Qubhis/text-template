@@ -43,14 +43,21 @@
 - [x] **T7.2** - Implement template data management (fetch, cache, update)
 - [x] **T7.3** - Add error handling and loading states
 - [ ] **T7.4** - Create state management for current template
+    - [x] Application initialization and dependency injection
+    - [x] UI event listeners setup (tabs, search, navigation)
+    - [x] Template list display structure
+    - [ ] Save template functionality (create/update)
+    - [ ] Load template into form when selected
+    - [ ] Form state management (dirty state, validation)
+    - [ ] Cancel/reset functionality
 
 ### 8. Template List (Sidebar)
 
-- [ ] **T8.1** - Display list of templates in sidebar
-- [ ] **T8.2** - Add template selection functionality
-- [ ] **T8.3** - Implement "Create New Template" button
+- [ ] **T8.1** - Display list of templates in sidebar (depends on T7.4 save functionality)
+- [ ] **T8.2** - Add template selection functionality (depends on T7.4 load functionality)
+- [ ] **T8.3** - Implement "Create New Template" button (already basic version in T7.4)
 - [ ] **T8.4** - Add category grouping in template list
-- [ ] **T8.5** - Add template search/filter functionality
+- [ ] **T8.5** - Add template search/filter functionality (basic version in T7.4)
 
 ## Phase 4: Core Template Features
 
