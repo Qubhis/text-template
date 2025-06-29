@@ -69,6 +69,19 @@ interface RequestOptions {
     timeout?: number;
 }
 
+export function isTemplate(value: unknown): value is Template {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "id" in value &&
+        "title" in value &&
+        "content" in value &&
+        "category" in value &&
+        "created" in value &&
+        "modified" in value
+    );
+}
+
 /**
  * Enhanced fetch wrapper with timeout, retries, and error handling
  */

@@ -2,7 +2,7 @@
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
 
-import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category, ApiError, ApiUtils } from "./apiClient";
+import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category, ApiError, ApiUtils, isTemplate } from "./apiClient.js";
 
 // Application state interfaces
 export interface AppState {
@@ -14,6 +14,22 @@ export interface AppState {
     error: string | null;
     searchQuery: string;
     filteredTemplates: Template[];
+}
+
+export interface SearchChangedEventParameters {
+    query: string;
+    results: Template[];
+}
+
+export function isSearchChangedEventParameters(value: unknown): value is SearchChangedEventParameters {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "query" in value &&
+        "results" in value &&
+        Array.isArray(value.results) &&
+        value.results.every((result) => isTemplate(result))
+    );
 }
 
 // Event types for state change notifications
@@ -246,7 +262,7 @@ export class TemplateManager {
             filteredTemplates: filtered,
         });
 
-        this.emit("search-changed", { query: normalizedQuery, results: filtered });
+        this.emit("search-changed", { query: normalizedQuery, results: filtered } as SearchChangedEventParameters);
     }
 
     /**

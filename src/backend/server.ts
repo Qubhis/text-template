@@ -59,6 +59,8 @@ app.use("/api", (req, res, next) => {
     });
 });
 
+// Serve compiled JavaScript files from dist
+app.use("/scripts", express.static(path.join(__dirname, "../frontend/scripts")));
 // Serve static files (frontend)
 app.use(express.static(path.join(__dirname, "../frontend")));
 

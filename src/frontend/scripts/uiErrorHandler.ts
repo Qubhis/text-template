@@ -2,8 +2,8 @@
 // UI Error Handler & Loading States Management
 // Integrates with TemplateManager events to provide user feedback
 
-import { TemplateManager, StateChangeEvent, StateChangeListener } from "./templateManager";
-import { ApiUtils } from "./apiClient";
+import { TemplateManager, StateChangeEvent, StateChangeListener } from "./templateManager.js";
+import { ApiUtils } from "./apiClient.js";
 
 // Error display types
 export type ErrorType = "error" | "warning" | "info" | "success";
