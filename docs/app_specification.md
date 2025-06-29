@@ -105,33 +105,44 @@ A simple web application for managing and using text templates with variable sub
 }
 ```
 
-## API Endpoints
+## API Endpoints (Implemented)
 
-### Templates
+### Templates API
+
+- **Base URL**: `/api/templates`
+- **Authentication**: None (local application)
+- **Content-Type**: `application/json`
+
+#### Response Format
+
+```typescript
+interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+    message?: string;
+    count?: number; // For list operations
+}
+```
+
+#### Endpoints
 
 - `GET /api/templates` - List all templates
-- `GET /api/templates/:id` - Get specific template
+    - **Response**: `{ success: true, data: Template[], count: number }`
+- `GET /api/templates/:id` - Get template by ID
+    - **Response**: `{ success: true, data: Template }`
+    - **Errors**: 404 if not found, 400 if invalid ID
 - `POST /api/templates` - Create new template
+    - **Body**: `CreateTemplateInput`
+    - **Response**: `{ success: true, data: Template, message: string }` (201)
+    - **Errors**: 400 if validation fails
 - `PUT /api/templates/:id` - Update template
+    - **Body**: Partial `UpdateTemplateInput`
+    - **Response**: `{ success: true, data: Template, message: string }`
+    - **Errors**: 404 if not found, 400 if validation fails
 - `DELETE /api/templates/:id` - Delete template
-
-### Categories
-
-- `GET /api/categories` - List all categories
-- `POST /api/categories` - Create category
-- `PUT /api/categories/:id` - Update category
-- `DELETE /api/categories/:id` - Delete category
-
-### Template Processing
-
-- `POST /api/templates/:id/process` - Process template with variables
-- `POST /api/templates/:id/preview` - Generate preview
-
-### Import/Export
-
-- `GET /api/export` - Export all templates as ZIP
-- `POST /api/import` - Import templates from ZIP/JSON
-- `GET /api/templates/:id/export` - Export single template
+    - **Response**: `{ success: true, message: string }`
+    - **Errors**: 404 if not found
 
 ## File System Structure
 
@@ -139,7 +150,7 @@ A simple web application for managing and using text templates with variable sub
 /app/
   src/
     backend/
-      server.ts                          👈 T1.2 - Express server setup
+      server.ts                            👈 T1.2 - Express server + T3 integration
       models/
         template.ts                      👈 T2.2 - Template data models & validation
         category.ts                      👈 T5.1 - Category data models
@@ -198,11 +209,9 @@ CMD ["npm", "start"]
 
 ## Implementation Status
 
-### ✅ Phase 1: Foundation & Core Backend (COMPLETED)
-
 #### T1.1-T1.5: Project Setup
 
-- **Status**: Completed (assumed)
+- **Status**: ✅ Completed (assumed)
 - **Implementation**: Node.js + Express + TypeScript project structure
 
 #### T2.1: File System Utilities
@@ -252,6 +261,26 @@ CMD ["npm", "start"]
     - **Graceful Degradation**: Expected scenarios (like deleting non-existent files) handled gracefully
     - **Operation Context**: All errors include what operation was being performed
 
+#### T3.1-T3.5: Template API Endpoints
+
+- **Status**: ✅ Completed
+- **Implementation**: REST API routes in `src/backend/routes/templates.ts`
+- **Approach**:
+    - **Middleware-Based Architecture**: Reusable validation middleware (`validateTemplateId`, `validateRequestBody`)
+    - **Centralized Error Handling**: `handleTemplateError()` function with proper HTTP status codes
+    - **Async Error Wrapper**: `asyncHandler()` middleware for automatic error catching
+    - **Consistent Response Format**: `ApiResponse<T>` interface for standardized JSON responses
+    - **HTTP Status Constants**: `HTTP_STATUS` object for maintainable status codes
+    - **Route Endpoints**:
+        - `GET /api/templates` - List all templates with count
+        - `GET /api/templates/:id` - Get single template by ID
+        - `POST /api/templates` - Create new template (returns 201)
+        - `PUT /api/templates/:id` - Update existing template
+        - `DELETE /api/templates/:id` - Delete template
+    - **Error Categories**: Proper 400/404/500 responses based on error type
+    - **Dependency Injection**: TemplateService injected via factory function
+    - **Server Integration**: Connected to Express server with service initialization
+
 ## Development Phases & Roadmap
 
 ### ✅ Phase 1: Foundation & Core Backend (COMPLETED)
@@ -259,12 +288,15 @@ CMD ["npm", "start"]
 1. **Project Setup** (T1.1-T1.5) - Node.js, TypeScript, Express, Docker setup
 2. **Data Layer** (T2.1-T2.4) - File utilities, data models, template service, error handling
 
-### 🔄 Phase 2: API Layer (IN PROGRESS)
+### ✅ Phase 2: API Layer (COMPLETED)
 
 1. **Template API** (T3.1-T3.5) - CRUD endpoints for templates
-2. **Processing Engine** (T4.1-T4.5) - Variable parsing and substitution
 
-### 📋 Phase 3: Basic Frontend (PLANNED)
+### 🔄 Phase 3: Template Processing Engine (IN PROGRESS)
+
+1. **Processing Engine** (T4.1-T4.5) - Variable parsing and substitution
+
+### 📋 Phase 4: Basic Frontend (PLANNED)
 
 1. **UI Structure** (T6.1-T6.4) - HTML layout, CSS, basic styling
 2. **Data Layer** (T7.1-T7.4) - API client, state management

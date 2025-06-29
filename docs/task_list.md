@@ -18,17 +18,17 @@
 - [x] **T2.4** - Add error handling for file operations
 - ~~**T2.5** - Create data directory initialization~~ _(Merged into T2.1)_
 
-## Phase 2: Backend API 🔄 IN PROGRESS
+## Phase 2: Backend API ✅ COMPLETED
 
-### 3. Core API Endpoints
+### 3. Core API Endpoints ✅ COMPLETED
 
-- [ ] **T3.1** - Implement GET /api/templates (list all templates)
-- [ ] **T3.2** - Implement GET /api/templates/:id (get single template)
-- [ ] **T3.3** - Implement POST /api/templates (create template)
-- [ ] **T3.4** - Implement PUT /api/templates/:id (update template)
-- [ ] **T3.5** - Implement DELETE /api/templates/:id (delete template)
+- [x] **T3.1** - Implement GET /api/templates (list all templates)
+- [x] **T3.2** - Implement GET /api/templates/:id (get single template)
+- [x] **T3.3** - Implement POST /api/templates (create template)
+- [x] **T3.4** - Implement PUT /api/templates/:id (update template)
+- [x] **T3.5** - Implement DELETE /api/templates/:id (delete template)
 
-### 4. Template Processing Engine
+## Phase 3: Template Processing Engine 🔄 IN PROGRESS
 
 - [ ] **T4.1** - Create variable parser (extract {{variables}} from text)
 - [ ] **T4.2** - Implement basic variable substitution
