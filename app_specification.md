@@ -35,39 +35,39 @@ A simple web application for managing and using text templates with variable sub
 - **Basic variables**: `{{variable}}` - generates text input
 - **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
 - **Enhanced variable types**:
-  - `{{name:text}}` - text input (default)
-  - `{{count:number}}` - number input
-  - `{{enabled:boolean}}` - checkbox
-  - `{{date:date}}` - date picker
+    - `{{name:text}}` - text input (default)
+    - `{{count:number}}` - number input
+    - `{{enabled:boolean}}` - checkbox
+    - `{{date:date}}` - date picker
 - **Conditional logic**: Simple if/else blocks
-  ```
-  {{#if variable}}This shows when variable has value{{/if}}
-  ```
+    ```
+    {{#if variable}}This shows when variable has value{{/if}}
+    ```
 
 ### 3. Template Processing
 
 - Real-time preview as variables are filled
 - Support for Markdown formatting in templates
 - Multiple output formats:
-  - Formatted (Markdown rendered)
-  - Plain text (Markdown syntax removed)
-  - Raw (exact template output)
+    - Formatted (Markdown rendered)
+    - Plain text (Markdown syntax removed)
+    - Raw (exact template output)
 
 ### 4. User Interface
 
 - **Layout**: Resizable sidebar (templates list) + main content area
 - **Sidebar** (~25% width, resizable):
-  - Template list with categories
-  - Create new template button
-  - Category management
+    - Template list with categories
+    - Create new template button
+    - Category management
 - **Main Area** (tabbed interface):
-  - **Edit Tab**: Template editor with variable inputs
-  - **Preview Tab**: Real-time formatted preview
-  - **Output Tab**: Final text with copy button
+    - **Edit Tab**: Template editor with variable inputs
+    - **Preview Tab**: Real-time formatted preview
+    - **Output Tab**: Final text with copy button
 - **Template Actions**:
-  - Edit button (pencil icon)
-  - Delete button (with confirmation)
-  - Copy output button
+    - Edit button (pencil icon)
+    - Delete button (with confirmation)
+    - Copy output button
 
 ## Data Models
 
@@ -75,14 +75,14 @@ A simple web application for managing and using text templates with variable sub
 
 ```json
 {
-  "id": "unique-id",
-  "title": "Template Title",
-  "content": "Template content with {{variables}}",
-  "category": "category-id",
-  "created": "2025-06-28T10:00:00Z",
-  "modified": "2025-06-28T10:00:00Z",
-  "description": "Optional description",
-  "tags": ["tag1", "tag2"]
+    "id": "unique-id",
+    "title": "Template Title",
+    "content": "Template content with {{variables}}",
+    "category": "category-id",
+    "created": "2025-06-28T10:00:00Z",
+    "modified": "2025-06-28T10:00:00Z",
+    "description": "Optional description",
+    "tags": ["tag1", "tag2"]
 }
 ```
 
@@ -90,18 +90,18 @@ A simple web application for managing and using text templates with variable sub
 
 ```json
 {
-  "categories": [
-    {
-      "id": "prompts",
-      "name": "LLM Prompts",
-      "color": "#3b82f6"
-    },
-    {
-      "id": "emails",
-      "name": "Email Templates",
-      "color": "#10b981"
-    }
-  ]
+    "categories": [
+        {
+            "id": "prompts",
+            "name": "LLM Prompts",
+            "color": "#3b82f6"
+        },
+        {
+            "id": "emails",
+            "name": "Email Templates",
+            "color": "#10b981"
+        }
+    ]
 }
 ```
 
@@ -139,35 +139,38 @@ A simple web application for managing and using text templates with variable sub
 /app/
   src/
     backend/
-      server.ts
+      server.ts                    👈 T1.2 - Express server setup ✅
+      models/                      👈 NEW - Data models and validation
+        template.ts                👈 T2.2 - Template data models ✅
+        category.ts                👈 T5.1 - Category data models
       routes/
-        templates.ts
-        categories.ts
-        processing.ts
+        templates.ts               👈 T3.1-T3.5 - Template API endpoints
+        categories.ts              👈 T5.2-T5.4 - Category API endpoints
+        processing.ts              👈 T4.4 - Template processing endpoints
       services/
-        templateService.ts
-        categoryService.ts
+        templateService.ts         👈 T2.3 - Template CRUD operations
+        categoryService.ts         👈 T5.1 - Category service
       utils/
-        fileManager.ts
-        templateParser.ts
+        fileManager.ts             👈 T2.1 - File system utilities ✅
+        templateParser.ts          👈 T4.1 - Variable parsing utilities
     frontend/
-      index.html
+      index.html                   👈 T6.1 - HTML layout
       styles/
-        main.css
+        main.css                   👈 T6.2 - CSS styling
       scripts/
-        main.ts
-        templateManager.ts
-        variableParser.ts
-  data/                    # Docker volume mount point
-    templates/             # Individual template JSON files
-    categories.json        # Categories configuration
-    backups/              # Automatic backups
+        main.ts                    👈 T7.1 - Main frontend application
+        templateManager.ts         👈 T7.2 - Template data management
+        variableParser.ts          👈 T10.1 - Frontend variable parsing
+  data/                            # Docker volume mount point
+    templates/                     # Individual template JSON files
+    categories.json                # Categories configuration
+    backups/                       # Automatic backups (future)
 ```
 
 ## Docker Setup
 
 ```dockerfile
-FROM node:22-alpine
+FROM node:18-alpine
 WORKDIR /app
 COPY . .
 RUN npm install && npm run build
