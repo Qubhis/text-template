@@ -190,6 +190,7 @@ interface ApiResponse<T> {
         main.css                         👈 T6.2 - CSS styling
       scripts/
         main.ts                          👈 T7.1 - Frontend entry point
+        apiClient.ts                     👈 T7.1 - Api Client
         templateManager.ts               👈 T8.1-T8.5 - Template list management
         templateParser.ts                👈 T10.1-T10.5 - Frontend variable parsing & processing
         variableInputs.ts                👈 T10.1-T10.5 - Variable input generation
