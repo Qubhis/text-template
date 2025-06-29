@@ -1,7 +1,7 @@
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
 
-import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category } from "./apiClient.js";
+import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category } from "./apiClient";
 
 // Application state interfaces
 export interface AppState {
@@ -11,8 +11,6 @@ export interface AppState {
     selectedTemplateId: string | null;
     isLoading: boolean;
     error: string | null;
-    lastSync: Date | null;
-    isDirty: boolean; // Has unsaved changes
     searchQuery: string;
     filteredTemplates: Template[];
 }
@@ -33,17 +31,6 @@ export type StateChangeEvent =
 // Event listener callback type
 export type StateChangeListener = (event: StateChangeEvent, data?: unknown) => void;
 
-// Cache configuration
-interface CacheConfig {
-    maxAge: number; // milliseconds
-    maxSize: number; // number of templates
-}
-
-const CACHE_CONFIG: CacheConfig = {
-    maxAge: 5 * 60 * 1000, // 5 minutes
-    maxSize: 100, // max 100 templates in cache
-};
-
 /**
  * Template Data Manager
  * Central state management for template data with caching and event system
@@ -51,12 +38,10 @@ const CACHE_CONFIG: CacheConfig = {
 export class TemplateManager {
     private state: AppState;
     private listeners: Map<StateChangeEvent, Set<StateChangeListener>>;
-    private cache: Map<string, { template: Template; timestamp: number }>;
 
     constructor() {
         this.state = this.createInitialState();
         this.listeners = new Map();
-        this.cache = new Map();
         this.initializeEventTypes();
     }
 
@@ -75,7 +60,6 @@ export class TemplateManager {
                 templates,
                 categories,
                 filteredTemplates: templates,
-                lastSync: new Date(),
             });
 
             this.emit("templates-loaded", templates);
@@ -122,69 +106,37 @@ export class TemplateManager {
     }
 
     /**
-     * Get template by ID (with caching)
+     * Get template by ID from current state
      */
-    async getTemplate(id: string): Promise<Template | null> {
+    getTemplate(id: string): Template | null {
         if (!id) return null;
 
-        try {
-            // Check cache first
-            const cached = this.cache.get(id);
-            if (cached && this.isCacheValid(cached.timestamp)) {
-                return { ...cached.template };
-            }
-
-            this.setLoading(true);
-            const template = await ApiClient.getTemplate(id);
-
-            // Update cache
-            this.cache.set(id, { template, timestamp: Date.now() });
-            this.cleanupCache();
-
-            // Update state if this is the current template
-            if (this.state.selectedTemplateId === id) {
-                this.updateState({ currentTemplate: template });
-            }
-
-            return { ...template };
-        } catch (error) {
-            this.handleError(`Failed to load template "${id}"`, error);
-            return null;
-        } finally {
-            this.setLoading(false);
-        }
+        const template = this.state.templates.find((t) => t.id === id);
+        return template ? { ...template } : null;
     }
 
     /**
      * Select a template by ID
      */
-    async selectTemplate(id: string | null): Promise<void> {
-        try {
-            if (id === null) {
-                this.updateState({
-                    selectedTemplateId: null,
-                    currentTemplate: null,
-                    isDirty: false,
-                });
-                this.emit("template-selected", null);
-                return;
-            }
+    selectTemplate(id: string | null): void {
+        if (id === null) {
+            this.updateState({
+                selectedTemplateId: null,
+                currentTemplate: null,
+            });
+            this.emit("template-selected", null);
+            return;
+        }
 
-            this.setLoading(true);
-            const template = await this.getTemplate(id);
-
-            if (template) {
-                this.updateState({
-                    selectedTemplateId: id,
-                    currentTemplate: template,
-                    isDirty: false,
-                });
-                this.emit("template-selected", template);
-            }
-        } catch (error) {
-            this.handleError(`Failed to select template "${id}"`, error);
-        } finally {
-            this.setLoading(false);
+        const template = this.getTemplate(id);
+        if (template) {
+            this.updateState({
+                selectedTemplateId: id,
+                currentTemplate: template,
+            });
+            this.emit("template-selected", template);
+        } else {
+            this.handleError(`Template "${id}" not found`, new Error("Template not found"));
         }
     }
 
@@ -205,12 +157,7 @@ export class TemplateManager {
                 filteredTemplates: this.filterTemplates(updatedTemplates, this.state.searchQuery),
                 currentTemplate: newTemplate,
                 selectedTemplateId: newTemplate.id,
-                isDirty: false,
-                lastSync: new Date(),
             });
-
-            // Update cache
-            this.cache.set(newTemplate.id, { template: newTemplate, timestamp: Date.now() });
 
             this.emit("template-created", newTemplate);
             return { ...newTemplate };
@@ -239,12 +186,7 @@ export class TemplateManager {
                 templates: updatedTemplates,
                 filteredTemplates: this.filterTemplates(updatedTemplates, this.state.searchQuery),
                 currentTemplate: this.state.selectedTemplateId === id ? updatedTemplate : this.state.currentTemplate,
-                isDirty: false,
-                lastSync: new Date(),
             });
-
-            // Update cache
-            this.cache.set(id, { template: updatedTemplate, timestamp: Date.now() });
 
             this.emit("template-updated", updatedTemplate);
             return { ...updatedTemplate };
@@ -271,20 +213,15 @@ export class TemplateManager {
             const newState: Partial<AppState> = {
                 templates: updatedTemplates,
                 filteredTemplates: this.filterTemplates(updatedTemplates, this.state.searchQuery),
-                lastSync: new Date(),
             };
 
             // Clear current template if it was deleted
             if (this.state.selectedTemplateId === id) {
                 newState.selectedTemplateId = null;
                 newState.currentTemplate = null;
-                newState.isDirty = false;
             }
 
             this.updateState(newState);
-
-            // Remove from cache
-            this.cache.delete(id);
 
             this.emit("template-deleted", { id });
             return true;
@@ -323,35 +260,23 @@ export class TemplateManager {
             this.updateState({
                 templates,
                 filteredTemplates: this.filterTemplates(templates, this.state.searchQuery),
-                lastSync: new Date(),
             });
 
-            // Clear cache to force fresh data
-            this.cache.clear();
+            // Clear cache to force fresh data on next access
+            this.state.templates.forEach((template) => {
+                // Update unknown templates that might have changed
+                const freshTemplate = templates.find((t) => t.id === template.id);
+                if (freshTemplate && freshTemplate.modified !== template.modified) {
+                    // Template was modified externally (shouldn't happen in single-user app)
+                    console.info(`Template "${template.id}" was updated externally`);
+                }
+            });
 
             this.emit("templates-loaded", templates);
         } catch (error) {
             this.handleError("Failed to refresh templates", error);
         } finally {
             this.setLoading(false);
-        }
-    }
-
-    /**
-     * Mark current template as dirty (has unsaved changes)
-     */
-    markDirty(): void {
-        if (!this.state.isDirty) {
-            this.updateState({ isDirty: true });
-        }
-    }
-
-    /**
-     * Clear dirty flag
-     */
-    clearDirty(): void {
-        if (this.state.isDirty) {
-            this.updateState({ isDirty: false });
         }
     }
 
@@ -380,7 +305,6 @@ export class TemplateManager {
      */
     destroy(): void {
         this.listeners.clear();
-        this.cache.clear();
     }
 
     // Private methods
@@ -393,8 +317,6 @@ export class TemplateManager {
             selectedTemplateId: null,
             isLoading: false,
             error: null,
-            lastSync: null,
-            isDirty: false,
             searchQuery: "",
             filteredTemplates: [],
         };
@@ -482,20 +404,6 @@ export class TemplateManager {
                 (template.description && template.description.toLowerCase().includes(query)) ||
                 (template.tags && template.tags.some((tag) => tag.toLowerCase().includes(query)))
         );
-    }
-
-    private isCacheValid(timestamp: number): boolean {
-        return Date.now() - timestamp < CACHE_CONFIG.maxAge;
-    }
-
-    private cleanupCache(): void {
-        if (this.cache.size <= CACHE_CONFIG.maxSize) return;
-
-        // Remove oldest entries
-        const entries = Array.from(this.cache.entries()).sort((a, b) => a[1].timestamp - b[1].timestamp);
-
-        const toRemove = entries.slice(0, entries.length - CACHE_CONFIG.maxSize);
-        toRemove.forEach(([id]) => this.cache.delete(id));
     }
 }
 
