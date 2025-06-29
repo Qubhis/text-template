@@ -3,8 +3,7 @@ import path from "path";
 import { existsSync } from "fs";
 
 /**
- * Simple utility for JSON file operations
- * Handles reading and writing template data files
+ * Simple utility for JSON file operations with file system error handling
  */
 export class FileManager {
     private dataDir: string;
@@ -19,13 +18,17 @@ export class FileManager {
      * Initialize the data directory structure
      */
     async initialize(): Promise<void> {
-        await this.ensureDirectoryExists(this.dataDir);
-        await this.ensureDirectoryExists(this.templatesDir);
+        try {
+            await this.ensureDirectoryExists(this.dataDir);
+            await this.ensureDirectoryExists(this.templatesDir);
 
-        // Initialize categories.json if it doesn't exist
-        const categoriesPath = this.getCategoriesPath();
-        if (!existsSync(categoriesPath)) {
-            await this.writeJsonFile(categoriesPath, { categories: [] });
+            // Initialize categories.json if it doesn't exist
+            const categoriesPath = this.getCategoriesPath();
+            if (!existsSync(categoriesPath)) {
+                await this.writeJsonFile(categoriesPath, { categories: [] });
+            }
+        } catch (error) {
+            throw this.createFileSystemError(error, "initialize data directory");
         }
     }
 
@@ -37,10 +40,7 @@ export class FileManager {
             const content = await fs.readFile(filePath, "utf8");
             return JSON.parse(content);
         } catch (error) {
-            if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-                throw new Error(`File not found: ${filePath}`);
-            }
-            throw new Error(`Failed to read file: ${filePath}`);
+            throw this.createFileSystemError(error, `read file: ${filePath}`);
         }
     }
 
@@ -53,7 +53,7 @@ export class FileManager {
             const content = JSON.stringify(data, null, 2);
             await fs.writeFile(filePath, content, "utf8");
         } catch (error) {
-            throw new Error(`Failed to write file: ${filePath}`);
+            throw this.createFileSystemError(error, `write file: ${filePath}`);
         }
     }
 
@@ -64,10 +64,11 @@ export class FileManager {
         try {
             await fs.unlink(filePath);
         } catch (error) {
-            if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-                return; // File doesn't exist, that's fine
+            const nodeError = error as NodeJS.ErrnoException;
+            if (nodeError.code === "ENOENT") {
+                return; // File doesn't exist, that's fine for delete
             }
-            throw new Error(`Failed to delete file: ${filePath}`);
+            throw this.createFileSystemError(error, `delete file: ${filePath}`);
         }
     }
 
@@ -78,8 +79,13 @@ export class FileManager {
         try {
             await fs.access(filePath);
             return true;
-        } catch {
-            return false;
+        } catch (error) {
+            const nodeError = error as NodeJS.ErrnoException;
+            if (nodeError.code === "ENOENT") {
+                return false;
+            }
+            // For permission errors, we should throw
+            throw this.createFileSystemError(error, `check file existence: ${filePath}`);
         }
     }
 
@@ -91,10 +97,11 @@ export class FileManager {
             const files = await fs.readdir(this.templatesDir);
             return files.filter((file) => file.endsWith(".json"));
         } catch (error) {
-            if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-                return [];
+            const nodeError = error as NodeJS.ErrnoException;
+            if (nodeError.code === "ENOENT") {
+                return []; // Directory doesn't exist, return empty array
             }
-            throw new Error("Failed to list template files");
+            throw this.createFileSystemError(error, `list template files`);
         }
     }
 
@@ -122,7 +129,7 @@ export class FileManager {
         try {
             await fs.mkdir(dirPath, { recursive: true });
         } catch (error) {
-            throw new Error(`Failed to create directory: ${dirPath}`);
+            throw this.createFileSystemError(error, `create directory: ${dirPath}`);
         }
     }
 
@@ -131,5 +138,38 @@ export class FileManager {
      */
     private isValidId(id: string): boolean {
         return /^[a-zA-Z0-9_-]+$/i.test(id);
+    }
+
+    /**
+     * Create descriptive error messages for file system operations
+     */
+    private createFileSystemError(error: unknown, operation: string): Error {
+        const nodeError = error as NodeJS.ErrnoException;
+        const filePath = nodeError.path || "unknown path";
+
+        switch (nodeError.code) {
+            case "ENOENT":
+                return new Error(`File or directory not found during ${operation}`);
+
+            case "EACCES":
+            case "EPERM":
+                return new Error(`Permission denied during ${operation}. Check Docker volume permissions.`);
+
+            case "EBUSY":
+                return new Error(`File is busy or locked during ${operation}. Please try again.`);
+
+            case "EISDIR":
+                return new Error(`Expected file but found directory: ${filePath}`);
+
+            case "ENOTDIR":
+                return new Error(`Expected directory but found file: ${filePath}`);
+
+            case "EMFILE":
+            case "ENFILE":
+                return new Error(`System resource limit reached during ${operation}`);
+
+            default:
+                return new Error(`File system error during ${operation}: ${nodeError.message || "Unknown error"}`);
+        }
     }
 }
