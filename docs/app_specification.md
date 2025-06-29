@@ -184,16 +184,20 @@ interface ApiResponse<T> {
       routes/
         templates.ts                     👈 T3.1-T3.5 - Template API endpoints ✅
         categories.ts                    👈 T5.2-T5.4 - Category API endpoints
-    frontend/
+    ffrontend/
       index.html                         👈 T6.1 - Basic HTML layout
       styles/
         main.css                         👈 T6.2 - CSS styling
       scripts/
-        main.ts                          👈 T7.1 - Frontend entry point
-        apiClient.ts                     👈 T7.1 - Api Client
-        templateManager.ts               👈 T8.1-T8.5 - Template list management
-        templateParser.ts                👈 T10.1-T10.5 - Frontend variable parsing & processing
+        main.ts                          👈 T7.4 - Frontend entry point & app initialization
+        apiClient.ts                     👈 T7.1 - API client for backend communication
+        templateManager.ts               👈 T7.2 - Template data management & state
+        errorHandler.ts                  👈 T7.3 - Error handling and loading states
+        templateList.ts                  👈 T8.1-T8.5 - Template list UI management
+        templateEditor.ts                👈 T9.1-T9.5 - Template editing functionality
+        templateParser.ts                👈 T10.1-T10.5 - Variable parsing & processing
         variableInputs.ts                👈 T10.1-T10.5 - Variable input generation
+        previewRenderer.ts               👈 T11.1-T11.5 - Preview and output handling
   data/                                  👈 T2.5 - Data directory (Docker volume)
     templates/                           👈 Individual template JSON files
     categories.json                      👈 Categories configuration
