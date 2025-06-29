@@ -139,32 +139,31 @@ A simple web application for managing and using text templates with variable sub
 /app/
   src/
     backend/
-      server.ts                    👈 T1.2 - Express server setup ✅
-      models/                      👈 NEW - Data models and validation
-        template.ts                👈 T2.2 - Template data models ✅
-        category.ts                👈 T5.1 - Category data models
-      routes/
-        templates.ts               👈 T3.1-T3.5 - Template API endpoints
-        categories.ts              👈 T5.2-T5.4 - Category API endpoints
-        processing.ts              👈 T4.4 - Template processing endpoints
+      server.ts                          👈 T1.2 - Express server setup
+      models/
+        template.ts                      👈 T2.2 - Template data models & validation
+        category.ts                      👈 T5.1 - Category data models
       services/
-        templateService.ts         👈 T2.3 - Template CRUD operations
-        categoryService.ts         👈 T5.1 - Category service
+        templateService.ts               👈 T2.3 - Template CRUD operations
+        categoryService.ts               👈 T5.2 - Category service operations
       utils/
-        fileManager.ts             👈 T2.1 - File system utilities ✅
-        templateParser.ts          👈 T4.1 - Variable parsing utilities
+        fileManager.ts                   👈 T2.1 - JSON file utilities
+        templateParser.ts                👈 T4.1 - Variable parsing logic
+      routes/
+        templates.ts                     👈 T3.1-T3.5 - Template API endpoints
+        categories.ts                    👈 T5.2-T5.4 - Category API endpoints
+        processing.ts                    👈 T4.4 - Template processing endpoint
     frontend/
-      index.html                   👈 T6.1 - HTML layout
+      index.html                         👈 T6.1 - Basic HTML layout
       styles/
-        main.css                   👈 T6.2 - CSS styling
+        main.css                         👈 T6.2 - CSS styling
       scripts/
-        main.ts                    👈 T7.1 - Main frontend application
-        templateManager.ts         👈 T7.2 - Template data management
-        variableParser.ts          👈 T10.1 - Frontend variable parsing
-  data/                            # Docker volume mount point
-    templates/                     # Individual template JSON files
-    categories.json                # Categories configuration
-    backups/                       # Automatic backups (future)
+        main.ts                          👈 T7.1 - Frontend entry point
+        templateManager.ts               👈 T8.1-T8.5 - Template list management
+        variableParser.ts                👈 T10.1-T10.5 - Variable input generation
+  data/                                  👈 T2.5 - Data directory (Docker volume)
+    templates/                           👈 Individual template JSON files
+    categories.json                      👈 Categories configuration
 ```
 
 ## Docker Setup
@@ -199,26 +198,40 @@ CMD ["npm", "start"]
 
 ## Development Phases
 
-### Phase 1: MVP (Core Features)
+### Phase 1: Foundation & Core Backend (T1-T2)
 
-1. Basic template CRUD operations
-2. Simple variable substitution (`{{variable}}`)
-3. File-based storage
-4. Basic UI with list and editor
+1. **Project Setup** (T1.1-T1.5) - Node.js, TypeScript, Express, Docker setup
+2. **Data Layer** (T2.1-T2.5) - File utilities, data models, template service
 
-### Phase 2: Enhanced UX
+### Phase 2: API Layer (T3-T4)
 
-1. Categories and organization
-2. Enhanced variable types
-3. Real-time preview
-4. Import/export functionality
+1. **Template API** (T3.1-T3.5) - CRUD endpoints for templates
+2. **Processing Engine** (T4.1-T4.5) - Variable parsing and substitution
 
-### Phase 3: Advanced Features
+### Phase 3: Basic Frontend (T6-T8)
 
-1. Conditional logic
-2. Template validation
-3. Search and filtering
-4. Backup/restore system
+1. **UI Structure** (T6.1-T6.4) - HTML layout, CSS, basic styling
+2. **Data Layer** (T7.1-T7.4) - API client, state management
+3. **Template List** (T8.1-T8.5) - Sidebar with template management
+
+### Phase 4: Core Features (T9-T11)
+
+1. **Template Editor** (T9.1-T9.5) - Edit forms, save/delete functionality
+2. **Variable System** (T10.1-T10.5) - Input generation, validation
+3. **Preview & Output** (T11.1-T11.5) - Real-time preview, copy functionality
+
+### Phase 5: Enhanced Features (T5, T12-T14)
+
+1. **Categories** (T5.1-T5.5) - Category system implementation
+2. **Enhanced Variables** (T12.1-T12.5) - Number, boolean, date types
+3. **Import/Export** (T13.1-T13.5) - File import/export system
+4. **Advanced UI** (T14.1-T14.5) - Tabs, shortcuts, advanced features
+
+### Phase 6: Polish & Deployment (T15-T17)
+
+1. **Error Handling** (T15.1-T15.5) - Validation, user feedback
+2. **Testing** (T16.1-T16.5) - Unit tests, integration tests
+3. **Production** (T17.1-T17.5) - Docker optimization, deployment
 
 ## Success Criteria
 
