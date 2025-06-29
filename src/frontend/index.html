@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Templates with Variables</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar: Template List -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Templates</h2>
+                <button class="btn btn-primary" id="createTemplateBtn">
+                    <span class="icon">+</span>
+                    New Template
+                </button>
+            </div>
+            
+            <div class="search-section">
+                <input type="text" id="templateSearch" placeholder="Search templates..." class="search-input">
+            </div>
+            
+            <div class="template-list" id="templateList">
+                <!-- Templates will be loaded here dynamically -->
+                <div class="loading">Loading templates...</div>
+            </div>
+            
+            <!-- Resize handle -->
+            <div class="resize-handle" id="resizeHandle"></div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header with template actions -->
+            <header class="content-header">
+                <div class="template-info">
+                    <h1 id="templateTitle">Select a template</h1>
+                    <div class="template-meta">
+                        <span id="templateCategory" class="category-badge"></span>
+                        <span id="templateModified" class="last-modified"></span>
+                    </div>
+                </div>
+                
+                <div class="template-actions">
+                    <button class="btn btn-secondary" id="editTemplateBtn" disabled>
+                        <span class="icon">✏️</span>
+                        Edit
+                    </button>
+                    <button class="btn btn-danger" id="deleteTemplateBtn" disabled>
+                        <span class="icon">🗑️</span>
+                        Delete
+                    </button>
+                </div>
+            </header>
+
+            <!-- Tab Navigation -->
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="edit">Edit</button>
+                <button class="tab-btn" data-tab="preview">Preview</button>
+                <button class="tab-btn" data-tab="output">Output</button>
+            </nav>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Edit Tab -->
+                <div class="tab-pane active" id="editTab">
+                    <div class="edit-container">
+                        <div class="template-form">
+                            <div class="form-group">
+                                <label for="templateTitleInput">Title</label>
+                                <input type="text" id="templateTitleInput" class="form-input" placeholder="Enter template title">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="templateCategorySelect">Category</label>
+                                <select id="templateCategorySelect" class="form-select">
+                                    <option value="">Select category...</option>
+                                    <!-- Categories will be loaded dynamically -->
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="templateDescriptionInput">Description (optional)</label>
+                                <input type="text" id="templateDescriptionInput" class="form-input" placeholder="Brief description">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="templateContent">Template Content</label>
+                                <textarea id="templateContent" class="form-textarea" placeholder="Enter your template content with {{variables}}..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
+                                <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Variable Inputs Section -->
+                        <div class="variable-inputs-section" id="variableInputsSection">
+                            <h3>Variables</h3>
+                            <div class="variable-inputs" id="variableInputs">
+                                <p class="no-variables">No variables detected. Use {{variableName}} in your template.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Tab -->
+                <div class="tab-pane" id="previewTab">
+                    <div class="preview-container">
+                        <div class="preview-content" id="previewContent">
+                            <p class="no-content">Select a template to see preview</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Tab -->
+                <div class="tab-pane" id="outputTab">
+                    <div class="output-container">
+                        <div class="output-actions">
+                            <div class="output-format">
+                                <label>Format:</label>
+                                <select id="outputFormat" class="form-select">
+                                    <option value="formatted">Formatted (Markdown)</option>
+                                    <option value="plain">Plain Text</option>
+                                    <option value="raw">Raw Output</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="copyOutputBtn">
+                                <span class="icon">📋</span>
+                                Copy to Clipboard
+                            </button>
+                        </div>
+                        
+                        <div class="output-content">
+                            <pre id="outputContent">Select a template and fill variables to see output</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="modal" id="confirmDialog">
+        <div class="modal-content">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="confirmYes">Yes</button>
+                <button class="btn btn-secondary" id="confirmNo">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scripts/main.js"></script>
+</body>
+</html>
