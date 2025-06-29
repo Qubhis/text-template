@@ -39,9 +39,9 @@
 
 ### 7. Frontend Data Layer
 
-- [ ] **T7.1** - Create API client service for backend communication
-- [ ] **T7.2** - Implement template data management (fetch, cache, update)
-- [ ] **T7.3** - Add error handling and loading states
+- [x] **T7.1** - Create API client service for backend communication
+- [x] **T7.2** - Implement template data management (fetch, cache, update)
+- [x] **T7.3** - Add error handling and loading states
 - [ ] **T7.4** - Create state management for current template
 
 ### 8. Template List (Sidebar)

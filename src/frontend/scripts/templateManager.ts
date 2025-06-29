@@ -1,7 +1,8 @@
+// src/frontend/scripts/templateManager.ts
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
 
-import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category } from "./apiClient";
+import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category, ApiError, ApiUtils } from "./apiClient";
 
 // Application state interfaces
 export interface AppState {
@@ -264,7 +265,7 @@ export class TemplateManager {
 
             // Clear cache to force fresh data on next access
             this.state.templates.forEach((template) => {
-                // Update unknown templates that might have changed
+                // Update any templates that might have changed
                 const freshTemplate = templates.find((t) => t.id === template.id);
                 if (freshTemplate && freshTemplate.modified !== template.modified) {
                     // Template was modified externally (shouldn't happen in single-user app)
@@ -365,13 +366,17 @@ export class TemplateManager {
     private handleError(message: string, error: unknown): void {
         console.error(message, error);
 
-        let errorMessage = message;
-        if (error instanceof Error) {
-            errorMessage += `: ${error.message}`;
-        }
+        // Use ApiUtils for better error classification and messaging
+        const userMessage = error instanceof Error ? ApiUtils.getErrorMessage(error) : message;
+        const errorData = {
+            message: userMessage,
+            originalError: error,
+            timestamp: new Date(),
+            context: message,
+        };
 
-        this.updateState({ error: errorMessage });
-        this.emit("error-occurred", { message: errorMessage, originalError: error });
+        this.updateState({ error: userMessage });
+        this.emit("error-occurred", errorData);
     }
 
     private clearError(): void {

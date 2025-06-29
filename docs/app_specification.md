@@ -192,7 +192,7 @@ interface ApiResponse<T> {
         main.ts                          👈 T7.4 - Frontend entry point & app initialization
         apiClient.ts                     👈 T7.1 - API client for backend communication
         templateManager.ts               👈 T7.2 - Template data management & state
-        errorHandler.ts                  👈 T7.3 - Error handling and loading states
+        uiErrorHandler.ts                👈 T7.3 - UI Error
         templateList.ts                  👈 T8.1-T8.5 - Template list UI management
         templateEditor.ts                👈 T9.1-T9.5 - Template editing functionality
         templateParser.ts                👈 T10.1-T10.5 - Variable parsing & processing
