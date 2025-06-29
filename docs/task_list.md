@@ -16,7 +16,7 @@
 - [x] **T2.2** - Implement template data model and validation
 - [x] **T2.3** - Create template file service (CRUD operations)
 - [x] **T2.4** - Add error handling for file operations
-- [ ] **T2.5** - Create data directory initialization
+- ~~**T2.5** - Create data directory initialization~~ _(Merged into T2.1)_
 
 ## Phase 2: Backend API
 

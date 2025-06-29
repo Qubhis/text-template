@@ -201,7 +201,7 @@ CMD ["npm", "start"]
 ### Phase 1: Foundation & Core Backend (T1-T2)
 
 1. **Project Setup** (T1.1-T1.5) - Node.js, TypeScript, Express, Docker setup
-2. **Data Layer** (T2.1-T2.5) - File utilities, data models, template service
+2. **Data Layer** (T2.1-T2.4) - File utilities, data models, template service, error handling
 
 ### Phase 2: API Layer (T3-T4)
 
