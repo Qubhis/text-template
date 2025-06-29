@@ -1,11 +1,29 @@
-// src/server.ts
+// src/backend/server.ts
 import express from "express";
 import cors from "cors";
 import path from "path";
+import { FileManager } from "./utils/fileManager";
+import { TemplateService } from "./services/templateService";
+import { createTemplateRoutes } from "./routes/templates";
 
 const app = express();
 const PORT = process.env.PORT || 3010;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../../data");
+
+// Initialize services
+const fileManager = new FileManager(DATA_DIR);
+const templateService = new TemplateService(fileManager);
+
+// Initialize data directory on startup
+async function initializeApp() {
+    try {
+        await fileManager.initialize();
+        console.log(`✅ Data directory initialized: ${DATA_DIR}`);
+    } catch (error) {
+        console.error("❌ Failed to initialize data directory:", error);
+        process.exit(1);
+    }
+}
 
 // Middleware
 app.use(cors());
@@ -28,10 +46,17 @@ app.get("/health", (req, res) => {
     });
 });
 
-// API routes placeholder
+// Template API routes
+app.use("/api", createTemplateRoutes(templateService));
+
+// API routes placeholder for future endpoints
 app.use("/api", (req, res, next) => {
-    console.log(`API request: ${req.method} ${req.path}`);
-    next();
+    // This will only run if no other API routes matched
+    res.status(404).json({
+        success: false,
+        error: "API endpoint not found",
+        message: `No API endpoint found for ${req.method} ${req.path}`,
+    });
 });
 
 // Serve static files (frontend)
@@ -53,11 +78,22 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📁 Data directory: ${DATA_DIR}`);
-    console.log(`🌟 Environment: ${process.env.NODE_ENV || "development"}`);
+// Start server with initialization
+async function startServer() {
+    await initializeApp();
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`📁 Data directory: ${DATA_DIR}`);
+        console.log(`🌟 Environment: ${process.env.NODE_ENV || "development"}`);
+        console.log(`📋 Template API available at http://localhost:${PORT}/api/templates`);
+    });
+}
+
+// Handle startup
+startServer().catch((error) => {
+    console.error("❌ Failed to start server:", error);
+    process.exit(1);
 });
 
 export default app;
