@@ -32,10 +32,10 @@
 
 ### 6. Basic UI Structure
 
-- [ ] **T6.1** - Create HTML layout with sidebar and main content area
-- [ ] **T6.2** - Implement CSS for responsive layout
-- [ ] **T6.3** - Add resizable sidebar functionality
-- [ ] **T6.4** - Create basic CSS styling and theme
+- [x] **T6.1** - Create HTML layout with sidebar and main content area
+- [x] **T6.2** - Implement CSS for responsive layout
+- [x] **T6.3** - Add resizable sidebar functionality
+- [x] **T6.4** - Create basic CSS styling and theme (The actual resize functionality will be implemented when we add the JavaScript in T7+ tasks.)
 
 ### 7. Frontend Data Layer
 

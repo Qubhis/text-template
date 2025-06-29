@@ -302,6 +302,20 @@ CMD ["npm", "start"]
     - **Dependency Injection**: TemplateService injected via factory function
     - **Server Integration**: Connected to Express server with service initialization
 
+#### T6.1-T6.4: Basic UI Structure
+
+- **Status**: ✅ Completed
+- **Implementation**: Complete HTML layout and CSS styling in `src/frontend/index.html` and `src/frontend/styles/main.css`
+- **Approach**:
+    - **HTML Structure**: Semantic layout with sidebar (templates list) + main content area with tabbed interface
+    - **CSS Framework**: Custom CSS with flexbox layout, responsive design, and modern styling
+    - **Tab System**: Edit/Preview/Output tabs with proper active/inactive states
+    - **Form Design**: Complete template editing form with all required fields (title, category, description, content)
+    - **Variables Panel**: Dedicated right-side panel for dynamic variable input generation
+    - **Responsive Layout**: Mobile-friendly design with media queries for smaller screens
+    - **Component Styling**: Consistent button styles, modal dialogs, loading states, and form elements
+    - **Resizable Sidebar**: CSS structure ready for JavaScript implementation (resize handle, constraints)
+
 ## Development Phases & Roadmap
 
 ### ✅ Phase 1: Foundation & Core Backend (COMPLETED)
@@ -313,11 +327,7 @@ CMD ["npm", "start"]
 
 1. **Template API** (T3.1-T3.5) - CRUD endpoints for templates
 
-### 🔄 Phase 3: Template Processing Engine (IN PROGRESS)
-
-1. **Processing Engine** (T4.1-T4.5) - Variable parsing and substitution
-
-### 📋 Phase 4: Basic Frontend (PLANNED)
+### 🔄 Phase 3: Basic Frontend (IN PROGRESS)
 
 1. **UI Structure** (T6.1-T6.4) - HTML layout, CSS, basic styling
 2. **Data Layer** (T7.1-T7.4) - API client, state management
