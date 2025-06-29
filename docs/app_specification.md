@@ -105,6 +105,28 @@ A simple web application for managing and using text templates with variable sub
 }
 ```
 
+## Template Processing Architecture
+
+### Frontend-Only Processing (Client-Side)
+
+- **Variable Parsing**: Extract `{{variables}}` from template text in browser
+- **Real-Time Preview**: Instant updates as user types variable values
+- **No Server Round-Trips**: All processing happens client-side for better performance
+- **Offline Capability**: Template processing works without server connection
+
+### Variable Types Supported
+
+- **Basic variables**: `{{variable}}` - generates text input
+- **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
+- **Enhanced variable types**: `{{var:number}}`, `{{var:boolean}}`, `{{var:date}}`
+
+### Processing Flow
+
+1. **Parse Template**: Extract variables and their types from template content
+2. **Generate Inputs**: Create appropriate input fields for each variable
+3. **Real-Time Processing**: Replace variables with values as user types
+4. **Output Formats**: Generate markdown, plain text, or raw output
+
 ## API Endpoints (Implemented)
 
 ### Templates API
@@ -159,11 +181,9 @@ interface ApiResponse<T> {
         categoryService.ts               👈 T5.2 - Category service operations
       utils/
         fileManager.ts                   👈 T2.1 - JSON file utilities
-        templateParser.ts                👈 T4.1 - Variable parsing logic
       routes/
-        templates.ts                     👈 T3.1-T3.5 - Template API endpoints
+        templates.ts                     👈 T3.1-T3.5 - Template API endpoints ✅
         categories.ts                    👈 T5.2-T5.4 - Category API endpoints
-        processing.ts                    👈 T4.4 - Template processing endpoint
     frontend/
       index.html                         👈 T6.1 - Basic HTML layout
       styles/
@@ -171,7 +191,8 @@ interface ApiResponse<T> {
       scripts/
         main.ts                          👈 T7.1 - Frontend entry point
         templateManager.ts               👈 T8.1-T8.5 - Template list management
-        variableParser.ts                👈 T10.1-T10.5 - Variable input generation
+        templateParser.ts                👈 T10.1-T10.5 - Frontend variable parsing & processing
+        variableInputs.ts                👈 T10.1-T10.5 - Variable input generation
   data/                                  👈 T2.5 - Data directory (Docker volume)
     templates/                           👈 Individual template JSON files
     categories.json                      👈 Categories configuration
@@ -211,7 +232,7 @@ CMD ["npm", "start"]
 
 #### T1.1-T1.5: Project Setup
 
-- **Status**: ✅ Completed (assumed)
+- **Status**: ✅ Completed
 - **Implementation**: Node.js + Express + TypeScript project structure
 
 #### T2.1: File System Utilities
