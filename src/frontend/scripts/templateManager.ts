@@ -2,7 +2,7 @@
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
 
-import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category, ApiError, ApiUtils, isTemplate } from "./apiClient.js";
+import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category, ApiUtils, isTemplate } from "./apiClient.js";
 
 // Application state interfaces
 export interface AppState {
@@ -52,7 +52,7 @@ export type StateChangeListener = (event: StateChangeEvent, data?: unknown) => v
  * Template Data Manager
  * Central state management for template data with caching and event system
  */
-export class TemplateManager {
+export default class TemplateManager {
     private state: AppState;
     private listeners: Map<StateChangeEvent, Set<StateChangeListener>>;
 
@@ -92,27 +92,6 @@ export class TemplateManager {
      */
     getState(): Readonly<AppState> {
         return { ...this.state };
-    }
-
-    /**
-     * Get all templates
-     */
-    getTemplates(): Template[] {
-        return [...this.state.templates];
-    }
-
-    /**
-     * Get filtered templates based on current search
-     */
-    getFilteredTemplates(): Template[] {
-        return [...this.state.filteredTemplates];
-    }
-
-    /**
-     * Get current template
-     */
-    getCurrentTemplate(): Template | null {
-        return this.state.currentTemplate ? { ...this.state.currentTemplate } : null;
     }
 
     /**
@@ -306,23 +285,6 @@ export class TemplateManager {
         this.listeners.get(event)!.add(listener);
     }
 
-    /**
-     * Remove event listener
-     */
-    removeEventListener(event: StateChangeEvent, listener: StateChangeListener): void {
-        const eventListeners = this.listeners.get(event);
-        if (eventListeners) {
-            eventListeners.delete(listener);
-        }
-    }
-
-    /**
-     * Clean up resources
-     */
-    destroy(): void {
-        this.listeners.clear();
-    }
-
     // Private methods
 
     private createInitialState(): AppState {
@@ -429,17 +391,3 @@ export class TemplateManager {
 
 // Singleton instance with lazy initialization
 let templateManagerInstance: TemplateManager | null = null;
-
-/**
- * Get the singleton TemplateManager instance
- * Automatically initializes on first call
- */
-export async function getTemplateManager(): Promise<TemplateManager> {
-    if (!templateManagerInstance) {
-        templateManagerInstance = new TemplateManager();
-        await templateManagerInstance.initialize();
-    }
-    return templateManagerInstance;
-}
-
-export default TemplateManager;

@@ -133,16 +133,4 @@ export class TemplateService {
             throw new Error(`Failed to delete template: ${error}`);
         }
     }
-
-    /**
-     * Check if template exists
-     */
-    async templateExists(id: string): Promise<boolean> {
-        try {
-            const templatePath = this.fileManager.getTemplatePath(id);
-            return await this.fileManager.fileExists(templatePath);
-        } catch (error) {
-            return false;
-        }
-    }
 }

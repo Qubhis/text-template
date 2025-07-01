@@ -40,31 +40,6 @@ export interface Category {
     color?: string;
 }
 
-// Categories file structure
-export interface CategoriesData {
-    categories: Category[];
-}
-
-// Variable types that can be extracted from templates
-export interface TemplateVariable {
-    name: string;
-    type: "text" | "dropdown" | "number" | "boolean" | "date";
-    options?: string[]; // For dropdown type
-    required: boolean;
-}
-
-// Template processing input
-export interface ProcessTemplateInput {
-    templateId: string;
-    variables: Record<string, any>;
-}
-
-// Template processing result
-export interface ProcessTemplateResult {
-    processedContent: string;
-    variables: TemplateVariable[];
-}
-
 /**
  * Validation utilities for template data
  */
@@ -230,40 +205,6 @@ export class TemplateValidator {
     }
 
     /**
-     * Validate category data
-     */
-    static validateCategory(data: any): data is Category {
-        const errors: string[] = [];
-
-        if (!data || typeof data !== "object") {
-            errors.push("Category must be an object");
-            return false;
-        }
-
-        if (!data.id || typeof data.id !== "string" || data.id.trim() === "") {
-            errors.push("Category ID is required and must be a non-empty string");
-        }
-
-        if (!data.name || typeof data.name !== "string" || data.name.trim() === "") {
-            errors.push("Category name is required and must be a non-empty string");
-        }
-
-        if (data.color !== undefined && (typeof data.color !== "string" || !this.isValidColor(data.color))) {
-            errors.push("Category color must be a valid hex color if provided");
-        }
-
-        if (data.id && !this.isValidId(data.id)) {
-            errors.push("Category ID can only contain letters, numbers, hyphens, and underscores");
-        }
-
-        if (errors.length > 0) {
-            throw new Error(`Category validation failed: ${errors.join(", ")}`);
-        }
-
-        return true;
-    }
-
-    /**
      * Check if string is a valid ID (alphanumeric, hyphens, underscores)
      */
     private static isValidId(id: string): boolean {
@@ -276,13 +217,6 @@ export class TemplateValidator {
     private static isValidISODate(dateString: string): boolean {
         const date = new Date(dateString);
         return date.toISOString() === dateString;
-    }
-
-    /**
-     * Check if string is a valid hex color
-     */
-    private static isValidColor(color: string): boolean {
-        return /^#[0-9a-fA-F]{6}$/.test(color);
     }
 }
 
@@ -301,7 +235,7 @@ export class TemplateUtils {
             .replace(/\s+/g, "-") // Replace spaces with hyphens
             .replace(/-+/g, "-") // Remove duplicate hyphens
             .replace(/^-|-$/g, "") // Remove leading/trailing hyphens
-            .substring(0, 30); // Limit length
+            .substring(0, 50); // Limit length
 
         return sanitized ? `${sanitized}-${timestamp}` : `template-${timestamp}`;
     }
@@ -350,16 +284,5 @@ export class TemplateUtils {
         }
 
         return updated;
-    }
-
-    /**
-     * Create a category with generated ID
-     */
-    static createCategory(name: string, color?: string): Category {
-        return {
-            id: this.generateId(name),
-            name: name.trim(),
-            color: color || "#3b82f6",
-        };
     }
 }

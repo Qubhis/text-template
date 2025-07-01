@@ -27,16 +27,16 @@ interface ApiResponse<T = any> {
 /**
  * Middleware for handling async route errors
  */
-const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => {
+function asyncHandler(fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) {
     return (req: Request, res: Response, next: NextFunction): void => {
         Promise.resolve(fn(req, res, next)).catch(next);
     };
-};
+}
 
 /**
  * Middleware for validating template ID parameter
  */
-const validateTemplateId = (req: Request, res: Response, next: NextFunction): void => {
+function validateTemplateId(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
 
     if (!id || typeof id !== "string" || id.trim() === "") {
@@ -49,12 +49,12 @@ const validateTemplateId = (req: Request, res: Response, next: NextFunction): vo
     }
 
     next();
-};
+}
 
 /**
  * Middleware for validating request body
  */
-const validateRequestBody = (req: Request, res: Response, next: NextFunction): void => {
+function validateRequestBody(req: Request, res: Response, next: NextFunction): void {
     if (!req.body || typeof req.body !== "object") {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
@@ -65,12 +65,12 @@ const validateRequestBody = (req: Request, res: Response, next: NextFunction): v
     }
 
     next();
-};
+}
 
 /**
  * Centralized error handler for template operations
  */
-const handleTemplateError = (error: unknown, operation: string, templateId?: string): { status: number; response: ApiResponse } => {
+function handleTemplateError(error: unknown, operation: string, templateId?: string): { status: number; response: ApiResponse } {
     console.error(`Error ${operation}${templateId ? ` template ${templateId}` : ""}:`, error);
 
     if (error instanceof Error) {
@@ -118,7 +118,7 @@ const handleTemplateError = (error: unknown, operation: string, templateId?: str
             message: error instanceof Error ? error.message : "Unknown error",
         },
     };
-};
+}
 
 /**
  * Template API routes with reduced duplication

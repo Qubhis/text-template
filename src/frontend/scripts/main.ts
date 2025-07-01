@@ -2,7 +2,9 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-import { getTemplateManager, isSearchChangedEventParameters, StateChangeEvent, TemplateManager } from "./templateManager.js";
+// FIXME: after deleting the header keeps title, category and change date of the last deleted template
+
+import TemplateManager, { isSearchChangedEventParameters, StateChangeEvent } from "./templateManager.js";
 import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./apiClient.js";
 import UIErrorHandler from "./uiErrorHandler.js";
 
@@ -916,13 +918,16 @@ async function initializeApp(): Promise<void> {
     }
 
     try {
-        // Initialize template manager first
-        console.log("📊 Initializing template manager...");
-        const templateManager = await getTemplateManager();
-
-        // Create and initialize app
+        // Create template manager first
+        console.log("🏗️ Creating template manager...");
+        const templateManager = new TemplateManager();
+        // Create app
         console.log("🏗️ Creating application...");
         appInstance = new App(templateManager);
+        // Then Initialize manager and app
+        console.log("🚀 Initializing template manager...");
+        await templateManager.initialize();
+        console.log("🚀 Initializing application...");
         await appInstance.initialize();
     } catch (error) {
         console.error("Failed to initialize application:", error);
@@ -943,6 +948,3 @@ if (document.readyState === "loading") {
     // DOM is already loaded
     initializeApp();
 }
-
-// Export for potential external access
-export { App, initializeApp };

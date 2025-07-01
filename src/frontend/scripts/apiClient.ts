@@ -43,11 +43,20 @@ export interface ApiResponse<T> {
     count?: number;
 }
 
-export interface ApiError extends Error {
+export class ApiError extends Error {
     status?: number;
     code?: string;
     details?: any;
     cause?: Error;
+
+    constructor(message: string, status?: number, code?: string, details?: any, cause?: Error) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+        this.code = code;
+        this.details = details;
+        this.cause = cause;
+    }
 }
 
 // API Configuration
@@ -108,6 +117,30 @@ async function fetchWithTimeout(url: string, options: RequestOptions, timeout: n
 }
 
 /**
+ * Create standardized API error
+ */
+function createApiError(message: string, originalError: unknown): ApiError {
+    const apiError: ApiError = new ApiError(message);
+
+    if (originalError instanceof Error) {
+        apiError.cause = originalError;
+
+        // Type-safe property access with proper type checking
+        if ("status" in originalError && typeof originalError.status === "number") {
+            apiError.status = originalError.status;
+        }
+        if ("code" in originalError && typeof originalError.code === "string") {
+            apiError.code = originalError.code;
+        }
+        if ("details" in originalError) {
+            apiError.details = originalError.details;
+        }
+    }
+
+    return apiError;
+}
+
+/**
  * Make HTTP request with retries and error handling
  */
 async function makeRequest<T>(endpoint: string, options: RequestOptions, retries: number = API_CONFIG.retries): Promise<ApiResponse<T>> {
@@ -120,10 +153,12 @@ async function makeRequest<T>(endpoint: string, options: RequestOptions, retries
             // Handle HTTP errors
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const apiError: ApiError = new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-                apiError.status = response.status;
-                apiError.code = errorData.code;
-                apiError.details = errorData;
+                const apiError = createApiError(errorData?.error || `HTTP ${response.status}: ${response.statusText}`, {
+                    status: response.status,
+                    code: errorData?.code,
+                    details: errorData,
+                });
+
                 throw apiError;
             }
 
@@ -167,31 +202,7 @@ export class ApiClient {
             return response.data;
         } catch (error) {
             console.error("Error fetching templates:", error);
-            throw this.createApiError("Failed to load templates", error);
-        }
-    }
-
-    /**
-     * Get single template by ID
-     */
-    static async getTemplate(id: string): Promise<Template> {
-        if (!id || typeof id !== "string") {
-            throw new Error("Template ID is required");
-        }
-
-        try {
-            const response = await makeRequest<Template>(`/templates/${encodeURIComponent(id)}`, {
-                method: "GET",
-            });
-
-            if (!response.success || !response.data) {
-                throw new Error(response.error || "Template not found");
-            }
-
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching template ${id}:`, error);
-            throw this.createApiError(`Failed to load template "${id}"`, error);
+            throw createApiError("Failed to load templates", error);
         }
     }
 
@@ -217,7 +228,7 @@ export class ApiClient {
             return response.data;
         } catch (error) {
             console.error("Error creating template:", error);
-            throw this.createApiError("Failed to create template", error);
+            throw createApiError("Failed to create template", error);
         }
     }
 
@@ -242,7 +253,7 @@ export class ApiClient {
             return response.data;
         } catch (error) {
             console.error(`Error updating template ${id}:`, error);
-            throw this.createApiError(`Failed to update template "${id}"`, error);
+            throw createApiError(`Failed to update template "${id}"`, error);
         }
     }
 
@@ -264,7 +275,7 @@ export class ApiClient {
             }
         } catch (error) {
             console.error(`Error deleting template ${id}:`, error);
-            throw this.createApiError(`Failed to delete template "${id}"`, error);
+            throw createApiError(`Failed to delete template "${id}"`, error);
         }
     }
 
@@ -285,51 +296,8 @@ export class ApiClient {
             return response.data;
         } catch (error) {
             console.warn("Categories endpoint not available:", error);
-            // Return default categories for now
-            return [
-                { id: "prompts", name: "LLM Prompts", color: "#3b82f6" },
-                { id: "emails", name: "Email Templates", color: "#10b981" },
-                { id: "code", name: "Code Snippets", color: "#f59e0b" },
-                { id: "other", name: "Other", color: "#6b7280" },
-            ];
+            throw createApiError("Failed to get categories", error);
         }
-    }
-
-    /**
-     * Check API health
-     */
-    static async healthCheck(): Promise<boolean> {
-        try {
-            const response = await fetch(`${API_CONFIG.baseUrl}/health`);
-            return response.ok;
-        } catch (error) {
-            console.warn("API health check failed:", error);
-            return false;
-        }
-    }
-
-    /**
-     * Create standardized API error
-     */
-    private static createApiError(message: string, originalError: unknown): ApiError {
-        const apiError: ApiError = new Error(message);
-
-        if (originalError instanceof Error) {
-            apiError.cause = originalError;
-
-            // Type-safe property access with proper type checking
-            if ("status" in originalError && typeof originalError.status === "number") {
-                apiError.status = originalError.status;
-            }
-            if ("code" in originalError && typeof originalError.code === "string") {
-                apiError.code = originalError.code;
-            }
-            if ("details" in originalError) {
-                apiError.details = originalError.details;
-            }
-        }
-
-        return apiError;
     }
 }
 
@@ -390,37 +358,6 @@ export class ApiUtils {
         }
 
         return error.message || "An unexpected error occurred.";
-    }
-
-    /**
-     * Validate template data before sending
-     */
-    static validateTemplateData(data: CreateTemplateInput | UpdateTemplateInput): string[] {
-        const errors: string[] = [];
-
-        if ("title" in data && data.title !== undefined) {
-            if (!data.title.trim()) {
-                errors.push("Title cannot be empty");
-            } else if (data.title.length > 200) {
-                errors.push("Title cannot exceed 200 characters");
-            }
-        }
-
-        if ("content" in data && data.content !== undefined) {
-            if (!data.content.trim()) {
-                errors.push("Content cannot be empty");
-            } else if (data.content.length > 50000) {
-                errors.push("Content cannot exceed 50,000 characters");
-            }
-        }
-
-        if ("description" in data && data.description !== undefined) {
-            if (data.description.length > 500) {
-                errors.push("Description cannot exceed 500 characters");
-            }
-        }
-
-        return errors;
     }
 }
 

@@ -2,7 +2,7 @@
 // UI Error Handler & Loading States Management
 // Integrates with TemplateManager events to provide user feedback
 
-import { TemplateManager, StateChangeEvent, StateChangeListener } from "./templateManager.js";
+import TemplateManager, { StateChangeEvent, StateChangeListener } from "./templateManager.js";
 import { ApiUtils } from "./apiClient.js";
 
 // Error display types
@@ -31,7 +31,6 @@ export interface ErrorAction {
 export interface LoadingState {
     isLoading: boolean;
     operation?: string;
-    progress?: number; // 0-100
 }
 
 /**
@@ -76,13 +75,11 @@ export class UIErrorHandler {
         const loadingStartListener: StateChangeListener = () => this.handleLoadingStart();
         const loadingEndListener: StateChangeListener = () => this.handleLoadingEnd();
         const errorListener: StateChangeListener = (event, data) => this.handleError(event, data);
-        const errorClearedListener: StateChangeListener = () => this.handleErrorCleared();
         const successListener: StateChangeListener = (event, data) => this.handleSuccess(event, data);
 
         this.templateManager.addEventListener("loading-start", loadingStartListener);
         this.templateManager.addEventListener("loading-end", loadingEndListener);
         this.templateManager.addEventListener("error-occurred", errorListener);
-        this.templateManager.addEventListener("error-cleared", errorClearedListener);
         this.templateManager.addEventListener("template-created", successListener);
         this.templateManager.addEventListener("template-updated", successListener);
         this.templateManager.addEventListener("template-deleted", successListener);
@@ -123,23 +120,6 @@ export class UIErrorHandler {
     }
 
     /**
-     * Show info notification
-     */
-    showInfo(title: string, message: string, autoHide = true): string {
-        const notification: ErrorNotification = {
-            id: this.generateNotificationId(),
-            type: "info",
-            title,
-            message,
-            timestamp: new Date(),
-            autoHide,
-            duration: 4000,
-        };
-
-        return this.showNotification(notification);
-    }
-
-    /**
      * Show success notification
      */
     showSuccess(title: string, message: string, autoHide = true): string {
@@ -168,23 +148,12 @@ export class UIErrorHandler {
     }
 
     /**
-     * Clear all notifications
-     */
-    clearAllNotifications(): void {
-        this.notifications.clear();
-        if (this.notificationContainer) {
-            this.notificationContainer.innerHTML = "";
-        }
-    }
-
-    /**
      * Show loading state
      */
-    showLoading(operation?: string, progress?: number): void {
+    showLoading(operation?: string): void {
         this.loadingState = {
             isLoading: true,
             operation,
-            progress,
         };
 
         this.updateLoadingUI();
@@ -196,19 +165,6 @@ export class UIErrorHandler {
     hideLoading(): void {
         this.loadingState = { isLoading: false };
         this.updateLoadingUI();
-    }
-
-    /**
-     * Update loading progress
-     */
-    updateProgress(progress: number, operation?: string): void {
-        if (this.loadingState.isLoading) {
-            this.loadingState.progress = progress;
-            if (operation) {
-                this.loadingState.operation = operation;
-            }
-            this.updateLoadingUI();
-        }
     }
 
     /**
@@ -234,7 +190,6 @@ export class UIErrorHandler {
     // Private methods
 
     private handleLoadingStart(): void {
-        const state = this.templateManager.getState();
         this.showLoading("Loading...");
     }
 
@@ -255,11 +210,6 @@ export class UIErrorHandler {
         } else {
             this.showError("Error", data?.message || "An unexpected error occurred");
         }
-    }
-
-    private handleErrorCleared(): void {
-        // Don't automatically clear all notifications - let user dismiss them
-        // This gives them time to read error messages
     }
 
     private handleSuccess(event: StateChangeEvent, data: any): void {
@@ -353,12 +303,6 @@ export class UIErrorHandler {
             const loadingText = this.loadingOverlay.querySelector("p");
             if (loadingText && this.loadingState.operation) {
                 loadingText.textContent = this.loadingState.operation;
-            }
-
-            // Update progress if available
-            const progressBar = this.loadingOverlay.querySelector(".progress-bar");
-            if (progressBar && this.loadingState.progress !== undefined) {
-                (progressBar as HTMLElement).style.width = `${this.loadingState.progress}%`;
             }
         } else {
             this.loadingOverlay.classList.remove("show");
