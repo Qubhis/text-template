@@ -7,7 +7,7 @@
         "build": "npm run clean && npm run build:backend && npm run build:frontend && npm run postBuild:frontend",
         "build:backend": "tsc -p tsconfig.backend.json",
         "build:frontend": "tsc -p tsconfig.frontend.json",
-        "postBuild:frontend": "cp -r src/frontend/styles src/frontend/index.html ./dist/frontend",
+        "postBuild:frontend": "cp -r src/frontend/* ./dist/frontend",
         "start": "node dist/backend/server.js",
         "start:prod": "NODE_ENV=production node dist/backend/server.js",
         "dev": "npm run build && node dist/backend/server.js",

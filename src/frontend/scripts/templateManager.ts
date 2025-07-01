@@ -141,7 +141,6 @@ export class TemplateManager {
                 selectedTemplateId: null,
                 currentTemplate: null,
             });
-            this.emit("template-selected", null);
             return;
         }
 

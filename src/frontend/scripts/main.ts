@@ -2,9 +2,16 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-import { isTemplate, Template } from "./apiClient.js";
-import { getTemplateManager, isSearchChangedEventParameters, TemplateManager } from "./templateManager.js";
+import { getTemplateManager, isSearchChangedEventParameters, StateChangeEvent, TemplateManager } from "./templateManager.js";
+import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./apiClient.js";
 import UIErrorHandler from "./uiErrorHandler.js";
+
+interface TemplateFormData {
+    title: string;
+    category: string;
+    description: string;
+    content: string;
+}
 
 /**
  * Application class - main coordinator
@@ -12,7 +19,8 @@ import UIErrorHandler from "./uiErrorHandler.js";
 class App {
     private templateManager: TemplateManager;
     private errorHandler: UIErrorHandler;
-    private isInitialized = false;
+    private currentMode: "view" | "edit" | "create" = "view";
+    private formIsDirty = false;
 
     constructor(templateManager: TemplateManager) {
         this.templateManager = templateManager;
@@ -36,9 +44,12 @@ class App {
 
             // Load initial data and update UI
             console.log("📋 Loading initial template list...");
-            await this.loadInitialData();
+            this.loadInitialData();
 
-            this.isInitialized = true;
+            // Set initial form state
+            this.setFormReadOnly(true);
+            this.updateFormButtons();
+
             console.log("✅ Application UI initialized successfully!");
 
             // Show success notification
@@ -91,6 +102,41 @@ class App {
             });
         }
 
+        // Save template button
+        const saveBtn = document.getElementById("saveTemplateBtn");
+        if (saveBtn) {
+            saveBtn.addEventListener("click", () => {
+                this.saveTemplate();
+            });
+        }
+
+        // Cancel edit button
+        const cancelBtn = document.getElementById("cancelEditBtn");
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", () => {
+                this.cancelEdit();
+            });
+        }
+
+        // Edit template button
+        const editBtn = document.getElementById("editTemplateBtn");
+        if (editBtn) {
+            editBtn.addEventListener("click", () => {
+                this.editCurrentTemplate();
+            });
+        }
+
+        // Delete template button
+        const deleteBtn = document.getElementById("deleteTemplateBtn");
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", () => {
+                this.deleteCurrentTemplate();
+            });
+        }
+
+        // Form change listeners for dirty state tracking
+        this.setupFormChangeListeners();
+
         console.log("✅ Basic UI listeners set up");
     }
 
@@ -109,13 +155,21 @@ class App {
             this.updateTemplateList(templates as Template[]);
         });
 
+        // Templates list changes events
+        const templateListChangeEvents: StateChangeEvent[] = ["template-created", "template-updated", "template-deleted"];
+        templateListChangeEvents.forEach((eventName) => {
+            this.templateManager.addEventListener(eventName, (event: string, data: unknown) => {
+                this.refreshTemplateList();
+            });
+        });
+
         // Template selected - update main content
         this.templateManager.addEventListener("template-selected", (event: string, data: unknown) => {
             if (!isTemplate(data)) {
                 console.error("Invalid template data received from template manager:", data);
                 return;
             }
-            this.updateSelectedTemplate(data);
+            this.handleTemplateSelected(data);
         });
 
         // Search results - update filtered list
@@ -133,15 +187,93 @@ class App {
     /**
      * Load initial data
      */
-    private async loadInitialData(): Promise<void> {
-        // Template manager will automatically load templates during initialization
-        // We just need to update the UI with the current state
-        const state = this.templateManager.getState();
-        this.updateTemplateList(state.filteredTemplates);
+    private loadInitialData(): void {
+        this.refreshTemplateList();
 
         // Load categories for the dropdown
         const categories = this.templateManager.getCategories();
         this.updateCategoriesDropdown(categories);
+    }
+
+    private refreshTemplateList(): void {
+        // Template manager will automatically load templates during initialization
+        // We just need to update the UI with the current state
+        const state = this.templateManager.getState();
+        this.updateTemplateList(state.filteredTemplates);
+    }
+
+    /**
+     * Handle template selection from TemplateManager
+     */
+    private handleTemplateSelected(template: Template): void {
+        // Check if we have unsaved changes before switching
+        if (this.formIsDirty && template?.id !== this.getCurrentTemplateId()) {
+            this.showUnsavedChangesModal(() => {
+                this.proceedWithTemplateSelection(template);
+            });
+        } else {
+            this.proceedWithTemplateSelection(template);
+        }
+    }
+
+    /**
+     * Proceed with template selection after handling unsaved changes
+     */
+    private proceedWithTemplateSelection(template: Template): void {
+        this.updateSelectedTemplate(template);
+
+        if (template) {
+            // Switch to view mode and load template
+            this.currentMode = "view";
+            this.loadTemplateIntoForm(template);
+            this.setFormReadOnly(true);
+        } else {
+            // No template selected
+            if (this.currentMode !== "create") {
+                this.clearTemplateForm();
+                this.setFormReadOnly(true);
+                this.currentMode = "view";
+            }
+        }
+
+        this.formIsDirty = false;
+        this.updateFormButtons();
+    }
+
+    /**
+     * Update UI to reflect selected template
+     */
+    private updateSelectedTemplate(template: Template): void {
+        // Update header
+        const titleElement = document.getElementById("templateTitle");
+        const categoryElement = document.getElementById("templateCategory");
+        const modifiedElement = document.getElementById("templateModified");
+
+        if (template) {
+            if (titleElement) titleElement.textContent = template.title;
+            if (categoryElement) {
+                categoryElement.textContent = template.category || "Uncategorized";
+                categoryElement.style.display = "inline";
+            }
+            if (modifiedElement) {
+                modifiedElement.textContent = `Modified ${this.formatDate(template.modified)}`;
+                modifiedElement.style.display = "inline";
+            }
+
+            // Enable action buttons
+            this.enableActionButtons(true);
+            // Update active template in sidebar
+            this.updateActiveTemplateInSidebar(template.id);
+        } else {
+            if (titleElement) titleElement.textContent = "Select a template";
+            if (categoryElement) categoryElement.style.display = "none";
+            if (modifiedElement) modifiedElement.style.display = "none";
+
+            // Disable action buttons
+            this.enableActionButtons(false);
+            // Clear active template in sidebar
+            this.updateActiveTemplateInSidebar(null);
+        }
     }
 
     /**
@@ -188,44 +320,6 @@ class App {
                 }
             });
         });
-    }
-
-    /**
-     * Update selected template in main content
-     */
-    private updateSelectedTemplate(template: any): void {
-        // Update header
-        const titleElement = document.getElementById("templateTitle");
-        const categoryElement = document.getElementById("templateCategory");
-        const modifiedElement = document.getElementById("templateModified");
-
-        if (template) {
-            if (titleElement) titleElement.textContent = template.title;
-            if (categoryElement) {
-                categoryElement.textContent = template.category || "Uncategorized";
-                categoryElement.style.display = "inline";
-            }
-            if (modifiedElement) {
-                modifiedElement.textContent = `Modified ${this.formatDate(template.modified)}`;
-                modifiedElement.style.display = "inline";
-            }
-
-            // Enable action buttons
-            this.enableActionButtons(true);
-
-            // Update active template in sidebar
-            this.updateActiveTemplateInSidebar(template.id);
-        } else {
-            if (titleElement) titleElement.textContent = "Select a template";
-            if (categoryElement) categoryElement.style.display = "none";
-            if (modifiedElement) modifiedElement.style.display = "none";
-
-            // Disable action buttons
-            this.enableActionButtons(false);
-
-            // Clear active template in sidebar
-            this.updateActiveTemplateInSidebar(null);
-        }
     }
 
     /**
@@ -287,8 +381,29 @@ class App {
      * Show create template form
      */
     private showCreateTemplateForm(): void {
+        if (this.formIsDirty) {
+            this.showUnsavedChangesModal(() => {
+                this.proceedWithCreateForm();
+            });
+        } else {
+            this.proceedWithCreateForm();
+        }
+    }
+
+    /**
+     * Proceed with showing create form
+     */
+    private proceedWithCreateForm(): void {
         // Clear the form
         this.clearTemplateForm();
+
+        // Set create mode
+        this.currentMode = "create";
+        this.formIsDirty = false;
+
+        // Update UI state
+        this.setFormReadOnly(false);
+        this.updateFormButtons();
 
         // Switch to edit tab
         this.switchTab("edit");
@@ -298,6 +413,9 @@ class App {
         if (titleInput) {
             titleInput.focus();
         }
+
+        // Deselect any selected template
+        this.templateManager.selectTemplate(null);
 
         console.log("Showing create template form");
     }
@@ -315,6 +433,422 @@ class App {
         if (categorySelect) categorySelect.value = "";
         if (descriptionInput) descriptionInput.value = "";
         if (contentTextarea) contentTextarea.value = "";
+
+        this.formIsDirty = false;
+    }
+
+    /**
+     * Load template data into form with error handling
+     */
+    private loadTemplateIntoForm(template: any): void {
+        try {
+            const titleInput = document.getElementById("templateTitleInput") as HTMLInputElement;
+            const categorySelect = document.getElementById("templateCategorySelect") as HTMLSelectElement;
+            const descriptionInput = document.getElementById("templateDescriptionInput") as HTMLInputElement;
+            const contentTextarea = document.getElementById("templateContent") as HTMLTextAreaElement;
+
+            if (!titleInput || !categorySelect || !descriptionInput || !contentTextarea) {
+                throw new Error("Form elements not found");
+            }
+
+            titleInput.value = template.title || "";
+            categorySelect.value = template.category || "";
+            descriptionInput.value = template.description || "";
+            contentTextarea.value = template.content || "";
+
+            this.formIsDirty = false;
+        } catch (error) {
+            console.error("Error loading template into form:", error);
+            this.errorHandler.showError("Form Error", "Failed to load template data into form.");
+        }
+    }
+
+    /**
+     * Set form read-only state with error handling
+     */
+    private setFormReadOnly(readOnly: boolean): void {
+        try {
+            const titleInput = document.getElementById("templateTitleInput") as HTMLInputElement;
+            const categorySelect = document.getElementById("templateCategorySelect") as HTMLSelectElement;
+            const descriptionInput = document.getElementById("templateDescriptionInput") as HTMLInputElement;
+            const contentTextarea = document.getElementById("templateContent") as HTMLTextAreaElement;
+
+            if (!titleInput || !categorySelect || !descriptionInput || !contentTextarea) {
+                throw new Error("Form elements not found");
+            }
+
+            titleInput.readOnly = readOnly;
+            categorySelect.disabled = readOnly;
+            descriptionInput.readOnly = readOnly;
+            contentTextarea.readOnly = readOnly;
+
+            // Update visual styling
+            const formElements = [titleInput, categorySelect, descriptionInput, contentTextarea];
+            formElements.forEach((element) => {
+                if (readOnly) {
+                    element.classList.add("read-only");
+                } else {
+                    element.classList.remove("read-only");
+                }
+            });
+        } catch (error) {
+            console.error("Error setting form read-only state:", error);
+        }
+    }
+
+    /**
+     * Setup form change listeners for dirty state tracking
+     */
+    private setupFormChangeListeners(): void {
+        const formElements = ["templateTitleInput", "templateCategorySelect", "templateDescriptionInput", "templateContent"];
+
+        formElements.forEach((elementId) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.addEventListener("input", () => {
+                    if (this.currentMode !== "view") {
+                        this.formIsDirty = true;
+                        this.updateFormButtons();
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Update form buttons based on current mode and state
+     */
+    private updateFormButtons(): void {
+        try {
+            const saveBtn = document.getElementById("saveTemplateBtn") as HTMLButtonElement;
+            const cancelBtn = document.getElementById("cancelEditBtn") as HTMLButtonElement;
+
+            if (!saveBtn || !cancelBtn) {
+                throw new Error("Form buttons not found");
+            }
+
+            const isEditing = this.currentMode === "edit" || this.currentMode === "create";
+
+            // Always show buttons but enable/disable based on state
+            saveBtn.disabled = !isEditing;
+            cancelBtn.disabled = !isEditing;
+
+            // Update save button text and state
+            if (this.currentMode === "create") {
+                saveBtn.textContent = "Create Template";
+            } else if (this.currentMode === "edit") {
+                saveBtn.textContent = "Save Changes";
+            } else {
+                saveBtn.textContent = "Save Template";
+            }
+        } catch (error) {
+            console.error("Error updating form buttons:", error);
+        }
+    }
+
+    /**
+     * Save template (create or update) with loading states
+     */
+    private async saveTemplate(): Promise<void> {
+        try {
+            const formData = this.getFormData();
+            const validation = this.validateForm(formData);
+
+            if (!validation.isValid) {
+                this.errorHandler.showError("Validation Error", validation.errors.join("\n"));
+                return;
+            }
+
+            // Show loading state
+            this.errorHandler.showLoading("Saving template...");
+
+            if (this.currentMode === "create") {
+                const createData: CreateTemplateInput = {
+                    title: formData.title,
+                    content: formData.content,
+                    category: formData.category || undefined,
+                    description: formData.description || undefined,
+                };
+
+                const newTemplate = await this.templateManager.createTemplate(createData);
+                if (newTemplate) {
+                    this.currentMode = "view";
+                    this.formIsDirty = false;
+                    this.setFormReadOnly(true);
+                    this.updateFormButtons();
+                    // Template manager will emit events and update UI automatically
+                }
+            } else if (this.currentMode === "edit") {
+                const currentTemplateId = this.getCurrentTemplateId();
+                if (!currentTemplateId) {
+                    throw new Error("No template selected for editing");
+                }
+
+                const updateData: UpdateTemplateInput = {
+                    title: formData.title,
+                    content: formData.content,
+                    category: formData.category || undefined,
+                    description: formData.description || undefined,
+                };
+
+                const updatedTemplate = await this.templateManager.updateTemplate(currentTemplateId, updateData);
+                if (updatedTemplate) {
+                    this.currentMode = "view";
+                    this.formIsDirty = false;
+                    this.setFormReadOnly(true);
+                    this.updateFormButtons();
+                    // Template manager will emit events and update UI automatically
+                }
+            }
+        } catch (error) {
+            console.error("Error saving template:", error);
+            this.errorHandler.showError("Save Failed", "Failed to save template. Please try again.");
+        } finally {
+            this.errorHandler.hideLoading();
+        }
+    }
+
+    /**
+     * Edit current template
+     */
+    private editCurrentTemplate(): void {
+        const currentTemplateId = this.getCurrentTemplateId();
+        if (!currentTemplateId) {
+            this.errorHandler.showWarning("No Template Selected", "Please select a template to edit.");
+            return;
+        }
+
+        if (this.formIsDirty) {
+            this.showUnsavedChangesModal(() => {
+                this.proceedWithEdit();
+            });
+        } else {
+            this.proceedWithEdit();
+        }
+    }
+
+    /**
+     * Proceed with edit after handling unsaved changes
+     */
+    private proceedWithEdit(): void {
+        this.currentMode = "edit";
+        this.setFormReadOnly(false);
+        this.updateFormButtons();
+        this.switchTab("edit");
+
+        const titleInput = document.getElementById("templateTitleInput") as HTMLInputElement;
+        if (titleInput) {
+            titleInput.focus();
+        }
+
+        console.log("Editing template:", this.getCurrentTemplateId());
+    }
+
+    /**
+     * Cancel edit/create operation
+     */
+    private cancelEdit(): void {
+        if (this.formIsDirty) {
+            this.showUnsavedChangesModal(() => {
+                this.proceedWithCancel();
+            });
+        } else {
+            this.proceedWithCancel();
+        }
+    }
+
+    /**
+     * Proceed with cancel after handling unsaved changes
+     */
+    private proceedWithCancel(): void {
+        if (this.currentMode === "create") {
+            // Go back to view mode with no template selected
+            this.currentMode = "view";
+            this.clearTemplateForm();
+            this.setFormReadOnly(true);
+            this.templateManager.selectTemplate(null);
+        } else if (this.currentMode === "edit") {
+            // Reload the original template data
+            this.currentMode = "view";
+            const currentTemplateId = this.getCurrentTemplateId();
+            if (currentTemplateId) {
+                const template = this.templateManager.getTemplate(currentTemplateId);
+                if (template) {
+                    this.loadTemplateIntoForm(template);
+                } else {
+                    this.clearTemplateForm();
+                }
+            }
+            this.setFormReadOnly(true);
+        }
+
+        this.formIsDirty = false;
+        this.updateFormButtons();
+
+        console.log("Cancelled edit operation");
+    }
+
+    /**
+     * Delete current template with loading states
+     */
+    private async deleteCurrentTemplate(): Promise<void> {
+        const currentTemplateId = this.getCurrentTemplateId();
+        if (!currentTemplateId) {
+            this.errorHandler.showWarning("No Template Selected", "Please select a template to delete.");
+            return;
+        }
+
+        const template = this.templateManager.getTemplate(currentTemplateId);
+        const templateTitle = template ? template.title : "this template";
+
+        this.showDeleteConfirmationModal(templateTitle, async () => {
+            try {
+                this.errorHandler.showLoading("Deleting template...");
+
+                const success = await this.templateManager.deleteTemplate(currentTemplateId);
+                if (success) {
+                    this.currentMode = "view";
+                    this.clearTemplateForm();
+                    this.setFormReadOnly(true);
+                    this.updateFormButtons();
+                    this.formIsDirty = false;
+                    // Template manager will emit events and update UI automatically
+                }
+            } catch (error) {
+                console.error("Error deleting template:", error);
+                this.errorHandler.showError("Delete Failed", "Failed to delete template. Please try again.");
+            } finally {
+                this.errorHandler.hideLoading();
+            }
+        });
+    }
+
+    /**
+     * Get form data with proper typing
+     */
+    private getFormData(): TemplateFormData {
+        const titleInput = document.getElementById("templateTitleInput") as HTMLInputElement;
+        const categorySelect = document.getElementById("templateCategorySelect") as HTMLSelectElement;
+        const descriptionInput = document.getElementById("templateDescriptionInput") as HTMLInputElement;
+        const contentTextarea = document.getElementById("templateContent") as HTMLTextAreaElement;
+
+        return {
+            title: titleInput?.value.trim() || "",
+            category: categorySelect?.value || "",
+            description: descriptionInput?.value.trim() || "",
+            content: contentTextarea?.value || "",
+        };
+    }
+
+    /**
+     * Get current template ID from TemplateManager state
+     */
+    private getCurrentTemplateId(): string | null {
+        const state = this.templateManager.getState();
+        return state.selectedTemplateId;
+    }
+
+    /**
+     * Show unsaved changes modal
+     */
+    private showUnsavedChangesModal(onConfirm: () => void): void {
+        this.showConfirmationModal(
+            "Unsaved Changes",
+            "You have unsaved changes. Are you sure you want to continue? Your changes will be lost.",
+            "Continue",
+            "Keep Editing",
+            onConfirm
+        );
+    }
+
+    /**
+     * Show delete confirmation modal
+     */
+    private showDeleteConfirmationModal(templateTitle: string, onConfirm: () => void): void {
+        this.showConfirmationModal(
+            "Delete Template",
+            `Are you sure you want to delete "${templateTitle}"? This action cannot be undone.`,
+            "Delete",
+            "Cancel",
+            onConfirm
+        );
+    }
+
+    /**
+     * Show confirmation modal using the existing modal system
+     */
+    private showConfirmationModal(title: string, message: string, confirmText: string, cancelText: string, onConfirm: () => void): void {
+        const modal = document.getElementById("confirmDialog");
+        const titleElement = document.getElementById("confirmTitle");
+        const messageElement = document.getElementById("confirmMessage");
+        const confirmButton = document.getElementById("confirmYes");
+        const cancelButton = document.getElementById("confirmNo");
+
+        if (!modal || !titleElement || !messageElement || !confirmButton || !cancelButton) {
+            console.error("Modal elements not found");
+            // Fallback to browser confirm
+            if (confirm(`${title}\n\n${message}`)) {
+                onConfirm();
+            }
+            return;
+        }
+
+        // Set modal content
+        titleElement.textContent = title;
+        messageElement.textContent = message;
+        confirmButton.textContent = confirmText;
+        cancelButton.textContent = cancelText;
+
+        // Remove any existing listeners
+        const newConfirmButton = confirmButton.cloneNode(true) as HTMLElement;
+        const newCancelButton = cancelButton.cloneNode(true) as HTMLElement;
+        confirmButton.parentNode?.replaceChild(newConfirmButton, confirmButton);
+        cancelButton.parentNode?.replaceChild(newCancelButton, cancelButton);
+
+        // Add new listeners
+        newConfirmButton.addEventListener("click", () => {
+            this.hideModal();
+            onConfirm();
+        });
+
+        newCancelButton.addEventListener("click", () => {
+            this.hideModal();
+        });
+
+        // Show modal
+        modal.classList.add("show");
+    }
+
+    /**
+     * Validate form data
+     */
+    private validateForm(data: Partial<TemplateFormData>): { isValid: boolean; errors: string[] } {
+        const errors: string[] = [];
+
+        if (!data.title) {
+            errors.push("Title is required");
+        }
+
+        if (!data.content) {
+            errors.push("Content is required");
+        }
+
+        if (data.title && data.title.length > 200) {
+            errors.push("Title cannot exceed 200 characters");
+        }
+
+        if (!data.category) {
+            errors.push("Category is required");
+        }
+
+        if (data.description && data.description.length > 500) {
+            errors.push("Description cannot exceed 500 characters");
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors,
+        };
     }
 
     /**
@@ -409,3 +943,6 @@ if (document.readyState === "loading") {
     // DOM is already loaded
     initializeApp();
 }
+
+// Export for potential external access
+export { App, initializeApp };
