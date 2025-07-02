@@ -482,10 +482,10 @@ class App {
                 throw new Error("Form elements not found");
             }
 
-            titleInput.readOnly = readOnly;
+            titleInput.disabled = readOnly;
             categorySelect.disabled = readOnly;
-            descriptionInput.readOnly = readOnly;
-            contentTextarea.readOnly = readOnly;
+            descriptionInput.disabled = readOnly;
+            contentTextarea.disabled = readOnly;
 
             // Update visual styling
             const formElements = [titleInput, categorySelect, descriptionInput, contentTextarea];
