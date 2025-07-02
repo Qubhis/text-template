@@ -29,6 +29,8 @@ export default abstract class BaseRoute<S> {
     constructor(service: S) {
         this.router = Router();
         this.service = service;
+
+        this.registerGlobalErrorHandler();
     }
 
     /**
@@ -85,6 +87,13 @@ export default abstract class BaseRoute<S> {
                 message: error instanceof Error ? error.message : "Unknown error",
             },
         };
+    }
+
+    protected registerGlobalErrorHandler(): void {
+        this.router.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+            const { status, response } = this.handleRouteError(error, req);
+            res.status(status).json(response);
+        });
     }
 
     abstract createRoutes(): Router;

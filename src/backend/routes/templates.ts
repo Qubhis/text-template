@@ -94,16 +94,6 @@ export class TemplateRoute extends BaseRoute<TemplateService> {
             })
         );
 
-        /**
-         * Global error handler for this router
-         */
-        this.router.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-            const operation = req.method.toLowerCase();
-
-            const { status, response } = this.handleRouteError(error, req);
-            res.status(status).json(response);
-        });
-
         return this.router;
     }
 
