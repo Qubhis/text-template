@@ -46,28 +46,28 @@
     - [x] Application initialization and dependency injection
     - [x] UI event listeners setup (tabs, search, navigation)
     - [x] Template list display structure
-    - [ ] Save template functionality (create/update)
-    - [ ] Load template into form when selected
-    - [ ] Form state management (dirty state, validation)
-    - [ ] Cancel/reset functionality
+    - [x] Save template functionality (create/update)
+    - [x] Load template into form when selected
+    - [x] Form state management (dirty state, validation)
+    - [x] Cancel/reset functionality
 
 ### 8. Template List (Sidebar)
 
-- [ ] **T8.1** - Display list of templates in sidebar (depends on T7.4 save functionality)
-- [ ] **T8.2** - Add template selection functionality (depends on T7.4 load functionality)
-- [ ] **T8.3** - Implement "Create New Template" button (already basic version in T7.4)
+- [ ] **T8.1** - Display list of templates in sidebar (depends on T7.4 save functionality, needs move from main.ts)
+- [ ] **T8.2** - Add template selection functionality (depends on T7.4 load functionality, needs move from main.ts)
+- [ ] **T8.3** - Implement "Create New Template" button (already basic version in T7.4, needs move from main.ts)
 - [ ] **T8.4** - Add category grouping in template list
-- [ ] **T8.5** - Add template search/filter functionality (basic version in T7.4)
+- [ ] **T8.5** - Add template search/filter functionality (basic version in T7.4, needs move from main.ts)
 
 ## Phase 4: Core Template Features
 
 ### 9. Template Editor
 
-- [ ] **T9.1** - Create template edit form (title, content, category)
-- [ ] **T9.2** - Implement save/cancel functionality
+- [ ] **T9.1** - Create template edit form (title, content, category) - , needs move from main.ts
+- [ ] **T9.2** - Implement save/cancel functionality - , needs move from main.ts
 - [ ] **T9.3** - Add real-time variable detection and highlighting
-- [ ] **T9.4** - Create template deletion with confirmation dialog
-- [ ] **T9.5** - Add template metadata editing (description, tags)
+- [ ] **T9.4** - Create template deletion with confirmation dialog - , needs move from main.ts
+- [ ] **T9.5** - Add template metadata editing (description, tags) - , needs move from main.ts
 
 ### 10. Frontend Template Processing & Variable System
 
