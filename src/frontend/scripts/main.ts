@@ -2,7 +2,7 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-// FIXME: after deleting the header keeps title, category and change date of the last deleted template
+// FIXME: after deleting or update the header keeps title, category and change date of the last deleted template
 
 import TemplateManager, { isSearchChangedEventParameters, StateChangeEvent } from "./templateManager.js";
 import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./apiClient.js";
@@ -161,6 +161,9 @@ class App {
         const templateListChangeEvents: StateChangeEvent[] = ["template-created", "template-updated", "template-deleted"];
         templateListChangeEvents.forEach((eventName) => {
             this.templateManager.addEventListener(eventName, (event: string, data: unknown) => {
+                const template: Template | undefined = isTemplate(data) ? data : undefined;
+                this.updateSelectedTemplate(template);
+
                 this.refreshTemplateList();
             });
         });
@@ -245,7 +248,7 @@ class App {
     /**
      * Update UI to reflect selected template
      */
-    private updateSelectedTemplate(template: Template): void {
+    private updateSelectedTemplate(template?: Template): void {
         // Update header
         const titleElement = document.getElementById("templateTitle");
         const categoryElement = document.getElementById("templateCategory");
@@ -255,11 +258,11 @@ class App {
             if (titleElement) titleElement.textContent = template.title;
             if (categoryElement) {
                 categoryElement.textContent = template.category || "Uncategorized";
-                categoryElement.style.display = "inline";
+                categoryElement.style.opacity = "100%";
             }
             if (modifiedElement) {
                 modifiedElement.textContent = `Modified ${this.formatDate(template.modified)}`;
-                modifiedElement.style.display = "inline";
+                modifiedElement.style.opacity = "100%";
             }
 
             // Enable action buttons
@@ -268,8 +271,8 @@ class App {
             this.updateActiveTemplateInSidebar(template.id);
         } else {
             if (titleElement) titleElement.textContent = "Select a template";
-            if (categoryElement) categoryElement.style.display = "none";
-            if (modifiedElement) modifiedElement.style.display = "none";
+            if (categoryElement) categoryElement.style.opacity = "0%";
+            if (modifiedElement) modifiedElement.style.opacity = "0%";
 
             // Disable action buttons
             this.enableActionButtons(false);

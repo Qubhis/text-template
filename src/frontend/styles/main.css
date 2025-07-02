@@ -171,11 +171,13 @@ body {
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
+    opacity: 0%;
 }
 
 .last-modified {
     color: #6b7280;
     font-size: 12px;
+    opacity: 0%;
 }
 
 .template-actions {
