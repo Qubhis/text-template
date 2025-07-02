@@ -33,13 +33,6 @@ export interface UpdateTemplateInput {
     tags?: string[];
 }
 
-// Category interface
-export interface Category {
-    id: string;
-    name: string;
-    color?: string;
-}
-
 /**
  * Validation utilities for template data
  */

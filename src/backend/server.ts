@@ -4,7 +4,10 @@ import cors from "cors";
 import path from "path";
 import { FileManager } from "./utils/fileManager";
 import { TemplateService } from "./services/templateService";
-import { createTemplateRoutes } from "./routes/templates";
+import { TemplateRoute } from "./routes/templates";
+import BaseRoute from "./routes/baseRoute";
+import { CategoryService } from "./services/categoryService";
+import { CategoryRoute } from "./routes/categories";
 
 const app = express();
 const PORT = process.env.PORT || 3010;
@@ -12,7 +15,6 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../../data");
 
 // Initialize services
 const fileManager = new FileManager(DATA_DIR);
-const templateService = new TemplateService(fileManager);
 
 // Initialize data directory on startup
 async function initializeApp() {
@@ -25,9 +27,12 @@ async function initializeApp() {
     }
 }
 
+// routes
+const routes: BaseRoute<unknown>[] = [new TemplateRoute(new TemplateService(fileManager)), new CategoryRoute(new CategoryService())];
+
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
@@ -46,8 +51,10 @@ app.get("/health", (req, res) => {
     });
 });
 
-// Template API routes
-app.use("/api", createTemplateRoutes(templateService));
+// Existing API routes
+for (const route of routes) {
+    app.use("/api", route.createRoutes());
+}
 
 // API routes placeholder for future endpoints
 app.use("/api", (req, res, next) => {
