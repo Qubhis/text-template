@@ -2,7 +2,7 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-// FIXME: after deleting or update the header keeps title, category and change date of the last deleted template
+// FIXME: after creating a new template, the template in the list is not selected after it appears
 
 import TemplateManager, { isSearchChangedEventParameters, StateChangeEvent } from "./templateManager.js";
 import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./apiClient.js";
@@ -161,10 +161,10 @@ class App {
         const templateListChangeEvents: StateChangeEvent[] = ["template-created", "template-updated", "template-deleted"];
         templateListChangeEvents.forEach((eventName) => {
             this.templateManager.addEventListener(eventName, (event: string, data: unknown) => {
+                console.debug(`Template manager event received: ${eventName}`, data);
                 const template: Template | undefined = isTemplate(data) ? data : undefined;
-                this.updateSelectedTemplate(template);
-
                 this.refreshTemplateList();
+                this.updateSelectedTemplate(template);
             });
         });
 
@@ -399,6 +399,8 @@ class App {
      * Proceed with showing create form
      */
     private proceedWithCreateForm(): void {
+        // Clear selected template
+        this.updateSelectedTemplate();
         // Clear the form
         this.clearTemplateForm();
 
