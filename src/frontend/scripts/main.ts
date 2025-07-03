@@ -2,8 +2,6 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-// FIXME: after creating a new template, the template in the list is not selected after it appears
-
 import TemplateManager, { isSearchChangedEventParameters, StateChangeEvent } from "./templateManager.js";
 import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./apiClient.js";
 import UIErrorHandler from "./uiErrorHandler.js";
