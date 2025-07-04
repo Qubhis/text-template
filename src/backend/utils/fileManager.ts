@@ -21,12 +21,6 @@ export class FileManager {
         try {
             await this.ensureDirectoryExists(this.dataDir);
             await this.ensureDirectoryExists(this.templatesDir);
-
-            // Initialize categories.json if it doesn't exist
-            const categoriesPath = this.getCategoriesPath();
-            if (!existsSync(categoriesPath)) {
-                await this.writeJsonFile(categoriesPath, { categories: [] });
-            }
         } catch (error) {
             throw this.createFileSystemError(error, "initialize data directory");
         }
@@ -113,13 +107,6 @@ export class FileManager {
             throw new Error("Invalid template ID");
         }
         return path.join(this.templatesDir, `${templateId}.json`);
-    }
-
-    /**
-     * Get path for categories file
-     */
-    getCategoriesPath(): string {
-        return path.join(this.dataDir, "categories.json");
     }
 
     /**
