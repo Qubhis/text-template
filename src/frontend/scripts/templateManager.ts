@@ -1,4 +1,5 @@
 // src/frontend/scripts/templateManager.ts
+
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
 

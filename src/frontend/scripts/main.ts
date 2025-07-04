@@ -1,4 +1,5 @@
 // src/frontend/scripts/main.ts
+
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 

@@ -1,4 +1,5 @@
 // src/frontend/scripts/uiErrorHandler.ts
+
 // UI Error Handler & Loading States Management
 // Integrates with TemplateManager events to provide user feedback
 
