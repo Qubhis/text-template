@@ -25,7 +25,7 @@ A simple web application for managing and using text templates with variable sub
 ### 1. Template Management
 
 - **Create** new templates with title and content
-- **Edit** existing templates
+- **Edit** existing templates with inline header editing (title/category) and form editing (description/content)
 - **Delete** templates (with confirmation dialog)
 - **List** all templates in sidebar
 - **Categorize** templates for organization
@@ -34,6 +34,10 @@ A simple web application for managing and using text templates with variable sub
 
 - **Basic variables**: `{{variable}}` - generates text input
 - **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
+- **Real-time detection**: Variables detected as user types in template content
+- **Value persistence**: Variable values persist per template during session
+- **Reset functionality**: Clear all variable values on demand via "Reset Values" button
+- **Validation**: Variable names must be alphanumeric with underscores, no spaces
 - **Conditional logic**: Simple if/else blocks
     ```
     {{#if variable}}This shows when variable has value{{/if}}
@@ -41,27 +45,32 @@ A simple web application for managing and using text templates with variable sub
 
 ### 3. Template Processing
 
-- Real-time preview as variables are filled
-- Support for Markdown formatting in templates
-- Multiple output formats:
-    - Formatted (Markdown rendered)
-    - Plain text (Markdown syntax removed)
-    - Raw (exact template output)
+- Real-time processing as variables are filled in view mode
+- Client-side template processing for better performance
+- Unfilled variables remain as `{{variable}}` in output
+- Support for malformed variable syntax with user-friendly error handling
+- Copy functionality for processed template content (future phase)
 
 ### 4. User Interface
 
-- **Layout**: Resizable sidebar (templates list) + main content area
+- **Layout**: Resizable sidebar (templates list) + main content area + variables panel
 - **Sidebar** (~25% width, resizable):
-    - Template list
+    - Template list with search functionality
     - Create new template button
-- **Main Area** (tabbed interface):
-    - **Edit Tab**: Template editor with variable inputs
-    - **Preview Tab**: Real-time formatted preview
-    - **Output Tab**: Final text with copy button
-- **Template Actions**:
-    - Edit button (pencil icon)
-    - Delete button (with confirmation)
-    - Copy output button
+- **Header** (template information and actions):
+    - **View Mode**: Template title (inline-editable) + category badge (inline-editable) + last modified + Edit/Delete buttons
+    - **Edit Mode**: Title input field + category select dropdown + Save/Cancel buttons
+- **Main Content Area** (central area):
+    - **View Mode**: Description (if present) + processed template content (scrollable)
+    - **Edit Mode**: Template editing form (description + content textarea only)
+- **Variables Panel** (~25% width, right side):
+    - **View Mode**: Dynamic input fields for detected variables + "Reset Values" button
+    - **Edit Mode**: Read-only list of detected variables for validation + variable count
+- **Mode Switching**:
+    - Edit button switches to edit mode
+    - Save/Cancel buttons in header control mode switching
+    - Unsaved changes trigger confirmation modal
+    - Variable values persist when switching modes for same template
 
 ## Data Models
 
@@ -80,26 +89,117 @@ A simple web application for managing and using text templates with variable sub
 }
 ```
 
+### Variable Data Structure
+
+```typescript
+interface Variable {
+    name: string;
+    type: "text" | "dropdown";
+    options?: string[]; // for dropdown type
+}
+
+interface VariableValues {
+    [variableName: string]: string;
+}
+```
+
 ## Template Processing Architecture
 
 ### Frontend-Only Processing (Client-Side)
 
-- **Variable Parsing**: Extract `{{variables}}` from template text in browser
-- **Real-Time Preview**: Instant updates as user types variable values
+- **Variable Parsing**: Extract `{{variables}}` from template text using regex patterns
+- **Real-Time Processing**: Instant template updates as user fills variable values in view mode
 - **No Server Round-Trips**: All processing happens client-side for better performance
 - **Offline Capability**: Template processing works without server connection
+- **Error Handling**: Graceful handling of malformed variable syntax
 
 ### Variable Types Supported
 
-- **Basic variables**: `{{variable}}` - generates text input
-- **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
+- **Basic variables**: `{{variable}}` - generates text input field
+- **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates select dropdown
+- **Invalid syntax**: `{{}}`, `{{:}}`, `{{var:}}` - detected but marked as invalid
 
 ### Processing Flow
 
 1. **Parse Template**: Extract variables and their types from template content
-2. **Generate Inputs**: Create appropriate input fields for each variable
-3. **Real-Time Processing**: Replace variables with values as user types
-4. **Output Formats**: Generate markdown, plain text, or raw output
+2. **Generate Inputs**: Create appropriate input fields for each variable in variables panel (view mode only)
+3. **Real-Time Processing**: Replace variables with values as user types (view mode only)
+4. **Preserve Unfilled**: Keep unfilled variables as `{{variable}}` in processed output
+
+## HTML Structure Changes
+
+### Current Structure (Being Removed)
+
+```html
+<!-- Tab Navigation -->
+<nav class="tab-nav">
+    <button class="tab-btn active" data-tab="edit">Edit</button>
+    <button class="tab-btn" data-tab="preview">Preview</button>
+    <button class="tab-btn" data-tab="output">Output</button>
+</nav>
+
+<!-- Tab Content -->
+<div class="tab-content">
+    <div class="tab-pane active" id="editTab">...</div>
+    <div class="tab-pane" id="previewTab">...</div>
+    <div class="tab-pane" id="outputTab">...</div>
+</div>
+```
+
+### New Structure (Target Design)
+
+```html
+<!-- Header with inline editing -->
+<header class="content-header">
+    <div class="template-info">
+        <!-- View mode: displays, Edit mode: inputs -->
+        <h1 id="templateTitle" class="inline-editable">Template Title</h1>
+        <div class="template-meta">
+            <span id="templateCategory" class="category-badge inline-editable">Category</span>
+            <span id="templateModified" class="last-modified">Modified date</span>
+        </div>
+    </div>
+    <div class="template-actions">
+        <!-- View mode: Edit + Delete, Edit mode: Save + Cancel -->
+        <button class="btn btn-secondary" id="editTemplateBtn">Edit</button>
+        <button class="btn btn-danger" id="deleteTemplateBtn">Delete</button>
+    </div>
+</header>
+
+<!-- Single content area -->
+<div class="main-content-area">
+    <!-- View mode: processed template display -->
+    <div id="viewContent" class="view-content">
+        <p id="templateDescription" class="template-description"></p>
+        <div id="processedTemplate" class="processed-template"></div>
+    </div>
+
+    <!-- Edit mode: template form -->
+    <div id="editContent" class="edit-content hidden">
+        <form class="template-form">
+            <div class="form-group">
+                <label for="templateDescriptionInput">Description (optional)</label>
+                <input type="text" id="templateDescriptionInput" class="form-input" />
+            </div>
+            <div class="form-group">
+                <label for="templateContent">Template Content</label>
+                <textarea id="templateContent" class="form-textarea"></textarea>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Variables Panel -->
+<div class="variable-inputs-section">
+    <h3>Variables</h3>
+    <!-- View mode: input fields -->
+    <div id="variableInputs" class="variable-inputs"></div>
+    <button id="resetValuesBtn" class="btn btn-secondary btn-small">Reset Values</button>
+
+    <!-- Edit mode: detected variables list -->
+    <div id="detectedVariables" class="detected-variables hidden"></div>
+</div>
+```
 
 ## API Endpoints (Implemented)
 
@@ -140,7 +240,7 @@ interface ApiResponse<T> {
     - **Response**: `{ success: true, message: string }`
     - **Errors**: 404 if not found
 
-## File System Structure (subject to change)
+## File System Structure - Planned
 
 ```
 /app/
@@ -164,34 +264,44 @@ interface ApiResponse<T> {
       styles/
         main.css
       scripts/
-        main.ts                          👈 Frontend entry point & app initialization
-        apiClient.ts                     👈 API client for backend communication
-        dataManager.ts                   👈 App Data Management
-        errorHandler.ts                  👈 UI Error
-        templateList.ts                  👈 Template list UI management
-        templateEditor.ts                👈 Template editing functionality
-        templateParser.ts                👈 Variable parsing & processing
-        variableInputs.ts                👈 Variable input generation
-        previewRenderer.ts               👈 Preview and output handling
+        main.ts                          👈 Frontend entry point & app initialization - coordinator
+        base/
+          EventProvider.ts               👈 Abstract class for components emitting events
+        core/
+          apiClient.ts                   👈 API communication
+          dataManager.ts                 👈 Data state management
+          errorHandler.ts                👈 Error system, notifications
+        ui/
+          templateHeader.ts              👈 Header with inline editing + mode-specific action buttons
+          templateForm.ts                👈 Single-mode view/edit + variable state management
+          templateList.ts                👈 Sidebar list + search + selection
+          modalSystem.ts                 👈 Confirmation modals
+          variablePanel.ts               👈 Right-Sidebar for variables
+        utils/
+          domHelpers.ts                  👈 DOM query utilities
+          formatters.ts                  👈 Date/text formatting
+          variableParser.ts              👈 NEW - Variable detection, parsing, and processing
   data/                                  👈 Data directory (Docker volume)
     templates/                           👈 Individual template JSON files
 ```
+
+### Planned Breaking Changes
+
+- **Removed**: `tabManager.ts` - No longer needed with single-mode interface
+- **Modified**: `templateForm.ts` - Major restructure for view/edit modes
+- **Modified**: `templateHeader.ts` - Added inline editing capabilities
+- **Modified**: `main.ts` - Remove tab manager integration
 
 ## Future Enhancements (out of MVP scope)
 
 ### Phase 2 Features
 
+- **Copy functionality** - Copy processed template output to clipboard with format options
+- **Multiple output formats** - Raw, Markdown
+- **Conditional logic** - Simple if/else blocks in templates
 - **Template versioning** - Keep history of changes
 - **Template sharing** - Export/import individual templates
 - **Search functionality** - Full-text search across templates
-- **Template validation** - Syntax checking for variables
-- **Bulk operations** - Mass edit, delete, categorize
-
-### Phase 3 Features
-
-- **Template marketplace** - Share templates with community
-- **Advanced conditionals** - More complex logic
-- **API integrations** - Connect with external services
 
 ## Implementation Status
 
@@ -270,50 +380,26 @@ interface ApiResponse<T> {
 #### T4: Category Service & API endpoints
 
 - **Status**: ✅ Completed
-- **Implementation**:
-    - API Routes in `src/backend/routes/categories.ts`
-    - service in `src/backend/services/categoryService.ts`
+- **Implementation**: API Routes and service for predefined categories
 - **Approach**: Constant values for categories for this MVP, defined in `src/backend/models/category.ts`
 
 #### T6.1-T6.4: Basic UI Structure
 
-- **Status**: ✅ Completed
-- **Implementation**: Complete HTML layout and CSS styling in `src/frontend/index.html` and `src/frontend/styles/main.css`
-- **Approach**:
-    - **HTML Structure**: Semantic layout with sidebar (templates list) + main content area with tabbed interface
-    - **CSS Framework**: Custom CSS with flexbox layout, responsive design, and modern styling
-    - **Tab System**: Edit/Preview/Output tabs with proper active/inactive states
-    - **Form Design**: Complete template editing form with all required fields (title, category, description, content)
-    - **Variables Panel**: Dedicated right-side panel for dynamic variable input generation
-    - **Responsive Layout**: Mobile-friendly design with media queries for smaller screens
-    - **Component Styling**: Consistent button styles, modal dialogs, loading states, and form elements
-    - **Resizable Sidebar**: CSS structure ready for JavaScript implementation (resize handle, constraints)
+- **Status**: 🔄 Major Update Required
+- **Current**: Tab-based layout with Edit/Preview/Output tabs
+- **Target**: Single-mode view/edit layout with inline header editing
+- **Breaking Changes**: Complete HTML structure redesign, CSS layout changes, removal of tab system
 
 #### T7.1-T7.3: Frontend Data Layer Foundation
 
 - **Status**: ✅ Completed
-- **Implementation**: Core frontend infrastructure in `src/frontend/scripts/`
-- **Approach**:
-    - **API Client** (`apiClient.ts`): TypeScript API client with comprehensive error handling, retries, timeout management, and type safety for all backend communication
-    - **Data Manager** (`dataManager.ts`): Centralized state management with event-driven architecture, template CRUD coordination, search/filtering, and reactive state updates
-    - **UI Error Handler** (`errorHandler.ts`): User-friendly error notifications, loading states, success messages, and retry mechanisms with DOM integration
-    - **Event-Driven Architecture**: DataManager emits events (templates-loaded, template-selected, error-occurred) that UI components subscribe to
-    - **Type Safety**: Full TypeScript interfaces with proper error handling and validation
-    - **Infrastructure Ready**: Foundation for UI interactions, but no actual template operations implemented yet
+- **Implementation**: API client, data manager, error handler with event-driven architecture
 
 #### T7.4: Current Template State Management
 
-- **Status**: ✅ Completed
-- **Implementation**: Basic app initialization in `src/frontend/scripts/main.ts`
-- **Completed**:
-    - Application entry point with dependency injection
-    - UI event listeners for tabs, search, navigation
-    - Template list display structure (no data yet)
-    - Basic state synchronization framework
-    - Save template functionality (create/update operations)
-    - Load template into form when selected
-    - Form state management (dirty state, validation)
-    - Cancel/reset functionality with confirmation
+- **Status**: 🔄 Update Required
+- **Current**: Basic template CRUD with tab integration
+- **Target**: Mode-based state management with variable value persistence
 
 ## Development Phases & Roadmap
 
@@ -326,35 +412,111 @@ interface ApiResponse<T> {
 
 1. **Template API** (T3.1-T3.5) - CRUD endpoints for templates
 
-### ✅ Phase 3: Frontend Foundation (IN PROGRESS)
+### ✅ Phase 3: Frontend Foundation (COMPLETED)
 
-1. **UI Structure** (T6.1-T6.4) - HTML layout, CSS styling, responsive design ✅
-2. **Data Layer Foundation** (T7.1-T7.3) - API client, state management, error handling ✅
-3. **Current Template State** (T7.4) - Form state management and basic CRUD operations ✅
+1. **UI Structure** (T6.1-T6.4) - Basic layout and components (requires major update)
+2. **Data Layer Foundation** (T7.1-T7.3) - API client, state management, error handling
+3. **Current Template State** (T7.4) - Basic CRUD operations (requires update for new layout)
 
-### 📋 Phase 4: Template List & Advanced Features (PLANNED)
+### 🔄 Phase 4: Template Editor Redesign (IN PROGRESS)
 
-1. **Template List** (T8.1-T8.5) - Sidebar template display, selection, search/filter UI
-2. **Template Editor** (T9.1-T9.5) - Enhanced editing, validation, deletion
-3. **Variable System** (T10.1-T10.5) - Variable parsing, input generation, processing
+1. **Variable Parser Foundation** (T10.1)
+    - [ ] Create `variableParser.ts` with Variable interface and parsing logic
+    - [ ] Implement `parseVariables()` and `processTemplate()` functions
+    - [ ] Add validation for variable syntax and edge cases
+    - [ ] Unit tests for variable detection and processing
 
-### 📋 Phase 5: Core Features (PLANNED)
+2. **Header Inline Editing** (T9.3-Header)
+    - [ ] Modify `templateHeader.ts` for inline editing capabilities
+    - [ ] Add edit mode state management to header
+    - [ ] Convert title/category to input fields in edit mode
+    - [ ] Move Save/Cancel buttons from form to header
+    - [ ] Handle keyboard interactions (Enter/Escape)
 
-1. **Template Editor** (T9.1-T9.5) - Edit forms, save/delete functionality
-2. **Variable System** (T10.1-T10.5) - Input generation, validation
-3. **Preview & Output** (T11.1-T11.5) - Real-time preview, copy functionality
+3. **Content Area Redesign** (T9.3-Content)
+    - [ ] Remove tab HTML structure and CSS
+    - [ ] Create view mode content display (description + processed template)
+    - [ ] Modify edit mode to show form without title/category
+    - [ ] Add smooth transitions between view/edit modes
+    - [ ] Implement scrollable content area
 
-### 📋 Phase6: Polish & Deployment (PLANNED)
+4. **Variables Panel Redesign** (T10.2-T10.5)
+    - [ ] Create dynamic input field generation for view mode
+    - [ ] Implement text inputs and dropdown selects for variables
+    - [ ] Add "Reset Values" button and functionality
+    - [ ] Create read-only detected variables list for edit mode
+    - [ ] Handle variable value persistence per template
 
-1. **Error Handling** (T15.1-T15.5) - Validation, user feedback
-2. **Testing** (T16.1-T16.5) - Unit tests, integration tests
-3. **Production** (T17.1-T17.5) - Docker optimization, deployment
+5. **Template Form Integration** (T9.1-T9.2)
+    - [ ] Remove tab-related logic from TemplateForm
+    - [ ] Add view/edit mode switching
+    - [ ] Integrate variable parser for real-time detection
+    - [ ] Connect header buttons to form operations
+    - [ ] Maintain unsaved changes detection and modal flow
+
+### 📋 Phase 5: CSS and Layout Updates (PLANNED)
+
+1. **Remove Tab System CSS**
+    - [ ] Remove `.tab-nav`, `.tab-btn`, `.tab-content`, `.tab-pane` styles
+    - [ ] Update main content area layout for single mode
+    - [ ] Add inline editing styles for header elements
+
+2. **Single-Mode Layout Styling**
+    - [ ] Style view mode content display area
+    - [ ] Style edit mode form layout
+    - [ ] Add smooth transitions between modes
+    - [ ] Update variables panel styling for both modes
+
+3. **Responsive Design Updates**
+    - [ ] Update media queries for single-mode interface
+    - [ ] Test and refine responsive behavior
+
+### 📋 Phase 6: Integration and Testing (PLANNED)
+
+1. **Component Integration**
+    - [ ] Update `main.ts` to remove TabManager
+    - [ ] Connect all components with new event flow
+    - [ ] Test mode switching and state persistence
+    - [ ] Verify all existing CRUD functionality
+
+2. **End-to-End Testing**
+    - [ ] Test create, edit, delete workflows
+    - [ ] Test variable detection and value filling
+    - [ ] Test responsive design and edge cases
+    - [ ] Polish animations and user feedback
+
+### 📋 Phase 7: Copy & Output System (PLANNED)
+
+1. **Copy Functionality**
+    - [ ] Add copy button for processed template content
+    - [ ] Implement clipboard API integration
+    - [ ] Add success notifications for copy operations
+    - [ ] Handle copy errors gracefully
+
+2. **Output Format Options**
+    - [ ] Add format selector (raw, markdown, plain text)
+    - [ ] Implement different output processing modes
+    - [ ] Add format-specific copy functionality
+
+### 📋 Phase 8: Enhanced Features (PLANNED)
+
+1. **Single processing**:
+    - [ ] **T14.1** - Implement single template export (JSON download)
+    - [ ] **T14.3** - Add single template import (JSON upload)
+    - [ ] **T14.5** - Add import/export UI components
+
+2. **Bulk processing**:
+    - [ ] **T14.2** - Create bulk export (ZIP with all templates)
+    - [ ] **T14.4** - Implement bulk import with conflict resolution
+    - [ ] **T14.6** - Extend import/export UI
 
 ## Success Criteria
 
-- Users can create, edit, and delete templates easily
-- Variable substitution works reliably
+- Users can create, edit, and delete templates with inline header editing
+- Variable substitution works reliably with real-time feedback in view mode
+- Mode switching (view/edit) provides smooth user experience without layout jarring
+- Variable values persist when switching modes for the same template
 - Data persists across container restarts
-- Export/import works seamlessly
-- UI is intuitive and responsive
+- UI is intuitive and responsive across desktop and mobile
 - Application starts quickly and runs smoothly in Docker
+- All existing functionality continues to work after redesign
