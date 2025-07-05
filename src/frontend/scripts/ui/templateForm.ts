@@ -63,6 +63,7 @@ export class TemplateForm {
      */
     public initialize(): void {
         this.setupEventListeners();
+        this.loadCategories();
         this.setFormReadOnly(true);
         this.updateFormButtons();
     }
@@ -81,6 +82,13 @@ export class TemplateForm {
 
         // Form change listeners for dirty state tracking
         this.setupFormChangeListeners();
+    }
+
+    private loadCategories(): void {
+        console.log("📋 Loading categories...");
+        // Load categories for the dropdown
+        const categories = this.dataManager.getCategories();
+        this.updateCategories(categories);
     }
 
     /**

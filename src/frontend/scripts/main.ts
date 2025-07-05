@@ -17,13 +17,7 @@ import { TemplateList } from "./ui/templateList.js";
 import { TabManager } from "./ui/tabManager.js";
 import { ModalSystem } from "./ui/modalSystem.js";
 import { TemplateForm } from "./ui/templateForm.js";
-
-interface TemplateFormData {
-    title: string;
-    category: string;
-    description: string;
-    content: string;
-}
+import { TemplateHeader } from "./ui/templateHeader.js";
 
 /**
  * Application class - main coordinator
@@ -35,6 +29,7 @@ class App {
     private tabManager: TabManager;
     private modalSystem: ModalSystem;
     private templateForm: TemplateForm;
+    private templateHeader: TemplateHeader;
 
     constructor(dataManager: DataManager) {
         this.dataManager = dataManager;
@@ -54,6 +49,10 @@ class App {
             onShowLoading: (message) => this.errorHandler.showLoading(message),
             onHideLoading: () => this.errorHandler.hideLoading(),
         });
+        this.templateHeader = new TemplateHeader({
+            onEditTemplate: () => this.templateForm.startEdit(),
+            onDeleteTemplate: () => this.deleteCurrentTemplate(),
+        });
     }
 
     /**
@@ -61,14 +60,12 @@ class App {
      */
     async initialize(): Promise<void> {
         try {
-            console.log("🚀 Initializing Text Templates App UI...");
-
-            console.log("🚀 Initializing data manager...");
-            await this.dataManager.initialize();
-
             // Setup data manager event listeners for UI updates
             console.log("🔗 Connecting data manager to UI...");
             this.setupDataManagerListeners();
+
+            console.log("🚀 Initializing data manager...");
+            await this.dataManager.initialize();
 
             // Initialize Template List
             console.log("🎨 Initializing template list...");
@@ -86,13 +83,9 @@ class App {
             console.log("🎨 Initializing template form...");
             this.templateForm.initialize();
 
-            // Setup basic UI event listeners
-            console.log("🎨 Setting up UI event listeners...");
-            this.setupBasicUIListeners();
-
-            // Load initial data and update UI
-            console.log("📋 Loading categories...");
-            this.loadInitialData();
+            // Initialize Template Header
+            console.log("🎨 Initializing template header...");
+            this.templateHeader.initialize();
 
             console.log("✅ Application UI initialized successfully!");
 
@@ -106,29 +99,6 @@ class App {
     }
 
     /**
-     * Setup basic UI event listeners (non-template related)
-     */
-    private setupBasicUIListeners(): void {
-        // Edit template button
-        const editBtn = document.getElementById("editTemplateBtn");
-        if (editBtn) {
-            editBtn.addEventListener("click", () => {
-                this.templateForm.startEdit();
-            });
-        }
-
-        // Delete template button
-        const deleteBtn = document.getElementById("deleteTemplateBtn");
-        if (deleteBtn) {
-            deleteBtn.addEventListener("click", () => {
-                this.deleteCurrentTemplate();
-            });
-        }
-
-        console.log("✅ Basic UI listeners set up");
-    }
-
-    /**
      * Setup template manager event listeners for UI updates
      */
     private setupDataManagerListeners(): void {
@@ -138,7 +108,7 @@ class App {
             this.dataManager.addEventListener(eventName, (event: string, data: unknown) => {
                 console.debug(`Template manager event received: ${eventName}`, data);
                 const template: Template | undefined = isTemplate(data) ? data : undefined;
-                this.updateSelectedTemplate(template);
+                this.templateHeader.updateHeader(template);
             });
         });
 
@@ -152,15 +122,6 @@ class App {
         });
 
         console.log("✅ Data manager listeners set up");
-    }
-
-    /**
-     * Load initial data
-     */
-    private loadInitialData(): void {
-        // Load categories for the dropdown
-        const categories = this.dataManager.getCategories();
-        this.templateForm.updateCategories(categories);
     }
 
     /**
@@ -181,7 +142,7 @@ class App {
      * Proceed with template selection after handling unsaved changes
      */
     private proceedWithTemplateSelection(template: Template): void {
-        this.updateSelectedTemplate(template);
+        this.templateHeader.updateHeader(template);
 
         if (template) {
             // Just load the template - it will automatically switch to view mode
@@ -191,38 +152,6 @@ class App {
             if (this.templateForm.getCurrentMode() !== "create") {
                 this.templateForm.clearForm();
             }
-        }
-    }
-
-    /**
-     * Update UI to reflect selected template
-     */
-    private updateSelectedTemplate(template?: Template): void {
-        // Update header
-        const titleElement = document.getElementById("templateTitle");
-        const categoryElement = document.getElementById("templateCategory");
-        const modifiedElement = document.getElementById("templateModified");
-
-        if (template) {
-            if (titleElement) titleElement.textContent = template.title;
-            if (categoryElement) {
-                categoryElement.textContent = template.category || "Uncategorized";
-                categoryElement.style.opacity = "100%";
-            }
-            if (modifiedElement) {
-                modifiedElement.textContent = `Modified ${this.formatDate(template.modified)}`;
-                modifiedElement.style.opacity = "100%";
-            }
-
-            // Enable action buttons
-            this.enableActionButtons(true);
-        } else {
-            if (titleElement) titleElement.textContent = "Select a template";
-            if (categoryElement) categoryElement.style.opacity = "0%";
-            if (modifiedElement) modifiedElement.style.opacity = "0%";
-
-            // Disable action buttons
-            this.enableActionButtons(false);
         }
     }
 
@@ -271,25 +200,6 @@ class App {
     private getCurrentTemplateId(): string | null {
         const state = this.dataManager.getState();
         return state.selectedTemplateId;
-    }
-
-    /**
-     * Enable/disable action buttons
-     */
-    private enableActionButtons(enabled: boolean): void {
-        const editBtn = document.getElementById("editTemplateBtn") as HTMLButtonElement;
-        const deleteBtn = document.getElementById("deleteTemplateBtn") as HTMLButtonElement;
-
-        if (editBtn) editBtn.disabled = !enabled;
-        if (deleteBtn) deleteBtn.disabled = !enabled;
-    }
-
-    /**
-     * Utility: Format date
-     */
-    private formatDate(dateString: string): string {
-        const date = new Date(dateString);
-        return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 }
 
