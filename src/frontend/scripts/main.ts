@@ -3,10 +3,11 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-import DataManager, { isSearchChangedEventParameters, StateChangeEvent } from "./core/dataManager.js";
+import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
 import { TemplateList } from "./ui/templateList.js";
+import { TabManager } from "./ui/tabManager.js";
 
 interface TemplateFormData {
     title: string;
@@ -22,6 +23,7 @@ class App {
     private dataManager: DataManager;
     private errorHandler: ErrorHandler;
     private templateList: TemplateList;
+    private tabManager: TabManager;
     private currentMode: "view" | "edit" | "create" = "view";
     private formIsDirty = false;
 
@@ -33,6 +35,7 @@ class App {
             onTemplateSelect: (templateId: string) => this.selectTemplate(templateId),
             onCreateTemplate: () => this.showCreateTemplateForm(),
         });
+        this.tabManager = new TabManager();
     }
 
     /**
@@ -52,6 +55,10 @@ class App {
             // Initialize Template List
             console.log("📋 Initializing template list...");
             this.templateList.initialize();
+
+            // Initialize Tab Manager
+            console.log("🎨 Initializing tab manager...");
+            this.tabManager.initialize();
 
             // Setup basic UI event listeners
             console.log("🎨 Setting up UI event listeners...");
@@ -80,18 +87,6 @@ class App {
      * Setup basic UI event listeners (non-template related)
      */
     private setupBasicUIListeners(): void {
-        // Tab switching
-        const tabButtons = document.querySelectorAll(".tab-btn");
-        tabButtons.forEach((button) => {
-            button.addEventListener("click", (e) => {
-                const target = e.target as HTMLElement;
-                const tabName = target.getAttribute("data-tab");
-                if (tabName) {
-                    this.switchTab(tabName);
-                }
-            });
-        });
-
         // Modal close handlers
         const confirmNo = document.getElementById("confirmNo");
         if (confirmNo) {
@@ -274,31 +269,6 @@ class App {
     }
 
     /**
-     * Switch tabs
-     */
-    private switchTab(tabName: string): void {
-        // Update tab buttons
-        const tabButtons = document.querySelectorAll(".tab-btn");
-        tabButtons.forEach((btn) => {
-            btn.classList.remove("active");
-            if (btn.getAttribute("data-tab") === tabName) {
-                btn.classList.add("active");
-            }
-        });
-
-        // Update tab panes
-        const tabPanes = document.querySelectorAll(".tab-pane");
-        tabPanes.forEach((pane) => {
-            pane.classList.remove("active");
-            if (pane.id === `${tabName}Tab`) {
-                pane.classList.add("active");
-            }
-        });
-
-        console.log(`Switched to ${tabName} tab`);
-    }
-
-    /**
      * Show create template form
      */
     private showCreateTemplateForm(): void {
@@ -329,7 +299,7 @@ class App {
         this.updateFormButtons();
 
         // Switch to edit tab
-        this.switchTab("edit");
+        this.tabManager.switchTab("edit");
 
         // Focus on title input
         const titleInput = document.getElementById("templateTitleInput") as HTMLInputElement;
@@ -557,7 +527,7 @@ class App {
         this.currentMode = "edit";
         this.setFormReadOnly(false);
         this.updateFormButtons();
-        this.switchTab("edit");
+        this.tabManager.switchTab("edit");
 
         const titleInput = document.getElementById("templateTitleInput") as HTMLInputElement;
         if (titleInput) {
