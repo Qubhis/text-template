@@ -16,7 +16,7 @@ A simple web application for managing and using text templates with variable sub
 ### Storage Strategy
 
 - Templates stored as individual JSON files in `/data/templates/`
-- Categories/metadata stored in `/data/categories.json`
+- Categories are pre-defined in the code (extensibility out of MVP scope)
 - Mounted Docker volume for persistence
 - Built-in export/import via file operations
 
@@ -34,11 +34,6 @@ A simple web application for managing and using text templates with variable sub
 
 - **Basic variables**: `{{variable}}` - generates text input
 - **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
-- **Enhanced variable types**:
-    - `{{name:text}}` - text input (default)
-    - `{{count:number}}` - number input
-    - `{{enabled:boolean}}` - checkbox
-    - `{{date:date}}` - date picker
 - **Conditional logic**: Simple if/else blocks
     ```
     {{#if variable}}This shows when variable has value{{/if}}
@@ -57,9 +52,8 @@ A simple web application for managing and using text templates with variable sub
 
 - **Layout**: Resizable sidebar (templates list) + main content area
 - **Sidebar** (~25% width, resizable):
-    - Template list with categories
+    - Template list
     - Create new template button
-    - Category management
 - **Main Area** (tabbed interface):
     - **Edit Tab**: Template editor with variable inputs
     - **Preview Tab**: Real-time formatted preview
@@ -86,25 +80,6 @@ A simple web application for managing and using text templates with variable sub
 }
 ```
 
-### Categories File Structure
-
-```json
-{
-    "categories": [
-        {
-            "id": "prompts",
-            "name": "LLM Prompts",
-            "color": "#3b82f6"
-        },
-        {
-            "id": "emails",
-            "name": "Email Templates",
-            "color": "#10b981"
-        }
-    ]
-}
-```
-
 ## Template Processing Architecture
 
 ### Frontend-Only Processing (Client-Side)
@@ -118,7 +93,6 @@ A simple web application for managing and using text templates with variable sub
 
 - **Basic variables**: `{{variable}}` - generates text input
 - **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
-- **Enhanced variable types**: `{{var:number}}`, `{{var:boolean}}`, `{{var:date}}`
 
 ### Processing Flow
 
@@ -166,56 +140,44 @@ interface ApiResponse<T> {
     - **Response**: `{ success: true, message: string }`
     - **Errors**: 404 if not found
 
-## File System Structure
+## File System Structure (subject to change)
 
 ```
 /app/
   src/
     backend/
-      server.ts                            👈 T1.2 - Express server + T3 integration
+      server.ts
       models/
-        template.ts                      👈 T2.2 - Template data models & validation
-        category.ts                      👈 T5.1 - Category data models
+        template.ts
+        category.ts
       services/
-        templateService.ts               👈 T2.3 - Template CRUD operations
-        categoryService.ts               👈 T5.2 - Category service operations
+        templateService.ts
+        categoryService.ts
       utils/
-        fileManager.ts                   👈 T2.1 - JSON file utilities
+        fileManager.ts                   👈 JSON file utilities
       routes/
-        templates.ts                     👈 T3.1-T3.5 - Template API endpoints ✅
-        categories.ts                    👈 T5.2-T5.4 - Category API endpoints
-    ffrontend/
-      index.html                         👈 T6.1 - Basic HTML layout
+        baseRoute.ts                     👈 Base class for routes
+        templates.ts
+        categories.ts
+    frontend/
+      index.html
       styles/
-        main.css                         👈 T6.2 - CSS styling
+        main.css
       scripts/
-        main.ts                          👈 T7.4 - Frontend entry point & app initialization
-        apiClient.ts                     👈 T7.1 - API client for backend communication
-        templateManager.ts               👈 T7.2 - Template data management & state
-        uiErrorHandler.ts                👈 T7.3 - UI Error
-        templateList.ts                  👈 T8.1-T8.5 - Template list UI management
-        templateEditor.ts                👈 T9.1-T9.5 - Template editing functionality
-        templateParser.ts                👈 T10.1-T10.5 - Variable parsing & processing
-        variableInputs.ts                👈 T10.1-T10.5 - Variable input generation
-        previewRenderer.ts               👈 T11.1-T11.5 - Preview and output handling
-  data/                                  👈 T2.5 - Data directory (Docker volume)
+        main.ts                          👈 Frontend entry point & app initialization
+        apiClient.ts                     👈 API client for backend communication
+        dataManager.ts                   👈 App Data Management
+        errorHandler.ts                  👈 UI Error
+        templateList.ts                  👈 Template list UI management
+        templateEditor.ts                👈 Template editing functionality
+        templateParser.ts                👈 Variable parsing & processing
+        variableInputs.ts                👈 Variable input generation
+        previewRenderer.ts               👈 Preview and output handling
+  data/                                  👈 Data directory (Docker volume)
     templates/                           👈 Individual template JSON files
-    categories.json                      👈 Categories configuration
 ```
 
-## Docker Setup
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY . .
-RUN npm install && npm run build
-EXPOSE 3000
-VOLUME ["/app/data"]
-CMD ["npm", "start"]
-```
-
-## Future Enhancements
+## Future Enhancements (out of MVP scope)
 
 ### Phase 2 Features
 
@@ -227,10 +189,8 @@ CMD ["npm", "start"]
 
 ### Phase 3 Features
 
-- **Collaboration** - Multi-user support
 - **Template marketplace** - Share templates with community
 - **Advanced conditionals** - More complex logic
-- **Plugin system** - Custom variable types
 - **API integrations** - Connect with external services
 
 ## Implementation Status
@@ -238,7 +198,7 @@ CMD ["npm", "start"]
 #### T1.1-T1.5: Project Setup
 
 - **Status**: ✅ Completed
-- **Implementation**: Node.js + Express + TypeScript project structure
+- **Implementation**: Node.js + Express + TypeScript project structure; Docker setup
 
 #### T2.1: File System Utilities
 
@@ -246,10 +206,10 @@ CMD ["npm", "start"]
 - **Implementation**: `FileManager` class in `src/backend/utils/fileManager.ts`
 - **Approach**:
     - Simple JSON file operations (read, write, delete, exists)
-    - Template-specific path helpers (`getTemplatePath`, `getCategoriesPath`)
+    - Template-specific path helpers (`getTemplatePath`)
     - Directory auto-creation with `recursive: true`
     - Input validation for template IDs (alphanumeric, hyphens, underscores only)
-    - Built-in directory initialization (data/, templates/, categories.json)
+    - Built-in directory initialization (data/, templates/)
 
 #### T2.2: Template Data Models & Validation
 
@@ -307,6 +267,14 @@ CMD ["npm", "start"]
     - **Dependency Injection**: TemplateService injected via factory function
     - **Server Integration**: Connected to Express server with service initialization
 
+#### T4: Category Service & API endpoints
+
+- **Status**: ✅ Completed
+- **Implementation**:
+    - API Routes in `src/backend/routes/categories.ts`
+    - service in `src/backend/services/categoryService.ts`
+- **Approach**: Constant values for categories for this MVP, defined in `src/backend/models/category.ts`
+
 #### T6.1-T6.4: Basic UI Structure
 
 - **Status**: ✅ Completed
@@ -327,22 +295,21 @@ CMD ["npm", "start"]
 - **Implementation**: Core frontend infrastructure in `src/frontend/scripts/`
 - **Approach**:
     - **API Client** (`apiClient.ts`): TypeScript API client with comprehensive error handling, retries, timeout management, and type safety for all backend communication
-    - **Template Manager** (`templateManager.ts`): Centralized state management with event-driven architecture, template CRUD coordination, search/filtering, and reactive state updates
-    - **UI Error Handler** (`uiErrorHandler.ts`): User-friendly error notifications, loading states, success messages, and retry mechanisms with DOM integration
-    - **Event-Driven Architecture**: TemplateManager emits events (templates-loaded, template-selected, error-occurred) that UI components subscribe to
+    - **Data Manager** (`dataManager.ts`): Centralized state management with event-driven architecture, template CRUD coordination, search/filtering, and reactive state updates
+    - **UI Error Handler** (`errorHandler.ts`): User-friendly error notifications, loading states, success messages, and retry mechanisms with DOM integration
+    - **Event-Driven Architecture**: DataManager emits events (templates-loaded, template-selected, error-occurred) that UI components subscribe to
     - **Type Safety**: Full TypeScript interfaces with proper error handling and validation
     - **Infrastructure Ready**: Foundation for UI interactions, but no actual template operations implemented yet
 
 #### T7.4: Current Template State Management
 
-- **Status**: 🔄 In Progress
+- **Status**: ✅ Completed
 - **Implementation**: Basic app initialization in `src/frontend/scripts/main.ts`
 - **Completed**:
     - Application entry point with dependency injection
     - UI event listeners for tabs, search, navigation
     - Template list display structure (no data yet)
     - Basic state synchronization framework
-- **Missing** (to complete T7.4):
     - Save template functionality (create/update operations)
     - Load template into form when selected
     - Form state management (dirty state, validation)
@@ -359,11 +326,11 @@ CMD ["npm", "start"]
 
 1. **Template API** (T3.1-T3.5) - CRUD endpoints for templates
 
-### 🔄 Phase 3: Frontend Foundation (IN PROGRESS)
+### ✅ Phase 3: Frontend Foundation (IN PROGRESS)
 
 1. **UI Structure** (T6.1-T6.4) - HTML layout, CSS styling, responsive design ✅
 2. **Data Layer Foundation** (T7.1-T7.3) - API client, state management, error handling ✅
-3. **Current Template State** (T7.4) - Form state management and basic CRUD operations 🔄
+3. **Current Template State** (T7.4) - Form state management and basic CRUD operations ✅
 
 ### 📋 Phase 4: Template List & Advanced Features (PLANNED)
 
@@ -377,14 +344,7 @@ CMD ["npm", "start"]
 2. **Variable System** (T10.1-T10.5) - Input generation, validation
 3. **Preview & Output** (T11.1-T11.5) - Real-time preview, copy functionality
 
-### 📋 Phase 6: Enhanced Features (PLANNED)
-
-1. **Categories** (T5.1-T5.5) - Category system implementation
-2. **Enhanced Variables** (T12.1-T12.5) - Number, boolean, date types
-3. **Import/Export** (T13.1-T13.5) - File import/export system
-4. **Advanced UI** (T14.1-T14.5) - Tabs, shortcuts, advanced features
-
-### 📋 Phase7: Polish & Deployment (PLANNED)
+### 📋 Phase6: Polish & Deployment (PLANNED)
 
 1. **Error Handling** (T15.1-T15.5) - Validation, user feedback
 2. **Testing** (T16.1-T16.5) - Unit tests, integration tests
