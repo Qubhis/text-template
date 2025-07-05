@@ -3,11 +3,15 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
+// FIXME: no modal is shown when a template is in edit mode and another template is selected from the template list. We should always warn the unsaved changes will be lost if another template is selected
+//        it works when a change was made and user clicks cancel or a new template button
+
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
 import { TemplateList } from "./ui/templateList.js";
 import { TabManager } from "./ui/tabManager.js";
+import { ModalSystem } from "./ui/modalSystem.js";
 
 interface TemplateFormData {
     title: string;
@@ -24,6 +28,7 @@ class App {
     private errorHandler: ErrorHandler;
     private templateList: TemplateList;
     private tabManager: TabManager;
+    private modalSystem: ModalSystem;
     private currentMode: "view" | "edit" | "create" = "view";
     private formIsDirty = false;
 
@@ -36,6 +41,7 @@ class App {
             onCreateTemplate: () => this.showCreateTemplateForm(),
         });
         this.tabManager = new TabManager();
+        this.modalSystem = new ModalSystem();
     }
 
     /**
@@ -59,6 +65,10 @@ class App {
             // Initialize Tab Manager
             console.log("🎨 Initializing tab manager...");
             this.tabManager.initialize();
+
+            // Initialize Modal System
+            console.log("🎨 Initializing modal system...");
+            this.modalSystem.initialize();
 
             // Setup basic UI event listeners
             console.log("🎨 Setting up UI event listeners...");
@@ -87,14 +97,6 @@ class App {
      * Setup basic UI event listeners (non-template related)
      */
     private setupBasicUIListeners(): void {
-        // Modal close handlers
-        const confirmNo = document.getElementById("confirmNo");
-        if (confirmNo) {
-            confirmNo.addEventListener("click", () => {
-                this.hideModal();
-            });
-        }
-
         // Save template button
         const saveBtn = document.getElementById("saveTemplateBtn");
         if (saveBtn) {
@@ -169,12 +171,12 @@ class App {
     }
 
     /**
-     * Handle template selection from TemplateManager
+     * Handle template selection from DataManager
      */
     private handleTemplateSelected(template: Template): void {
         // Check if we have unsaved changes before switching
         if (this.formIsDirty && template?.id !== this.getCurrentTemplateId()) {
-            this.showUnsavedChangesModal(() => {
+            this.modalSystem.showUnsavedChangesModal(() => {
                 this.proceedWithTemplateSelection(template);
             });
         } else {
@@ -273,7 +275,7 @@ class App {
      */
     private showCreateTemplateForm(): void {
         if (this.formIsDirty) {
-            this.showUnsavedChangesModal(() => {
+            this.modalSystem.showUnsavedChangesModal(() => {
                 this.proceedWithCreateForm();
             });
         } else {
@@ -512,7 +514,7 @@ class App {
         }
 
         if (this.formIsDirty) {
-            this.showUnsavedChangesModal(() => {
+            this.modalSystem.showUnsavedChangesModal(() => {
                 this.proceedWithEdit();
             });
         } else {
@@ -542,7 +544,7 @@ class App {
      */
     private cancelEdit(): void {
         if (this.formIsDirty) {
-            this.showUnsavedChangesModal(() => {
+            this.modalSystem.showUnsavedChangesModal(() => {
                 this.proceedWithCancel();
             });
         } else {
@@ -594,7 +596,7 @@ class App {
         const template = this.dataManager.getTemplate(currentTemplateId);
         const templateTitle = template ? template.title : "this template";
 
-        this.showDeleteConfirmationModal(templateTitle, async () => {
+        this.modalSystem.showDeleteConfirmationModal(templateTitle, async () => {
             try {
                 this.errorHandler.showLoading("Deleting template...");
 
@@ -605,7 +607,7 @@ class App {
                     this.setFormReadOnly(true);
                     this.updateFormButtons();
                     this.formIsDirty = false;
-                    // Template manager will emit events and update UI automatically
+                    // Data manager will emit events and update UI automatically
                 }
             } catch (error) {
                 console.error("Error deleting template:", error);
@@ -639,77 +641,6 @@ class App {
     private getCurrentTemplateId(): string | null {
         const state = this.dataManager.getState();
         return state.selectedTemplateId;
-    }
-
-    /**
-     * Show unsaved changes modal
-     */
-    private showUnsavedChangesModal(onConfirm: () => void): void {
-        this.showConfirmationModal(
-            "Unsaved Changes",
-            "You have unsaved changes. Are you sure you want to continue? Your changes will be lost.",
-            "Continue",
-            "Keep Editing",
-            onConfirm
-        );
-    }
-
-    /**
-     * Show delete confirmation modal
-     */
-    private showDeleteConfirmationModal(templateTitle: string, onConfirm: () => void): void {
-        this.showConfirmationModal(
-            "Delete Template",
-            `Are you sure you want to delete "${templateTitle}"? This action cannot be undone.`,
-            "Delete",
-            "Cancel",
-            onConfirm
-        );
-    }
-
-    /**
-     * Show confirmation modal using the existing modal system
-     */
-    private showConfirmationModal(title: string, message: string, confirmText: string, cancelText: string, onConfirm: () => void): void {
-        const modal = document.getElementById("confirmDialog");
-        const titleElement = document.getElementById("confirmTitle");
-        const messageElement = document.getElementById("confirmMessage");
-        const confirmButton = document.getElementById("confirmYes");
-        const cancelButton = document.getElementById("confirmNo");
-
-        if (!modal || !titleElement || !messageElement || !confirmButton || !cancelButton) {
-            console.error("Modal elements not found");
-            // Fallback to browser confirm
-            if (confirm(`${title}\n\n${message}`)) {
-                onConfirm();
-            }
-            return;
-        }
-
-        // Set modal content
-        titleElement.textContent = title;
-        messageElement.textContent = message;
-        confirmButton.textContent = confirmText;
-        cancelButton.textContent = cancelText;
-
-        // Remove any existing listeners
-        const newConfirmButton = confirmButton.cloneNode(true) as HTMLElement;
-        const newCancelButton = cancelButton.cloneNode(true) as HTMLElement;
-        confirmButton.parentNode?.replaceChild(newConfirmButton, confirmButton);
-        cancelButton.parentNode?.replaceChild(newCancelButton, cancelButton);
-
-        // Add new listeners
-        newConfirmButton.addEventListener("click", () => {
-            this.hideModal();
-            onConfirm();
-        });
-
-        newCancelButton.addEventListener("click", () => {
-            this.hideModal();
-        });
-
-        // Show modal
-        modal.classList.add("show");
     }
 
     /**
@@ -753,25 +684,6 @@ class App {
 
         if (editBtn) editBtn.disabled = !enabled;
         if (deleteBtn) deleteBtn.disabled = !enabled;
-    }
-
-    /**
-     * Hide modal
-     */
-    private hideModal(): void {
-        const modal = document.getElementById("confirmDialog");
-        if (modal) {
-            modal.classList.remove("show");
-        }
-    }
-
-    /**
-     * Utility: Escape HTML
-     */
-    private escapeHtml(text: string): string {
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     /**
