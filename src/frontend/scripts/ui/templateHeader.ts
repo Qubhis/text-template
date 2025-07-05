@@ -99,6 +99,8 @@ export class TemplateHeader {
     private showEmptyState(): void {
         setTextContent(this.titleElement, "Select a template");
 
+        // set default category text just for spacing purposes
+        setTextContent(this.categoryElement, "Uncategorized");
         // Hide category and modified info
         setElementVisibility(this.categoryElement, false);
         setElementVisibility(this.modifiedElement, false);

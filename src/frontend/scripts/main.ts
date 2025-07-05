@@ -6,8 +6,6 @@
 // FIXME: no modal is shown when a template is in edit mode and another template is selected from the template list. We should always warn the unsaved changes will be lost if another template is selected
 //        it works when a change was made and user clicks cancel or a new template button
 
-// FIXME: initial header load doesn't contain all elements (should be there but hidden) and causes UI inconsistency
-
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { isTemplate, Template } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
