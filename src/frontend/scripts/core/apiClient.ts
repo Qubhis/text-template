@@ -1,4 +1,4 @@
-// frontend/scripts/apiClient.ts
+// frontend/scripts/core/apiClient.ts
 
 // Frontend API Client Service
 // Handles all communication with the backend REST API
