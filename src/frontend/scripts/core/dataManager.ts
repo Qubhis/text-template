@@ -3,6 +3,7 @@
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
 
+import EventProvider from "../base/EventProvider.js";
 import { ApiClient, Template, CreateTemplateInput, UpdateTemplateInput, Category, ApiUtils, isTemplate } from "./apiClient.js";
 
 // Application state interfaces
@@ -53,13 +54,12 @@ export type StateChangeListener = (event: StateChangeEvent, data?: unknown) => v
  * Data Manager
  * Central state management for template data and event notifications
  */
-export default class DataManager {
+export default class DataManager extends EventProvider<StateChangeEvent> {
     private state: AppState;
-    private listeners: Map<StateChangeEvent, Set<StateChangeListener>>;
 
     constructor() {
+        super();
         this.state = this.createInitialState();
-        this.listeners = new Map();
         this.initializeEventTypes();
     }
 
@@ -276,16 +276,6 @@ export default class DataManager {
         }
     }
 
-    /**
-     * Add event listener
-     */
-    addEventListener(event: StateChangeEvent, listener: StateChangeListener): void {
-        if (!this.listeners.has(event)) {
-            this.listeners.set(event, new Set());
-        }
-        this.listeners.get(event)!.add(listener);
-    }
-
     // Private methods
 
     private createInitialState(): AppState {
@@ -361,19 +351,6 @@ export default class DataManager {
         if (this.state.error) {
             this.updateState({ error: null });
             this.emit("error-cleared");
-        }
-    }
-
-    private emit(event: StateChangeEvent, data?: unknown): void {
-        const eventListeners = this.listeners.get(event);
-        if (eventListeners) {
-            eventListeners.forEach((listener) => {
-                try {
-                    listener(event, data);
-                } catch (error) {
-                    console.error(`Error in event listener for ${event}:`, error);
-                }
-            });
         }
     }
 

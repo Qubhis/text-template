@@ -117,6 +117,8 @@ class App {
             this.handleTemplateSelected(data);
         });
 
+        this.templateForm.addEventListener("create-cancelled", (event: string) => this.templateHeader.enableEditButton(false));
+
         console.log("✅ Data manager listeners set up");
     }
 

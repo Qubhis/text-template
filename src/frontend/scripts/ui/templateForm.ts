@@ -3,6 +3,7 @@
 // Template Form Component
 // Handles template form CRUD operations, validation, and state management
 
+import EventProvider from "../base/EventProvider.js";
 import { Template, CreateTemplateInput, UpdateTemplateInput, Category } from "../core/apiClient.js";
 import DataManager from "../core/dataManager.js";
 import { getRequiredElement, addEventListenerWithCleanup, focusElement } from "../utils/domHelpers.js";
@@ -24,11 +25,13 @@ interface TemplateFormData {
     content: string;
 }
 
+export type TemplateFormEvent = "create-cancelled";
+
 /**
  * Template Form Component
  * Manages template editing form and CRUD operations
  */
-export class TemplateForm {
+export class TemplateForm extends EventProvider<TemplateFormEvent> {
     private dataManager: DataManager;
     private callbacks: TemplateFormCallbacks;
     private cleanupFunctions: (() => void)[] = [];
@@ -46,6 +49,7 @@ export class TemplateForm {
     private formIsDirty = false;
 
     constructor(dataManager: DataManager, callbacks: TemplateFormCallbacks = {}) {
+        super();
         this.dataManager = dataManager;
         this.callbacks = callbacks;
 
@@ -246,6 +250,7 @@ export class TemplateForm {
             this.clearForm();
             this.setFormReadOnly(true);
             this.dataManager.selectTemplate(null);
+            this.emit("create-cancelled");
         } else if (this.currentMode === "edit") {
             this.setMode("view");
             const currentTemplateId = this.getCurrentTemplateId();
