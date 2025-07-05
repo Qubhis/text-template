@@ -3,9 +3,10 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-import TemplateManager, { isSearchChangedEventParameters, StateChangeEvent } from "./templateManager.js";
-import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./apiClient.js";
-import UIErrorHandler from "./uiErrorHandler.js";
+import DataManager, { isSearchChangedEventParameters, StateChangeEvent } from "./core/dataManager.js";
+import { CreateTemplateInput, isTemplate, Template, UpdateTemplateInput } from "./core/apiClient.js";
+import ErrorHandler from "./core/errorHandler.js";
+import { TemplateList } from "./ui/templateList.js";
 
 interface TemplateFormData {
     title: string;
@@ -18,14 +19,20 @@ interface TemplateFormData {
  * Application class - main coordinator
  */
 class App {
-    private templateManager: TemplateManager;
-    private errorHandler: UIErrorHandler;
+    private dataManager: DataManager;
+    private errorHandler: ErrorHandler;
+    private templateList: TemplateList;
     private currentMode: "view" | "edit" | "create" = "view";
     private formIsDirty = false;
 
-    constructor(templateManager: TemplateManager) {
-        this.templateManager = templateManager;
-        this.errorHandler = new UIErrorHandler(templateManager);
+    constructor(dataManager: DataManager) {
+        this.dataManager = dataManager;
+        this.errorHandler = new ErrorHandler(dataManager);
+
+        this.templateList = new TemplateList(dataManager, {
+            onTemplateSelect: (templateId: string) => this.selectTemplate(templateId),
+            onCreateTemplate: () => this.showCreateTemplateForm(),
+        });
     }
 
     /**
@@ -35,16 +42,23 @@ class App {
         try {
             console.log("🚀 Initializing Text Templates App UI...");
 
+            console.log("🚀 Initializing data manager...");
+            await this.dataManager.initialize();
+
+            // Setup data manager event listeners for UI updates
+            console.log("🔗 Connecting data manager to UI...");
+            this.setupDataManagerListeners();
+
+            // Initialize Template List
+            console.log("📋 Initializing template list...");
+            this.templateList.initialize();
+
             // Setup basic UI event listeners
             console.log("🎨 Setting up UI event listeners...");
             this.setupBasicUIListeners();
 
-            // Setup template manager event listeners for UI updates
-            console.log("🔗 Connecting template manager to UI...");
-            this.setupTemplateManagerListeners();
-
             // Load initial data and update UI
-            console.log("📋 Loading initial template list...");
+            console.log("📋 Loading categories...");
             this.loadInitialData();
 
             // Set initial form state
@@ -83,23 +97,6 @@ class App {
         if (confirmNo) {
             confirmNo.addEventListener("click", () => {
                 this.hideModal();
-            });
-        }
-
-        // Search functionality
-        const searchInput = document.getElementById("templateSearch") as HTMLInputElement;
-        if (searchInput) {
-            searchInput.addEventListener("input", (e) => {
-                const query = (e.target as HTMLInputElement).value;
-                this.templateManager.searchTemplates(query);
-            });
-        }
-
-        // Create new template button
-        const createBtn = document.getElementById("createTemplateBtn");
-        if (createBtn) {
-            createBtn.addEventListener("click", () => {
-                this.showCreateTemplateForm();
             });
         }
 
@@ -144,45 +141,24 @@ class App {
     /**
      * Setup template manager event listeners for UI updates
      */
-    private setupTemplateManagerListeners(): void {
-        // Templates loaded - update sidebar
-        this.templateManager.addEventListener("templates-loaded", (event: string, data: unknown) => {
-            const templates: unknown[] = !Array.isArray(data) ? [data] : data;
-            const nonTemplates = templates.filter((template) => !isTemplate(template));
-            if (nonTemplates.length > 0) {
-                console.error("Invalid template data received from template manager:", templates);
-                return;
-            }
-            this.updateTemplateList(templates as Template[]);
-        });
-
+    private setupDataManagerListeners(): void {
         // Templates list changes events
         const templateListChangeEvents: StateChangeEvent[] = ["template-created", "template-updated", "template-deleted"];
         templateListChangeEvents.forEach((eventName) => {
-            this.templateManager.addEventListener(eventName, (event: string, data: unknown) => {
+            this.dataManager.addEventListener(eventName, (event: string, data: unknown) => {
                 console.debug(`Template manager event received: ${eventName}`, data);
                 const template: Template | undefined = isTemplate(data) ? data : undefined;
-                this.refreshTemplateList();
                 this.updateSelectedTemplate(template);
             });
         });
 
         // Template selected - update main content
-        this.templateManager.addEventListener("template-selected", (event: string, data: unknown) => {
+        this.dataManager.addEventListener("template-selected", (event: string, data: unknown) => {
             if (!isTemplate(data)) {
-                console.error("Invalid template data received from template manager:", data);
+                console.error("Invalid template data received from data manager:", data);
                 return;
             }
             this.handleTemplateSelected(data);
-        });
-
-        // Search results - update filtered list
-        this.templateManager.addEventListener("search-changed", (event: string, data: unknown) => {
-            if (!isSearchChangedEventParameters(data)) {
-                console.error("Invalid search data received from template manager:", data);
-                return;
-            }
-            this.updateTemplateList(data.results);
         });
 
         console.log("✅ Template manager listeners set up");
@@ -192,18 +168,9 @@ class App {
      * Load initial data
      */
     private loadInitialData(): void {
-        this.refreshTemplateList();
-
         // Load categories for the dropdown
-        const categories = this.templateManager.getCategories();
+        const categories = this.dataManager.getCategories();
         this.updateCategoriesDropdown(categories);
-    }
-
-    private refreshTemplateList(): void {
-        // Template manager will automatically load templates during initialization
-        // We just need to update the UI with the current state
-        const state = this.templateManager.getState();
-        this.updateTemplateList(state.filteredTemplates);
     }
 
     /**
@@ -266,8 +233,6 @@ class App {
 
             // Enable action buttons
             this.enableActionButtons(true);
-            // Update active template in sidebar
-            this.updateActiveTemplateInSidebar(template.id);
         } else {
             if (titleElement) titleElement.textContent = "Select a template";
             if (categoryElement) categoryElement.style.opacity = "0%";
@@ -275,55 +240,7 @@ class App {
 
             // Disable action buttons
             this.enableActionButtons(false);
-            // Clear active template in sidebar
-            this.updateActiveTemplateInSidebar(null);
         }
-    }
-
-    /**
-     * Update template list in sidebar
-     */
-    private updateTemplateList(templates: Template[]): void {
-        const templateList = document.getElementById("templateList");
-        if (!templateList) {
-            console.error("Template list element not found");
-            return;
-        }
-
-        if (templates.length === 0) {
-            templateList.innerHTML = `
-                <div class="loading">
-                    <p>No templates found.</p>
-                    <p class="text-muted">Create your first template to get started!</p>
-                </div>
-            `;
-            return;
-        }
-
-        templateList.innerHTML = templates
-            .map(
-                (template) => `
-            <div class="template-item" data-template-id="${template.id}">
-                <div class="template-item-title">${this.escapeHtml(template.title)}</div>
-                <div class="template-item-meta">
-                    <span class="category-tag">${this.escapeHtml(template.category || "Uncategorized")}</span>
-                    <span class="template-date">${this.formatDate(template.modified)}</span>
-                </div>
-            </div>
-        `
-            )
-            .join("");
-
-        // Add click listeners to template items
-        const templateItems = templateList.querySelectorAll(".template-item");
-        templateItems.forEach((item) => {
-            item.addEventListener("click", () => {
-                const templateId = item.getAttribute("data-template-id");
-                if (templateId) {
-                    this.selectTemplate(templateId);
-                }
-            });
-        });
     }
 
     /**
@@ -353,7 +270,7 @@ class App {
      * Select a template
      */
     private selectTemplate(templateId: string): void {
-        this.templateManager.selectTemplate(templateId);
+        this.dataManager.selectTemplate(templateId);
     }
 
     /**
@@ -421,7 +338,7 @@ class App {
         }
 
         // Deselect any selected template
-        this.templateManager.selectTemplate(null);
+        this.dataManager.selectTemplate(null);
 
         console.log("Showing create template form");
     }
@@ -576,7 +493,7 @@ class App {
                     description: formData.description || undefined,
                 };
 
-                const newTemplate = await this.templateManager.createTemplate(createData);
+                const newTemplate = await this.dataManager.createTemplate(createData);
                 if (newTemplate) {
                     this.currentMode = "view";
                     this.formIsDirty = false;
@@ -597,7 +514,7 @@ class App {
                     description: formData.description || undefined,
                 };
 
-                const updatedTemplate = await this.templateManager.updateTemplate(currentTemplateId, updateData);
+                const updatedTemplate = await this.dataManager.updateTemplate(currentTemplateId, updateData);
                 if (updatedTemplate) {
                     this.currentMode = "view";
                     this.formIsDirty = false;
@@ -672,13 +589,13 @@ class App {
             this.currentMode = "view";
             this.clearTemplateForm();
             this.setFormReadOnly(true);
-            this.templateManager.selectTemplate(null);
+            this.dataManager.selectTemplate(null);
         } else if (this.currentMode === "edit") {
             // Reload the original template data
             this.currentMode = "view";
             const currentTemplateId = this.getCurrentTemplateId();
             if (currentTemplateId) {
-                const template = this.templateManager.getTemplate(currentTemplateId);
+                const template = this.dataManager.getTemplate(currentTemplateId);
                 if (template) {
                     this.loadTemplateIntoForm(template);
                 } else {
@@ -704,14 +621,14 @@ class App {
             return;
         }
 
-        const template = this.templateManager.getTemplate(currentTemplateId);
+        const template = this.dataManager.getTemplate(currentTemplateId);
         const templateTitle = template ? template.title : "this template";
 
         this.showDeleteConfirmationModal(templateTitle, async () => {
             try {
                 this.errorHandler.showLoading("Deleting template...");
 
-                const success = await this.templateManager.deleteTemplate(currentTemplateId);
+                const success = await this.dataManager.deleteTemplate(currentTemplateId);
                 if (success) {
                     this.currentMode = "view";
                     this.clearTemplateForm();
@@ -750,7 +667,7 @@ class App {
      * Get current template ID from TemplateManager state
      */
     private getCurrentTemplateId(): string | null {
-        const state = this.templateManager.getState();
+        const state = this.dataManager.getState();
         return state.selectedTemplateId;
     }
 
@@ -869,19 +786,6 @@ class App {
     }
 
     /**
-     * Update active template in sidebar
-     */
-    private updateActiveTemplateInSidebar(templateId: string | null): void {
-        const templateItems = document.querySelectorAll(".template-item");
-        templateItems.forEach((item) => {
-            item.classList.remove("active");
-            if (templateId && item.getAttribute("data-template-id") === templateId) {
-                item.classList.add("active");
-            }
-        });
-    }
-
-    /**
      * Hide modal
      */
     private hideModal(): void {
@@ -924,13 +828,13 @@ async function initializeApp(): Promise<void> {
     try {
         // Create template manager first
         console.log("🏗️ Creating template manager...");
-        const templateManager = new TemplateManager();
+        const dataManager = new DataManager();
         // Create app
         console.log("🏗️ Creating application...");
-        appInstance = new App(templateManager);
+        appInstance = new App(dataManager);
         // Then Initialize manager and app
-        console.log("🚀 Initializing template manager...");
-        await templateManager.initialize();
+        console.log("🚀 Initializing data manager...");
+        await dataManager.initialize();
         console.log("🚀 Initializing application...");
         await appInstance.initialize();
     } catch (error) {
