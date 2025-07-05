@@ -8,8 +8,6 @@
 
 // FIXME: initial header load doesn't contain all elements (should be there but hidden) and causes UI inconsistency
 
-// FIXME: Header is not cleared upon template creation or template deletion
-
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { isTemplate, Template } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
@@ -37,7 +35,7 @@ class App {
 
         this.templateList = new TemplateList(dataManager, {
             onTemplateSelect: (templateId: string) => this.selectTemplate(templateId),
-            onCreateTemplate: () => this.templateForm.startCreate(),
+            onCreateTemplate: () => this.handleCreateTemplate(),
         });
         this.tabManager = new TabManager();
         this.modalSystem = new ModalSystem();
@@ -160,6 +158,14 @@ class App {
      */
     private selectTemplate(templateId: string): void {
         this.dataManager.selectTemplate(templateId);
+    }
+
+    /**
+     * Handle create template button press
+     */
+    private handleCreateTemplate(): void {
+        this.templateHeader.updateHeader(); // clear header
+        this.templateForm.startCreate();
     }
 
     /**
