@@ -110,8 +110,12 @@ export class TemplateHeader {
      * Enable or disable action buttons
      */
     private enableActionButtons(enabled: boolean): void {
-        this.editButton.disabled = !enabled;
+        this.enableEditButton(enabled);
         this.deleteButton.disabled = !enabled;
+    }
+
+    public enableEditButton(enabled: boolean): void {
+        this.editButton.disabled = !enabled;
     }
 
     /**

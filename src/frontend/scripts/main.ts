@@ -3,9 +3,6 @@
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application
 
-// FIXME: no modal is shown when a template is in edit mode and another template is selected from the template list. We should always warn the unsaved changes will be lost if another template is selected
-//        it works when a change was made and user clicks cancel or a new template button
-
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { isTemplate, Template } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
@@ -38,7 +35,10 @@ class App {
         this.tabManager = new TabManager();
         this.modalSystem = new ModalSystem();
         this.templateForm = new TemplateForm(this.dataManager, {
-            onModeChange: (mode) => this.templateList.setInteractive(mode === "view"),
+            onModeChange: (mode) => {
+                this.templateList.setInteractive(mode === "view");
+                this.templateHeader.enableEditButton(mode === "view");
+            },
             onSwitchToTab: (tabName) => this.tabManager.switchTab(tabName),
             onShowUnsavedChangesModal: (onConfirm) => this.modalSystem.showUnsavedChangesModal(onConfirm),
             onShowError: (title, message) => this.errorHandler.showError(title, message),
