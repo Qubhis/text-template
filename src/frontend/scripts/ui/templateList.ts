@@ -143,6 +143,7 @@ export class TemplateList {
         if (!this.isInteractive) return;
 
         if (this.callbacks.onCreateTemplate) {
+            this.setSelectedTemplate(null);
             this.callbacks.onCreateTemplate();
         } else {
             console.warn("No create template callback provided");
