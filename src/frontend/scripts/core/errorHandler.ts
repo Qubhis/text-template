@@ -1,9 +1,9 @@
-// src/frontend/scripts/uiErrorHandler.ts
+// src/frontend/scripts/core/errorHandler.ts
 
 // UI Error Handler & Loading States Management
 // Integrates with TemplateManager events to provide user feedback
 
-import TemplateManager, { StateChangeEvent, StateChangeListener } from "./templateManager.js";
+import DataManager, { StateChangeEvent, StateChangeListener } from "./dataManager.js";
 import { ApiUtils } from "./apiClient.js";
 
 // Error display types
@@ -38,15 +38,15 @@ export interface LoadingState {
  * UI Error Handler
  * Manages error display, loading states, and user feedback
  */
-export class UIErrorHandler {
-    private templateManager: TemplateManager;
+export class ErrorHandler {
+    private templateManager: DataManager;
     private notifications: Map<string, ErrorNotification>;
     private loadingState: LoadingState;
     private notificationContainer: HTMLElement | null = null;
     private loadingOverlay: HTMLElement | null = null;
     private notificationCounter = 0;
 
-    constructor(templateManager: TemplateManager) {
+    constructor(templateManager: DataManager) {
         this.templateManager = templateManager;
         this.notifications = new Map();
         this.loadingState = { isLoading: false };
@@ -347,4 +347,4 @@ export class UIErrorHandler {
     }
 }
 
-export default UIErrorHandler;
+export default ErrorHandler;
