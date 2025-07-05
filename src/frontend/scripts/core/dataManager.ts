@@ -1,4 +1,4 @@
-// src/frontend/scripts/templateManager.ts
+// src/frontend/scripts/core/dataManager.ts
 
 // Template Data Manager & State Management
 // Handles template data, caching, state management, and UI integration
@@ -50,10 +50,10 @@ export type StateChangeEvent =
 export type StateChangeListener = (event: StateChangeEvent, data?: unknown) => void;
 
 /**
- * Template Data Manager
- * Central state management for template data with caching and event system
+ * Data Manager
+ * Central state management for template data and event notifications
  */
-export default class TemplateManager {
+export default class DataManager {
     private state: AppState;
     private listeners: Map<StateChangeEvent, Set<StateChangeListener>>;
 
@@ -389,6 +389,3 @@ export default class TemplateManager {
         );
     }
 }
-
-// Singleton instance with lazy initialization
-let templateManagerInstance: TemplateManager | null = null;
