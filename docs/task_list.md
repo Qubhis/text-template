@@ -175,7 +175,9 @@ T1.1 → T1.2 → T1.3 → T2.1 → T2.2 → T2.3 → T3.1-T3.5 → T6.1-T6.2 �
 3. Create a simple frontend to test the API
 4. Iterate and build features incrementally
 
---- UI/UX redesign without tabs
+---
+
+# UI/UX redesign without tabs
 
 ## Implementation Plan: Single-Mode Template Editor
 
