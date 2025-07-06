@@ -3,10 +3,10 @@
 // Template Form Component
 // Handles template form CRUD operations, validation, and state management
 
-import EventProvider from "../base/EventProvider.js";
-import { Template, CreateTemplateInput, UpdateTemplateInput, Category } from "../core/apiClient.js";
-import DataManager from "../core/dataManager.js";
-import { getRequiredElement, addEventListenerWithCleanup, focusElement } from "../utils/domHelpers.js";
+import EventProvider from "../../base/EventProvider.js";
+import { Template, CreateTemplateInput, UpdateTemplateInput, Category } from "../../core/apiClient.js";
+import DataManager from "../../core/dataManager.js";
+import { getRequiredElement, addEventListenerWithCleanup, focusElement } from "../../utils/domHelpers.js";
 
 export interface TemplateFormCallbacks {
     onModeChange?: (mode: "view" | "edit" | "create") => void;

@@ -3,9 +3,9 @@
 // Template Header Component
 // Handles template title, category, modified date display and action buttons
 
-import { Template } from "../core/apiClient.js";
-import { getRequiredElement, setTextContent, setElementVisibility, addEventListenerWithCleanup } from "../utils/domHelpers.js";
-import { formatDate } from "../utils/formatters.js";
+import { Template } from "../../core/apiClient.js";
+import { getRequiredElement, setTextContent, setElementVisibility, addEventListenerWithCleanup } from "../../utils/domHelpers.js";
+import { formatDate } from "../../utils/formatters.js";
 
 export interface TemplateHeaderCallbacks {
     onEditTemplate?: () => void;
