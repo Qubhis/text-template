@@ -272,8 +272,10 @@ interface ApiResponse<T> {
           dataManager.ts                 👈 Data state management
           errorHandler.ts                👈 Error system, notifications
         ui/
-          templateHeader.ts              👈 Header with inline editing + mode-specific action buttons
-          templateForm.ts                👈 Single-mode view/edit + variable state management
+          editor/
+            templateHeader.ts            👈 Header with inline editing + mode-specific action buttons
+            templateForm.ts              👈 Single-mode view/edit + variable state management
+          templateEditor.ts              👈 State and orchestrator for templateHeader and templateForm
           templateList.ts                👈 Sidebar list + search + selection
           modalSystem.ts                 👈 Confirmation modals
           variablePanel.ts               👈 Right-Sidebar for variables
@@ -420,11 +422,11 @@ interface ApiResponse<T> {
 
 ### 🔄 Phase 4: Template Editor Redesign (IN PROGRESS)
 
-1. **Variable Parser Foundation** (T10.1)
-    - [ ] Create `variableParser.ts` with Variable interface and parsing logic
-    - [ ] Implement `parseVariables()` and `processTemplate()` functions
-    - [ ] Add validation for variable syntax and edge cases
-    - [ ] Unit tests for variable detection and processing
+1. **Variable Parser Foundation** ✅ (T10.1) (COMPLETED)
+    - [x] Create `variableParser.ts` with Variable interface and parsing logic
+    - [x] Implement `parseVariables()` and `processTemplate()` functions
+    - [x] Add validation for variable syntax and edge cases
+    - [x] Unit tests for variable detection and processing
 
 2. **Header Inline Editing** (T9.3-Header)
     - [ ] Modify `templateHeader.ts` for inline editing capabilities
@@ -446,6 +448,9 @@ interface ApiResponse<T> {
     - [ ] Add "Reset Values" button and functionality
     - [ ] Create read-only detected variables list for edit mode
     - [ ] Handle variable value persistence per template
+        - values are cleared when user switched between templates
+        - values are cleared when browser refreshes
+        - values persist only while the same template is selected
 
 5. **Template Form Integration** (T9.1-T9.2)
     - [ ] Remove tab-related logic from TemplateForm
