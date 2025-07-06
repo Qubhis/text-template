@@ -1,4 +1,4 @@
-// src/frontend/scripts/ui/templateForm.ts
+// src/frontend/scripts/ui/editor/templateForm.ts
 
 // Template Form Component
 // Handles template form CRUD operations, validation, and state management

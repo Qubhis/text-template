@@ -1,3 +1,5 @@
+// src/frontend/tests/utils/variableParser.test.ts
+
 import VariableParser from "../../scripts/utils/variableParser.js";
 
 /**

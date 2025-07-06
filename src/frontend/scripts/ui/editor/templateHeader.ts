@@ -1,4 +1,4 @@
-// src/frontend/scripts/ui/templateHeader.ts
+// src/frontend/scripts/ui/editor/templateHeader.ts
 
 // Template Header Component
 // Handles template title, category, modified date display and action buttons
