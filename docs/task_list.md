@@ -199,18 +199,17 @@ T1.1 → T1.2 → T1.3 → T2.1 → T2.2 → T2.3 → T3.1-T3.5 → T6.1-T6.2 �
 
 ### Phase 2: Header Inline Editing
 
-- [ ] **2.1** Modify `templateHeader.ts` for inline editing
-    - [ ] Add edit mode state management
-    - [ ] Convert title display to inline input field in edit mode
-    - [ ] Convert category display to inline select in edit mode
-    - [ ] Add CSS transitions for smooth mode switching
-    - [ ] Handle Enter key to save, Escape key to cancel
+- [x] **2.1** Modify `templateHeader.ts` for inline editing
+    - [x] Add edit mode state management
+    - [x] Convert title display to inline input field in edit mode
+    - [x] Convert category display to inline select in edit mode
+    - [x] Add CSS transitions for smooth mode switching
 
-- [ ] **2.2** Update header button logic
-    - [ ] Move Save/Cancel buttons from form to header
-    - [ ] Update button visibility based on mode (view: Edit+Delete, edit: Save+Cancel)
-    - [ ] Connect header Save button to template form save logic
-    - [ ] Update button states and styling
+- [x] **2.2** Update header button logic
+    - [x] Move Save/Cancel buttons from form to header
+    - [x] Update button visibility based on mode (view: Edit+Delete, edit: Save+Cancel)
+    - [x] Connect header Save button to template form save logic
+    - [x] Update button states and styling
 
 ### Phase 3: Content Area Redesign
 
