@@ -4,7 +4,7 @@
     "description": "text template app",
     "private": true,
     "scripts": {
-        "build": "npm run build:dev && npm run postBuild:remove-tests",
+        "build": "npm run build:dev && npm run postBuild:remove-tests && postBuild:frontend && npm run postBuild:remove-tests",
         "build:dev": "npm run clean && npm run build:backend && npm run build:frontend && npm run postBuild:frontend",
         "build:backend": "tsc -p tsconfig.backend.json",
         "build:frontend": "tsc -p tsconfig.frontend.json",

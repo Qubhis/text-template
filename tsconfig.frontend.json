@@ -11,8 +11,8 @@
         "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "sourceMap": true,
-        "sourceRoot": "../."
+        "inlineSourceMap": true,
+        "inlineSources": true
     },
     "include": ["src/frontend/**/*"],
     "exclude": ["node_modules", "src/backend"]
