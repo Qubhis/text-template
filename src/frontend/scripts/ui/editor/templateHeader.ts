@@ -116,8 +116,10 @@ export class TemplateHeader {
         if (this.currentMode === "view") {
             if (modifiedAt) {
                 this.showTemplateInfo(data.title, data.category, modifiedAt);
+                this.enableActionButtons(true);
             } else {
                 this.showEmptyState();
+                this.enableActionButtons(false);
             }
         } else if (this.currentMode === "edit" || this.currentMode === "create") {
             this.updateInlineEditingElements(data);
