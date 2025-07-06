@@ -279,10 +279,8 @@ export class TemplateList {
         templateItems.forEach((item) => {
             const element = item as HTMLElement;
             if (interactive) {
-                element.style.pointerEvents = "";
                 removeClass(element, "disabled");
             } else {
-                element.style.pointerEvents = "none";
                 addClass(element, "disabled");
             }
         });

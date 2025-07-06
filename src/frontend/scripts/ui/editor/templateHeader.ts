@@ -7,10 +7,11 @@ import { Template, Category } from "../../core/apiClient.js";
 import {
     getRequiredElement,
     setTextContent,
-    setElementVisibility,
+    setElementTransparent,
     addEventListenerWithCleanup,
     addClass,
     removeClass,
+    setElementDisplayed,
 } from "../../utils/domHelpers.js";
 import { formatDate, escapeHtml } from "../../utils/formatters.js";
 
@@ -155,8 +156,8 @@ export class TemplateHeader {
         setTextContent(this.modifiedElement, `Modified ${formatDate(modifiedAt)}`);
 
         // Show category and modified info
-        setElementVisibility(this.categoryElement, true);
-        setElementVisibility(this.modifiedElement, true);
+        setElementTransparent(this.categoryElement, true);
+        setElementTransparent(this.modifiedElement, true);
     }
 
     /**
@@ -167,8 +168,8 @@ export class TemplateHeader {
         setTextContent(this.categoryElement, "Uncategorized");
 
         // Hide category and modified info
-        setElementVisibility(this.categoryElement, false);
-        setElementVisibility(this.modifiedElement, false);
+        setElementTransparent(this.categoryElement, false);
+        setElementTransparent(this.modifiedElement, false);
     }
 
     /**
@@ -297,16 +298,16 @@ export class TemplateHeader {
         if (!this.titleInput || !this.categorySelect || !this.saveButton || !this.cancelButton) return;
 
         // Replace title element with input
-        this.titleElement.style.display = "none";
+        setElementDisplayed(this.titleElement, false);
         this.titleElement.parentNode?.insertBefore(this.titleInput, this.titleElement);
 
         // Replace category element with select
-        this.categoryElement.style.display = "none";
+        setElementDisplayed(this.categoryElement, false);
         this.categoryElement.parentNode?.insertBefore(this.categorySelect, this.categoryElement);
 
         // Hide view mode buttons
-        this.editButton.style.display = "none";
-        this.deleteButton.style.display = "none";
+        setElementDisplayed(this.editButton, false);
+        setElementDisplayed(this.deleteButton, false);
 
         // Show edit mode buttons
         const actionsContainer = this.editButton.parentElement;
@@ -327,12 +328,12 @@ export class TemplateHeader {
      */
     private switchToViewLayout(): void {
         // Show original elements
-        this.titleElement.style.display = "";
-        this.categoryElement.style.display = "";
+        setElementDisplayed(this.titleElement, true);
+        setElementDisplayed(this.categoryElement, true);
 
         // Show view mode buttons
-        this.editButton.style.display = "";
-        this.deleteButton.style.display = "";
+        setElementDisplayed(this.deleteButton, true);
+        setElementDisplayed(this.editButton, true);
 
         // Remove edit mode class from header
         const header = this.titleElement.closest(".content-header");

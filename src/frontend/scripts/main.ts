@@ -1,25 +1,23 @@
 // src/frontend/scripts/main.ts
 
 // Frontend Application Entry Point & Initialization
+// Updated for Phase 3: Single-Mode Interface (No Tab Manager)
 // Initializes all managers and sets up the application with TemplateEditor coordinator
-// Updated for header inline editing integration
 
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { isTemplate } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
 import { TemplateList } from "./ui/templateList.js";
-import { TabManager } from "./ui/tabManager.js";
 import { ModalSystem } from "./ui/modalSystem.js";
 import { TemplateEditor } from "./ui/templateEditor.js";
 
 /**
- * Application class - main coordinator with header integration
+ * Application class - main coordinator with single-mode interface
  */
 class App {
     private dataManager: DataManager;
     private errorHandler: ErrorHandler;
     private templateList: TemplateList;
-    private tabManager: TabManager;
     private modalSystem: ModalSystem;
     private templateEditor: TemplateEditor; // Single interface to template editing with header integration
 
@@ -32,12 +30,10 @@ class App {
             onCreateTemplate: () => this.handleCreateTemplate(),
         });
 
-        this.tabManager = new TabManager();
         this.modalSystem = new ModalSystem();
 
-        // Create template editor coordinator with header integration
+        // Create template editor coordinator with single-mode interface
         this.templateEditor = new TemplateEditor(this.dataManager, {
-            onSwitchToTab: (tabName) => this.tabManager.switchTab(tabName),
             onShowUnsavedChangesModal: (onConfirm) => this.modalSystem.showUnsavedChangesModal(onConfirm),
             onShowDeleteConfirmationModal: (templateTitle, onConfirm) => this.modalSystem.showDeleteConfirmationModal(templateTitle, onConfirm),
             onShowError: (title, message) => this.errorHandler.showError(title, message),
@@ -58,26 +54,22 @@ class App {
             console.log("🚀 Initializing data manager...");
             await this.dataManager.initialize();
 
-            // Initialize Template Editor (coordinates header + form with inline editing)
-            console.log("🎨 Initializing template editor with header integration...");
+            // Initialize Template Editor (coordinates header + form with single-mode interface)
+            console.log("🎨 Initializing template editor with single-mode interface...");
             this.templateEditor.initialize();
 
             // Initialize Template List
             console.log("🎨 Initializing template list...");
             this.templateList.initialize();
 
-            // Initialize Tab Manager (still needed for current phase)
-            console.log("🎨 Initializing tab manager...");
-            this.tabManager.initialize();
-
             // Initialize Modal System
             console.log("🎨 Initializing modal system...");
             this.modalSystem.initialize();
 
-            console.log("✅ Application UI initialized successfully with header integration!");
+            console.log("✅ Application UI initialized successfully with single-mode interface!");
 
             // Show success notification
-            this.errorHandler.showSuccess("Application Ready", "Text Templates application loaded successfully!");
+            this.errorHandler.showSuccess("Application Ready", "Text Templates application loaded with new interface!");
         } catch (error) {
             console.error("❌ Failed to initialize application UI:", error);
             this.errorHandler.showError("Initialization Failed", "Failed to initialize the user interface. Please refresh the page.");
@@ -112,7 +104,7 @@ class App {
             this.handleModeChange(data.mode);
         });
 
-        console.log("✅ Data manager listeners set up with header integration");
+        console.log("✅ Data manager listeners set up with single-mode interface");
     }
 
     /**
@@ -122,12 +114,8 @@ class App {
         // Update app-level components based on mode
         this.templateList.setInteractive(mode === "view");
 
-        // Switch to edit tab when entering edit/create mode
-        if (mode === "edit" || mode === "create") {
-            this.tabManager.switchTab("edit");
-        }
-
-        console.log(`🎛️ App mode changed to: ${mode} (with header integration)`);
+        // Log mode changes for debugging
+        console.log(`🎛️ App mode changed to: ${mode} (single-mode interface)`);
     }
 
     /**
@@ -161,9 +149,11 @@ async function initializeApp(): Promise<void> {
         // Create template manager first
         console.log("🏗️ Creating template manager...");
         const dataManager = new DataManager();
+
         // Create app
-        console.log("🏗️ Creating application with header integration...");
+        console.log("🏗️ Creating application with single-mode interface...");
         appInstance = new App(dataManager);
+
         // Then initialize the app
         console.log("🚀 Initializing application...");
         await appInstance.initialize();

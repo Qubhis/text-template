@@ -27,9 +27,15 @@ export function setTextContent(element: HTMLElement | null, text: string): void 
 /**
  * Set element visibility
  */
-export function setElementVisibility(element: HTMLElement | null, visible: boolean): void {
+export function setElementTransparent(element: HTMLElement | null, transparent: boolean): void {
     if (element) {
-        element.style.opacity = visible ? "100%" : "0%";
+        element.style.opacity = transparent ? "100%" : "0%";
+    }
+}
+
+export function setElementDisplayed(element: HTMLElement | null, displayed: boolean): void {
+    if (element) {
+        element.style.display = displayed ? "" : "none";
     }
 }
 

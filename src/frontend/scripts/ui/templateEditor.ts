@@ -10,7 +10,6 @@ import { TemplateHeader } from "./editor/templateHeader.js";
 import { TemplateForm } from "./editor/templateForm.js";
 
 export interface TemplateEditorCallbacks {
-    onSwitchToTab?: (tabName: string) => void;
     onShowUnsavedChangesModal?: (onConfirm: () => void) => void;
     onShowDeleteConfirmationModal?: (templateTitle: string, onConfirm: () => void) => void;
     onShowError?: (title: string, message: string) => void;
@@ -367,9 +366,6 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.setMode("create");
         this.syncData();
         this.isDirty = false;
-
-        // Switch to edit tab
-        this.callbacks.onSwitchToTab?.("edit");
 
         console.log("➕ Starting template creation");
     }
