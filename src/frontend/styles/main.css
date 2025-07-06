@@ -428,10 +428,10 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border: none;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -782,6 +782,8 @@ body {
     background: #a8a8a8;
 }
 
+/* Inline Editing Styles for Template Header */
+
 /* Header Edit Mode Layout */
 .content-header.edit-mode {
     background-color: #f0f8ff; /* Light blue background to indicate edit mode */
@@ -847,9 +849,9 @@ body {
     gap: 8px;
 }
 
-.content-header.edit-mode .template-actions .btn {
-    font-size: 13px;
-    padding: 6px 12px;
+/* Consistent button sizing for all header buttons */
+.content-header .template-actions .btn {
+    justify-content: center;
 }
 
 /* Template Meta Layout Adjustments for Edit Mode */
