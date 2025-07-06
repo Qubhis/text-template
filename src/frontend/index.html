@@ -69,19 +69,6 @@
                     <div class="edit-container">
                         <div class="template-form">
                             <div class="form-group">
-                                <label for="templateTitleInput">Title</label>
-                                <input type="text" id="templateTitleInput" class="form-input" placeholder="Enter template title">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="templateCategorySelect">Category</label>
-                                <select id="templateCategorySelect" class="form-select select-arrow-formatted">
-                                    <option value="">Select category...</option>
-                                    <!-- Categories will be loaded dynamically -->
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
                                 <label for="templateDescriptionInput">Description (optional)</label>
                                 <input type="text" id="templateDescriptionInput" class="form-input" placeholder="Brief description">
                             </div>
@@ -91,7 +78,8 @@
                                 <textarea id="templateContent" class="form-textarea" placeholder="Enter your template content with {{variables}}..."></textarea>
                             </div>
                             
-                            <div class="form-actions">
+                            <!-- Form actions hidden - Save/Cancel now in header -->
+                            <div class="form-actions" style="display: none;">
                                 <button class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
                                 <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
                             </div>

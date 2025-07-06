@@ -781,3 +781,186 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+/* Header Edit Mode Layout */
+.content-header.edit-mode {
+    background-color: #f0f8ff; /* Light blue background to indicate edit mode */
+    border-left: 4px solid #3b82f6; /* Blue accent border */
+    transition:
+        background-color 0.2s ease,
+        border-left 0.2s ease;
+}
+
+/* Inline Title Input */
+.inline-edit-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    padding: 4px 8px;
+    background-color: white;
+    min-width: 300px;
+    max-width: 500px;
+    transition: border-color 0.2s ease;
+}
+
+.inline-edit-title:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inline-edit-title:invalid {
+    border-color: #ef4444;
+}
+
+/* Inline Category Select */
+.inline-edit-category {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border: 2px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 120px;
+    transition: border-color 0.2s ease;
+
+    /* Custom arrow for select */
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231e40af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px 10px;
+    padding-right: 24px;
+}
+
+.inline-edit-category:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Edit Mode Button Spacing */
+.content-header.edit-mode .template-actions {
+    gap: 8px;
+}
+
+.content-header.edit-mode .template-actions .btn {
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
+/* Template Meta Layout Adjustments for Edit Mode */
+.content-header.edit-mode .template-meta {
+    gap: 16px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+/* Smooth Transitions */
+.template-info h1,
+.template-meta .category-badge,
+.template-actions .btn {
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Edit Mode Animation */
+.content-header.edit-mode .template-info {
+    transform: translateX(0);
+}
+
+.inline-edit-title,
+.inline-edit-category {
+    animation: fadeInScale 0.2s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive Inline Editing */
+@media (max-width: 768px) {
+    .content-header.edit-mode {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .inline-edit-title {
+        min-width: 100%;
+        font-size: 18px;
+    }
+
+    .content-header.edit-mode .template-actions {
+        align-self: flex-end;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .content-header.edit-mode .template-meta {
+        width: 100%;
+        margin-top: 0;
+    }
+}
+
+/* Focus Management */
+.inline-edit-title:focus,
+.inline-edit-category:focus {
+    z-index: 10;
+    position: relative;
+}
+
+/* Error States */
+.inline-edit-title.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.inline-edit-category.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+/* Loading State */
+.content-header.saving {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.content-header.saving .inline-edit-title,
+.content-header.saving .inline-edit-category {
+    background-color: #f3f4f6;
+}
+
+/* Hide original form title/category fields - now in header */
+#templateTitleInput,
+#templateCategorySelect,
+.form-group:has(#templateTitleInput),
+.form-group:has(#templateCategorySelect) {
+    display: none !important;
+}
+
+/* Hide form actions - Save/Cancel now in header */
+.form-actions {
+    display: none !important;
+}
+
+/* Adjust form layout without title/category */
+.template-form {
+    padding-top: 16px; /* Reduced since title/category removed */
+}
+
+.template-form .form-group:first-child {
+    margin-top: 0;
+}

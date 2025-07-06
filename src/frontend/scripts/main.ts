@@ -2,9 +2,10 @@
 
 // Frontend Application Entry Point & Initialization
 // Initializes all managers and sets up the application with TemplateEditor coordinator
+// Updated for header inline editing integration
 
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
-import { isTemplate, Template } from "./core/apiClient.js";
+import { isTemplate } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
 import { TemplateList } from "./ui/templateList.js";
 import { TabManager } from "./ui/tabManager.js";
@@ -12,7 +13,7 @@ import { ModalSystem } from "./ui/modalSystem.js";
 import { TemplateEditor } from "./ui/templateEditor.js";
 
 /**
- * Application class - main coordinator
+ * Application class - main coordinator with header integration
  */
 class App {
     private dataManager: DataManager;
@@ -20,7 +21,7 @@ class App {
     private templateList: TemplateList;
     private tabManager: TabManager;
     private modalSystem: ModalSystem;
-    private templateEditor: TemplateEditor; // Single interface to template editing
+    private templateEditor: TemplateEditor; // Single interface to template editing with header integration
 
     constructor(dataManager: DataManager) {
         this.dataManager = dataManager;
@@ -34,7 +35,7 @@ class App {
         this.tabManager = new TabManager();
         this.modalSystem = new ModalSystem();
 
-        // Create template editor coordinator that manages both
+        // Create template editor coordinator with header integration
         this.templateEditor = new TemplateEditor(this.dataManager, {
             onSwitchToTab: (tabName) => this.tabManager.switchTab(tabName),
             onShowUnsavedChangesModal: (onConfirm) => this.modalSystem.showUnsavedChangesModal(onConfirm),
@@ -57,15 +58,15 @@ class App {
             console.log("🚀 Initializing data manager...");
             await this.dataManager.initialize();
 
-            // Initialize Template Editor (coordinates header + form)
-            console.log("🎨 Initializing template editor...");
+            // Initialize Template Editor (coordinates header + form with inline editing)
+            console.log("🎨 Initializing template editor with header integration...");
             this.templateEditor.initialize();
 
             // Initialize Template List
             console.log("🎨 Initializing template list...");
             this.templateList.initialize();
 
-            // Initialize Tab Manager
+            // Initialize Tab Manager (still needed for current phase)
             console.log("🎨 Initializing tab manager...");
             this.tabManager.initialize();
 
@@ -73,7 +74,7 @@ class App {
             console.log("🎨 Initializing modal system...");
             this.modalSystem.initialize();
 
-            console.log("✅ Application UI initialized successfully!");
+            console.log("✅ Application UI initialized successfully with header integration!");
 
             // Show success notification
             this.errorHandler.showSuccess("Application Ready", "Text Templates application loaded successfully!");
@@ -92,7 +93,7 @@ class App {
         const templateListChangeEvents: StateChangeEvent[] = ["template-created", "template-updated", "template-deleted"];
         templateListChangeEvents.forEach((eventName) => {
             this.dataManager.addEventListener(eventName, (event: string, data: unknown) => {
-                console.debug(`Template manager event received: ${eventName}`, data);
+                console.debug(`Data manager event received: ${eventName}`, data);
                 // TemplateEditor handles its own updates, no need to manually update components
             });
         });
@@ -111,7 +112,7 @@ class App {
             this.handleModeChange(data.mode);
         });
 
-        console.log("✅ Data manager listeners set up");
+        console.log("✅ Data manager listeners set up with header integration");
     }
 
     /**
@@ -126,7 +127,7 @@ class App {
             this.tabManager.switchTab("edit");
         }
 
-        console.log(`🎛️ App mode changed to: ${mode}`);
+        console.log(`🎛️ App mode changed to: ${mode} (with header integration)`);
     }
 
     /**
@@ -161,7 +162,7 @@ async function initializeApp(): Promise<void> {
         console.log("🏗️ Creating template manager...");
         const dataManager = new DataManager();
         // Create app
-        console.log("🏗️ Creating application...");
+        console.log("🏗️ Creating application with header integration...");
         appInstance = new App(dataManager);
         // Then initialize the app
         console.log("🚀 Initializing application...");
