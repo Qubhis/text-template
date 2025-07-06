@@ -81,7 +81,7 @@ A simple web application for managing and using text templates with variable sub
     "id": "unique-id",
     "title": "Template Title",
     "content": "Template content with {{variables}}",
-    "category": "category-id",
+    "categoryId": "category-id",
     "created": "2025-06-28T10:00:00Z",
     "modified": "2025-06-28T10:00:00Z",
     "description": "Optional description",
@@ -429,16 +429,15 @@ interface ApiResponse<T> {
     - [x] Unit tests for variable detection and processing
 
 2. **Header Inline Editing** (T9.3-Header)
-    - [ ] Modify `templateHeader.ts` for inline editing capabilities
-    - [ ] Add edit mode state management to header
-    - [ ] Convert title/category to input fields in edit mode
-    - [ ] Move Save/Cancel buttons from form to header
-    - [ ] Handle keyboard interactions (Enter/Escape)
+    - [x] Modify `templateHeader.ts` for inline editing capabilities
+    - [x] Add edit mode state management to header
+    - [x] Convert title/category to input fields in edit mode
+    - [x] Move Save/Cancel buttons from form to header
 
 3. **Content Area Redesign** (T9.3-Content)
     - [ ] Remove tab HTML structure and CSS
-    - [ ] Create view mode content display (description + processed template)
-    - [ ] Modify edit mode to show form without title/category
+    - [x] Create view mode content display (description + processed template)
+    - [x] Modify edit mode to show form without title/category
     - [ ] Add smooth transitions between view/edit modes
     - [ ] Implement scrollable content area
 

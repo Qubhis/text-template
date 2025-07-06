@@ -229,10 +229,12 @@ T1.1 → T1.2 → T1.3 → T2.1 → T2.2 → T2.3 → T3.1-T3.5 → T6.1-T6.2 �
 ### Phase 4: Variables Panel Redesign
 
 - [ ] **4.1** Create variable state management
-    - [ ] Add variable values storage in TemplateForm component
-    - [ ] Implement variable value persistence per template
+    - [ ] Add variable values storage in TemplateEditor component
+    - [ ] Implement variable value persistence for currently selected template
     - [ ] Add Reset Values functionality
     - [ ] Handle variable value changes and template updates
+        - [ ] this should be coordinated in TemplateEditor since it's coordinator of a template detail (currently selected template)
+        - [ ] template content update should be split to chunks of text and a variables and highlight the variables by styling (styling to be aligned)
 
 - [ ] **4.2** Build view mode variables panel
     - [ ] Create dynamic input field generation from parsed variables
