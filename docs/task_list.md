@@ -181,19 +181,19 @@ T1.1 → T1.2 → T1.3 → T2.1 → T2.2 → T2.3 → T3.1-T3.5 → T6.1-T6.2 �
 
 ### Phase 1: Variable Parser Foundation
 
-- [ ] **1.1** Create `src/frontend/scripts/utils/variableParser.ts`
-    - [ ] Define `Variable` interface (name, type, options, defaultValue)
-    - [ ] Implement `parseVariables(content: string): Variable[]`
-    - [ ] Handle basic variables: `{{variableName}}`
-    - [ ] Handle dropdown variables: `{{name:option1|option2|option3}}`
-    - [ ] Add input validation for variable syntax
-    - [ ] Add unit tests for edge cases (malformed syntax, duplicates)
+- [x] **1.1** Create `src/frontend/scripts/utils/variableParser.ts`
+    - [x] Define `Variable` interface (name, type, options, defaultValue)
+    - [x] Implement `parseVariables(content: string): Variable[]`
+    - [x] Handle basic variables: `{{variableName}}`
+    - [x] Handle dropdown variables: `{{name:option1|option2|option3}}`
+    - [x] Add input validation for variable syntax
+    - [x] Add unit tests for edge cases (malformed syntax, duplicates)
 
-- [ ] **1.2** Implement template processing logic
-    - [ ] Create `processTemplate(content: string, values: VariableValues): string`
-    - [ ] Replace filled variables with their values
-    - [ ] Keep unfilled variables as `{{variableName}}` in output
-    - [ ] Handle special characters and escaping properly
+- [x] **1.2** Implement template processing logic
+    - [x] Create `processTemplate(content: string, values: VariableValues): string`
+    - [x] Replace filled variables with their values
+    - [x] Keep unfilled variables as `{{variableName}}` in output
+    - [x] Handle special characters and escaping properly
 
 ### Phase 2: Header Inline Editing
 
