@@ -16,7 +16,7 @@ export interface TemplateFormCallbacks {
  */
 interface TemplateDisplayData {
     title: string;
-    category: string;
+    categoryId: string;
     description: string;
     content: string;
 }
@@ -50,7 +50,7 @@ export class TemplateForm {
     public initialize(): void {
         this.setupEventListeners();
         this.setMode("view");
-        this.updateData({ title: "", category: "", description: "", content: "" });
+        this.updateData({ title: "", categoryId: "", description: "", content: "" });
     }
 
     /**

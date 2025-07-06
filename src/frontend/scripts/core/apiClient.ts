@@ -8,7 +8,7 @@ export interface Template {
     id: string;
     title: string;
     content: string;
-    category: string;
+    categoryId: string;
     created: string;
     modified: string;
     description?: string;
@@ -18,7 +18,7 @@ export interface Template {
 export interface CreateTemplateInput {
     title: string;
     content: string;
-    category?: string;
+    categoryId?: string;
     description?: string;
     tags?: string[];
 }
@@ -26,7 +26,7 @@ export interface CreateTemplateInput {
 export interface UpdateTemplateInput {
     title?: string;
     content?: string;
-    category?: string;
+    categoryId?: string;
     description?: string;
     tags?: string[];
 }
@@ -88,7 +88,7 @@ export function isTemplate(value: unknown): value is Template {
         "id" in value &&
         "title" in value &&
         "content" in value &&
-        "category" in value &&
+        "categoryId" in value &&
         "created" in value &&
         "modified" in value
     );

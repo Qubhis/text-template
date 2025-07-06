@@ -28,7 +28,7 @@ export interface TemplateHeaderCallbacks {
  */
 interface TemplateDisplayData {
     title: string;
-    category: string;
+    categoryId: string;
     description: string;
     content: string;
 }
@@ -115,7 +115,7 @@ export class TemplateHeader {
     public updateData(data: TemplateDisplayData, modifiedAt?: string): void {
         if (this.currentMode === "view") {
             if (modifiedAt) {
-                this.showTemplateInfo(data.title, data.category, modifiedAt);
+                this.showTemplateInfo(data.title, data.categoryId, modifiedAt);
                 this.enableActionButtons(true);
             } else {
                 this.showEmptyState();
@@ -149,9 +149,9 @@ export class TemplateHeader {
     /**
      * Show template information in header
      */
-    private showTemplateInfo(title: string, category: string, modifiedAt: string): void {
+    private showTemplateInfo(title: string, categoryId: string, modifiedAt: string): void {
         setTextContent(this.titleElement, title);
-        setTextContent(this.categoryElement, category || "Uncategorized");
+        setTextContent(this.categoryElement, this.getCategoryNameById(categoryId));
         setTextContent(this.modifiedElement, `Modified ${formatDate(modifiedAt)}`);
 
         // Show category and modified info
@@ -227,7 +227,12 @@ export class TemplateHeader {
     private updateInlineEditingElements(data: TemplateDisplayData): void {
         if (!this.titleInput || !this.categorySelect) throw new Error("Inline editing elements not created");
         this.titleInput.value = data.title;
-        this.categorySelect.value = data.category;
+        this.categorySelect.value = data.categoryId;
+    }
+
+    private getCategoryNameById(categoryId: string): string {
+        const category = this.categories.find((c) => c.id === categoryId);
+        return category ? category.name : "Uncategorized";
     }
 
     /**

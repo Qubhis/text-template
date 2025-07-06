@@ -7,7 +7,7 @@ export interface Template {
     id: string;
     title: string;
     content: string;
-    category?: string;
+    categoryId?: string;
     description?: string;
     tags: string[];
     created: string; // ISO date string
@@ -18,7 +18,7 @@ export interface Template {
 export interface CreateTemplateInput {
     title: string;
     content: string;
-    category?: string;
+    categoryId?: string;
     description?: string;
     tags?: string[];
 }
@@ -28,7 +28,7 @@ export interface UpdateTemplateInput {
     id: string;
     title?: string;
     content?: string;
-    category?: string;
+    categoryId?: string;
     description?: string;
     tags?: string[];
 }
@@ -70,8 +70,8 @@ export class TemplateValidator {
         }
 
         // Optional fields
-        if (data.category !== undefined && (typeof data.category !== "string" || data.category.trim() === "")) {
-            errors.push("Template category must be a non-empty string if provided");
+        if (data.categoryId !== undefined && (typeof data.categoryId !== "string" || data.categoryId.trim() === "")) {
+            errors.push("Template categoryId must be a non-empty string if provided");
         }
 
         if (data.description !== undefined && typeof data.description !== "string") {
@@ -118,8 +118,8 @@ export class TemplateValidator {
             errors.push("Content is required and must be a string");
         }
 
-        if (data.category !== undefined && (typeof data.category !== "string" || data.category.trim() === "")) {
-            errors.push("Category must be a non-empty string if provided");
+        if (data.categoryId !== undefined && (typeof data.categoryId !== "string" || data.categoryId.trim() === "")) {
+            errors.push("Category ID must be a non-empty string if provided");
         }
 
         if (data.description !== undefined && typeof data.description !== "string") {
@@ -167,8 +167,8 @@ export class TemplateValidator {
             errors.push("Content must be a string if provided");
         }
 
-        if (data.category !== undefined && (typeof data.category !== "string" || data.category.trim() === "")) {
-            errors.push("Category must be a non-empty string if provided");
+        if (data.categoryId !== undefined && (typeof data.categoryId !== "string" || data.categoryId.trim() === "")) {
+            errors.push("Category ID must be a non-empty string if provided");
         }
 
         if (data.description !== undefined && typeof data.description !== "string") {
@@ -243,7 +243,7 @@ export class TemplateUtils {
             id: this.generateId(input.title),
             title: input.title.trim(),
             content: input.content,
-            category: input.category?.trim() || undefined,
+            categoryId: input.categoryId?.trim() || undefined,
             description: input.description?.trim() || undefined,
             tags: input.tags || [],
             created: now,
@@ -266,8 +266,8 @@ export class TemplateUtils {
         if (updates.content !== undefined) {
             updated.content = updates.content;
         }
-        if (updates.category !== undefined) {
-            updated.category = updates.category.trim() || undefined;
+        if (updates.categoryId !== undefined) {
+            updated.categoryId = updates.categoryId.trim() || undefined;
         }
         if (updates.description !== undefined) {
             updated.description = updates.description.trim() || undefined;

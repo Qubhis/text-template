@@ -102,6 +102,11 @@ export default class DataManager extends EventProvider<StateChangeEvent> {
         return [...this.state.categories];
     }
 
+    public getCategoryNameById(categoryId: string): string {
+        const category = this.state.categories.find((c) => c.id === categoryId);
+        return category ? category.name : "Uncategorized";
+    }
+
     /**
      * Get template by ID from current state
      */

@@ -25,7 +25,7 @@ export type TemplateEditorEvent = "mode-changed";
  */
 interface TemplateData {
     title: string;
-    category: string;
+    categoryId: string;
     description: string;
     content: string;
 }
@@ -43,7 +43,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     // Centralized state - single source of truth
     private currentMode: "view" | "edit" | "create" = "view";
     private currentTemplate: Template | null = null;
-    private currentData: TemplateData = { title: "", category: "", description: "", content: "" };
+    private currentData: TemplateData = { title: "", categoryId: "", description: "", content: "" };
     private isDirty = false;
 
     constructor(dataManager: DataManager, callbacks: TemplateEditorCallbacks = {}) {
@@ -54,7 +54,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         // Create components as pure views with callbacks
         this.templateHeader = new TemplateHeader({
             onTitleChange: (title) => this.handleDataChange({ title }),
-            onCategoryChange: (category) => this.handleDataChange({ category }),
+            onCategoryChange: (category) => this.handleDataChange({ categoryId: category }),
             onSave: () => this.handleSave(),
             onCancel: () => this.handleCancel(),
             onEdit: () => this.handleEdit(),
@@ -203,7 +203,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         const originalData = this.getOriginalData();
         const hasChanges =
             this.currentData.title !== originalData.title ||
-            this.currentData.category !== originalData.category ||
+            this.currentData.categoryId !== originalData.categoryId ||
             this.currentData.description !== originalData.description ||
             this.currentData.content !== originalData.content;
 
@@ -217,12 +217,12 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         if (this.currentTemplate) {
             return {
                 title: this.currentTemplate.title,
-                category: this.currentTemplate.category || "",
+                categoryId: this.currentTemplate.categoryId || "",
                 description: this.currentTemplate.description || "",
                 content: this.currentTemplate.content,
             };
         }
-        return { title: "", category: "", description: "", content: "" };
+        return { title: "", categoryId: "", description: "", content: "" };
     }
 
     private syncMode(): void {
@@ -255,7 +255,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
                 const createData: CreateTemplateInput = {
                     title: this.currentData.title,
                     content: this.currentData.content,
-                    category: this.currentData.category || undefined,
+                    categoryId: this.currentData.categoryId || undefined,
                     description: this.currentData.description || undefined,
                 };
 
@@ -264,7 +264,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
                 const updateData: UpdateTemplateInput = {
                     title: this.currentData.title,
                     content: this.currentData.content,
-                    category: this.currentData.category || undefined,
+                    categoryId: this.currentData.categoryId || undefined,
                     description: this.currentData.description || undefined,
                 };
 
@@ -276,7 +276,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
                 this.currentData = {
                     title: savedTemplate.title,
                     content: savedTemplate.content,
-                    category: savedTemplate.category || "",
+                    categoryId: savedTemplate.categoryId || "",
                     description: savedTemplate.description || "",
                 };
                 this.setMode("view");
@@ -341,7 +341,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.currentTemplate = template;
         this.currentData = {
             title: template.title,
-            category: template.category || "",
+            categoryId: template.categoryId || "",
             description: template.description || "",
             content: template.content,
         };
@@ -353,7 +353,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
 
     private proceedWithClear(): void {
         this.currentTemplate = null;
-        this.currentData = { title: "", category: "", description: "", content: "" };
+        this.currentData = { title: "", categoryId: "", description: "", content: "" };
         this.setMode("view");
         this.syncData();
         this.isDirty = false;
@@ -363,7 +363,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
 
     private proceedWithCreate(): void {
         this.currentTemplate = null;
-        this.currentData = { title: "", category: "", description: "", content: "" };
+        this.currentData = { title: "", categoryId: "", description: "", content: "" };
         this.setMode("create");
         this.syncData();
         this.isDirty = false;
@@ -410,7 +410,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
             errors.push("Title cannot exceed 200 characters");
         }
 
-        if (!data.category) {
+        if (!data.categoryId) {
             errors.push("Category is required");
         }
 
