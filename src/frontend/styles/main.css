@@ -162,7 +162,7 @@ body {
     display: flex;
     gap: 12px;
     align-items: center;
-    margin-top: 1.2rem;
+    margin-top: 0.9rem;
 }
 
 .category-badge {
@@ -786,8 +786,6 @@ body {
 
 /* Header Edit Mode Layout */
 .content-header.edit-mode {
-    background-color: #f0f8ff; /* Light blue background to indicate edit mode */
-    border-left: 4px solid #3b82f6; /* Blue accent border */
     transition:
         background-color 0.2s ease,
         border-left 0.2s ease;
@@ -823,7 +821,7 @@ body {
     color: #1e40af;
     border: 2px solid #bfdbfe;
     border-radius: 6px;
-    padding: 2px 8px;
+    padding: 2.5px 8px;
     font-size: 12px;
     font-weight: 500;
     min-width: 120px;
