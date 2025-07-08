@@ -228,26 +228,31 @@ T1.1 → T1.2 → T1.3 → T2.1 → T2.2 → T2.3 → T3.1-T3.5 → T6.1-T6.2 �
 
 ### Phase 4: Variables Panel Redesign
 
-- [ ] **4.1** Create variable state management
-    - [ ] Add variable values storage in TemplateEditor component
-    - [ ] Implement variable value persistence for currently selected template
-    - [ ] Add Reset Values functionality
-    - [ ] Handle variable value changes and template updates
-        - [ ] this should be coordinated in TemplateEditor since it's coordinator of a template detail (currently selected template)
-        - [ ] template content update should be split to chunks of text and a variables and highlight the variables by styling (styling to be aligned)
+- [x] **4.1** Create variable state management
+    - [x] Add variable values storage in TemplateEditor component
+    - [x] Implement variable value persistence for currently selected template
+    - [x] Add Reset Values functionality
+    - [x] Handle variable value changes and template updates
+        - [x] this should be coordinated in TemplateEditor since it's coordinator of a template detail (currently selected template)
+        - [x] template content update should be split to chunks of text and a variables and highlight the variables by styling (styling to be aligned)
 
-- [ ] **4.2** Build view mode variables panel
-    - [ ] Create dynamic input field generation from parsed variables
-    - [ ] Implement text input for basic variables
-    - [ ] Implement dropdown for choice variables
-    - [ ] Add real-time template processing on value changes
-    - [ ] Add Reset Values button and functionality
+- [x] **4.2** Build view mode variables panel
+    - [x] Create dynamic input field generation from parsed variables
+    - [x] Implement text input for basic variables
+    - [x] Implement dropdown for choice variables
+    - [x] Add real-time template processing on value changes
+    - [x] Add Reset Values button and functionality
 
-- [ ] **4.3** Build edit mode variables panel
-    - [ ] Create read-only detected variables list
-    - [ ] Add visual indicators for variable validation
-    - [ ] Show variable type and options (for dropdowns)
-    - [ ] Add "No variables detected" state
+- [x] **4.3** Build edit mode variables panel
+    - [x] Create read-only detected variables list
+    - [x] Add visual indicators for variable validation
+    - [x] Show variable type and options (for dropdowns)
+    - [x] Add "No variables detected" state
+
+- [x] **4.4** Invalid Variable Handling
+    - [x] 4.1: Restrict saving templates with invalid variables (validation during save)
+    - [x] 4.2: Show invalid variables list in Variables panel during edit/create mode
+    - [x] 4.3: Add validation error messages for invalid variable syntax
 
 ### Phase 5: Template Form Integration
 
