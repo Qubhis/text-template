@@ -4,10 +4,12 @@
 // Handles display elements in view mode, dynamic inputs in edit mode
 
 import { addEventListenerWithCleanup, getRequiredElement, setTextContent, addClass, removeClass } from "../../utils/domHelpers.js";
+import { VariableValues } from "../../utils/variableParser.js";
 
 export interface TemplateFormCallbacks {
     onDescriptionChange?: (description: string) => void;
     onContentChange?: (content: string) => void;
+    getVariableValues?: () => VariableValues; // Get current variable values
 }
 
 /**
@@ -122,15 +124,108 @@ export class TemplateForm {
             addClass(this.descriptionDisplay, "empty");
         }
 
-        // Update content display
+        // Update content display with variable highlighting
         if (this.currentData.content && this.currentData.content.trim()) {
-            // For now, show raw content. In future phases, this will be processed template
-            setTextContent(this.contentDisplay, this.currentData.content);
+            this.renderContentWithVariableHighlights();
             removeClass(this.contentDisplay, "empty");
         } else {
             setTextContent(this.contentDisplay, "No content");
             addClass(this.contentDisplay, "empty");
         }
+    }
+
+    /**
+     * Render content with variable highlighting using spans
+     */
+    private renderContentWithVariableHighlights(): void {
+        const content = this.currentData.content;
+        const variableValues = this.callbacks.getVariableValues?.() ?? {};
+
+        // Split content into chunks with variables
+        const chunks = this.splitContentIntoChunks(content, variableValues);
+
+        // Clear and populate content display
+        this.contentDisplay.innerHTML = "";
+
+        chunks.forEach((chunk) => {
+            if (chunk.isVariable) {
+                const span = document.createElement("span");
+                span.className = chunk.isFilled ? "variable-filled" : "variable-empty";
+                span.textContent = chunk.text;
+                span.title = chunk.isVariable ? `Variable: ${chunk.variableName}` : "";
+                this.contentDisplay.appendChild(span);
+            } else {
+                // Regular text - preserve line breaks
+                const lines = chunk.text.split("\n");
+                lines.forEach((line, index) => {
+                    if (index > 0) {
+                        this.contentDisplay.appendChild(document.createElement("br"));
+                    }
+                    if (line.trim()) {
+                        const textNode = document.createTextNode(line);
+                        this.contentDisplay.appendChild(textNode);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Split content into text and variable chunks
+     */
+    private splitContentIntoChunks(content: string, variableValues: { [key: string]: string }) {
+        const chunks: Array<{
+            text: string;
+            isVariable: boolean;
+            isFilled: boolean;
+            variableName?: string;
+        }> = [];
+
+        const variablePattern = /\{\{([^}]*)\}\}/g;
+        let lastIndex = 0;
+        let match: RegExpExecArray | null;
+
+        while ((match = variablePattern.exec(content)) !== null) {
+            // Add text before variable
+            if (match.index > lastIndex) {
+                chunks.push({
+                    text: content.substring(lastIndex, match.index),
+                    isVariable: false,
+                    isFilled: false,
+                });
+            }
+
+            // Add variable
+            const fullMatch = match[0]; // {{variableName}}
+            const innerContent = match[1].trim();
+
+            // Parse variable name (handle both {{name}} and {{name:options}} formats)
+            const colonIndex = innerContent.indexOf(":");
+            const variableName = colonIndex > 0 ? innerContent.substring(0, colonIndex) : innerContent;
+
+            const hasValue = !!(variableValues[variableName] && variableValues[variableName].trim() !== "");
+            const displayText = hasValue ? variableValues[variableName] : fullMatch;
+
+            chunks.push({
+                text: displayText,
+                isVariable: true,
+                isFilled: hasValue,
+                variableName: variableName,
+            });
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        // Add remaining text
+        if (lastIndex < content.length) {
+            chunks.push({
+                text: content.substring(lastIndex),
+                isVariable: false,
+                isFilled: false,
+            });
+        }
+
+        return chunks;
     }
 
     // Private Methods - Edit Mode
@@ -255,29 +350,6 @@ export class TemplateForm {
         this.editContent.innerHTML = "";
 
         console.log("🧹 Destroyed dynamic edit elements");
-    }
-
-    /**
-     * Get current form mode
-     */
-    public getCurrentMode(): "view" | "edit" | "create" {
-        return this.currentMode;
-    }
-
-    /**
-     * Get current data (for debugging)
-     */
-    public getCurrentData(): TemplateDisplayData {
-        return { ...this.currentData };
-    }
-
-    /**
-     * Focus content input (for create mode)
-     */
-    public focusContentInput(): void {
-        if (this.contentTextarea) {
-            this.contentTextarea.focus();
-        }
     }
 
     /**

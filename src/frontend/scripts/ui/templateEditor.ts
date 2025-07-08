@@ -8,6 +8,8 @@ import { Template, CreateTemplateInput, UpdateTemplateInput } from "../core/apiC
 import DataManager from "../core/dataManager.js";
 import { TemplateHeader } from "./editor/templateHeader.js";
 import { TemplateForm } from "./editor/templateForm.js";
+import { VariablePanel } from "./variablePanel.js";
+import VariableParser, { VariableValues } from "../utils/variableParser.js";
 
 export interface TemplateEditorCallbacks {
     onShowUnsavedChangesModal?: (onConfirm: () => void) => void;
@@ -38,12 +40,16 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private callbacks: TemplateEditorCallbacks;
     private templateHeader: TemplateHeader;
     private templateForm: TemplateForm;
+    private variablePanel: VariablePanel;
 
     // Centralized state - single source of truth
     private currentMode: "view" | "edit" | "create" = "view";
     private currentTemplate: Template | null = null;
     private currentData: TemplateData = { title: "", categoryId: "", description: "", content: "" };
     private isDirty = false;
+
+    // Variable state management - per template during session
+    private variableValues: VariableValues = {};
 
     constructor(dataManager: DataManager, callbacks: TemplateEditorCallbacks = {}) {
         super();
@@ -63,6 +69,12 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.templateForm = new TemplateForm({
             onDescriptionChange: (description) => this.handleDataChange({ description }),
             onContentChange: (content) => this.handleDataChange({ content }),
+            getVariableValues: () => this.getVariableValues(),
+        });
+
+        this.variablePanel = new VariablePanel({
+            onVariableValueChange: (variableName, value) => this.handleVariableChange(variableName, value),
+            onResetValues: () => this.handleResetValues(),
         });
     }
 
@@ -73,6 +85,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         // Initialize components
         this.templateHeader.initialize();
         this.templateForm.initialize();
+        this.variablePanel.initialize();
 
         // Load categories for header dropdown
         this.loadCategories();
@@ -99,7 +112,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         if (this.getCurrentMode() !== "view") {
             throw new Error("[BUG] - Cannot load template while not in view mode");
         }
-        if (this.isDirty) {
+        if (this.isDirtyState()) {
             this.callbacks.onShowUnsavedChangesModal?.(() => {
                 this.proceedWithTemplateLoad(template);
             });
@@ -109,23 +122,10 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     }
 
     /**
-     * Clear editor (no template selected)
-     */
-    public clearEditor(): void {
-        if (this.isDirty) {
-            this.callbacks.onShowUnsavedChangesModal?.(() => {
-                this.proceedWithClear();
-            });
-        } else {
-            this.proceedWithClear();
-        }
-    }
-
-    /**
      * Start creating new template
      */
     public startCreate(): void {
-        if (this.isDirty) {
+        if (this.isDirtyState()) {
             this.callbacks.onShowUnsavedChangesModal?.(() => {
                 this.proceedWithCreate();
             });
@@ -175,6 +175,51 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         return this.currentTemplate;
     }
 
+    /**
+     * Get current variable values for the selected template
+     */
+    public getVariableValues(): VariableValues {
+        return { ...this.variableValues };
+    }
+
+    /**
+     * Set variable value for the current template
+     */
+    public setVariableValue(variableName: string, value: string): void {
+        this.variableValues[variableName] = value;
+    }
+
+    /**
+     * Reset all variable values for the current template
+     */
+    public resetVariableValues(): void {
+        this.variableValues = {};
+    }
+
+    /**
+     * Get processed template content with current variable values
+     */
+    public getProcessedTemplate(): string {
+        if (!this.currentTemplate) {
+            return "";
+        }
+
+        const processResult = VariableParser.processTemplate(this.currentTemplate.content, this.variableValues);
+        return processResult.content;
+    }
+
+    /**
+     * Get current variables parsed from template content
+     */
+    public getCurrentVariables() {
+        if (!this.currentTemplate) {
+            return [];
+        }
+
+        const parseResult = VariableParser.parseVariables(this.currentTemplate.content);
+        return parseResult.variables; // Return ALL variables (valid and invalid)
+    }
+
     // Private methods - State Management
 
     /**
@@ -187,7 +232,42 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         // Update dirty state
         this.updateDirtyState();
 
+        // If content changed, update Variables panel to show detected variables in real-time
+        if (changes.content !== undefined) {
+            this.updateVariablePanelFromCurrentData();
+        }
+
         console.log(`📝 Data changed:`, changes, `Dirty: ${this.isDirty}`);
+    }
+
+    /**
+     * Update Variables panel from current content data (for real-time detection during editing)
+     */
+    private updateVariablePanelFromCurrentData(): void {
+        if (this.currentData.content) {
+            const parseResult = VariableParser.parseVariables(this.currentData.content);
+            this.variablePanel.updateData(parseResult.variables, this.variableValues);
+        } else {
+            this.variablePanel.updateData([], this.variableValues);
+        }
+    }
+
+    /**
+     * Handle variable value changes from variable panel
+     */
+    private handleVariableChange(variableName: string, value: string): void {
+        this.setVariableValue(variableName, value);
+        // Refresh the form display to show updated variable highlighting
+        this.templateForm.updateData(this.currentData);
+    }
+
+    /**
+     * Handle reset values from variable panel
+     */
+    private handleResetValues(): void {
+        this.resetVariableValues();
+        // Refresh both variable panel and form display
+        this.syncData();
     }
 
     /**
@@ -227,11 +307,13 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private syncMode(): void {
         this.templateHeader.setMode(this.currentMode);
         this.templateForm.setMode(this.currentMode);
+        this.variablePanel.setMode(this.currentMode);
     }
 
     private syncData(): void {
         this.templateHeader.updateData(this.currentData, this.currentTemplate?.modified);
         this.templateForm.updateData(this.currentData);
+        this.variablePanel.updateData(this.getCurrentVariables(), this.variableValues);
     }
 
     /**
@@ -294,7 +376,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
      * Handle cancel action from header
      */
     private handleCancel(): void {
-        if (this.isDirty) {
+        if (this.isDirtyState()) {
             this.callbacks.onShowUnsavedChangesModal?.(() => {
                 this.proceedWithCancel();
             });
@@ -344,6 +426,8 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
             description: template.description || "",
             content: template.content,
         };
+        // Clear variable values when switching templates
+        this.resetVariableValues();
         this.syncData();
         this.isDirty = false;
 
@@ -353,6 +437,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private proceedWithClear(): void {
         this.currentTemplate = null;
         this.currentData = { title: "", categoryId: "", description: "", content: "" };
+        this.resetVariableValues();
         this.setMode("view");
         this.syncData();
         this.isDirty = false;
@@ -363,6 +448,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private proceedWithCreate(): void {
         this.currentTemplate = null;
         this.currentData = { title: "", categoryId: "", description: "", content: "" };
+        this.resetVariableValues();
         this.setMode("create");
         this.syncData();
         this.isDirty = false;
@@ -414,6 +500,20 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
             errors.push("Description cannot exceed 500 characters");
         }
 
+        // Validate template variables
+        if (data.content?.trim()) {
+            const parseResult = VariableParser.parseVariables(data.content);
+            const invalidVariables = parseResult.variables.filter((v) => !v.isValid);
+
+            if (invalidVariables.length > 0) {
+                errors.push("Template contains invalid variables:");
+                invalidVariables.forEach((variable) => {
+                    const errorMsg = variable.errorMessage || `Invalid variable: ${variable.name}`;
+                    errors.push(`  • ${errorMsg}`);
+                });
+            }
+        }
+
         return {
             isValid: errors.length === 0,
             errors,
@@ -426,6 +526,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     public destroy(): void {
         this.templateHeader.destroy();
         this.templateForm.destroy();
+        this.variablePanel.destroy();
         console.log("🧹 Template editor coordinator destroyed");
     }
 }

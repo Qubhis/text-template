@@ -76,33 +76,46 @@ export class VariableParser {
             const fullMatch = match[0]; // {{variableName}} or {{name:options}}
             const innerContent = match[1].trim(); // variableName or name:options
 
+            let variable: Variable;
+
             if (!innerContent) {
+                // Create invalid variable for empty content - show the actual {{}} as name
+                variable = {
+                    name: fullMatch, // Show {{}} as the name so user can identify it
+                    type: "text",
+                    isValid: false,
+                    errorMessage: "Empty variable name",
+                };
                 errors.push(`Empty variable found: ${fullMatch}`);
-                continue;
-            }
+            } else {
+                variable = this.parseVariableDefinition(innerContent, fullMatch);
 
-            const variable = this.parseVariableDefinition(innerContent, fullMatch);
-
-            if (!variable.isValid) {
-                errors.push(variable.errorMessage || `Invalid variable: ${fullMatch}`);
-                continue;
-            }
-
-            // Check for duplicates with different definitions
-            const existing = variables.get(variable.name);
-            if (existing) {
-                if (!this.areVariablesEqual(existing, variable)) {
-                    errors.push(`Variable "${variable.name}" has conflicting definitions`);
-                    // Mark both as invalid
-                    existing.isValid = false;
-                    existing.errorMessage = "Conflicting definitions";
-                    variable.isValid = false;
-                    variable.errorMessage = "Conflicting definitions";
+                if (!variable.isValid) {
+                    errors.push(variable.errorMessage || `Invalid variable: ${fullMatch}`);
                 }
-                continue;
             }
 
-            variables.set(variable.name, variable);
+            // Use fullMatch as unique key to avoid conflicts while keeping meaningful names
+            const mapKey = variable.isValid ? variable.name : fullMatch;
+
+            // Check for duplicates with different definitions (only for valid variables)
+            if (variable.isValid) {
+                const existing = variables.get(variable.name);
+                if (existing && existing.isValid) {
+                    if (!this.areVariablesEqual(existing, variable)) {
+                        errors.push(`Variable "${variable.name}" has conflicting definitions`);
+                        // Mark both as invalid
+                        existing.isValid = false;
+                        existing.errorMessage = "Conflicting definitions";
+                        variable.isValid = false;
+                        variable.errorMessage = "Conflicting definitions";
+                    }
+                    continue; // Skip duplicate
+                }
+            }
+
+            // Add to map - invalid variables use fullMatch as key, valid ones use variable name
+            variables.set(mapKey, variable);
         }
 
         const variableArray = Array.from(variables.values());
@@ -177,30 +190,6 @@ export class VariableParser {
         return this.VARIABLE_NAME_PATTERN.test(name.trim());
     }
 
-    /**
-     * Get variable names from content (helper method)
-     */
-    static getVariableNames(content: string): string[] {
-        const parseResult = this.parseVariables(content);
-        return parseResult.variables.filter((v) => v.isValid).map((v) => v.name);
-    }
-
-    /**
-     * Check if content contains variables
-     */
-    static hasVariables(content: string): boolean {
-        if (!content) return false;
-        return this.VARIABLE_PATTERN.test(content);
-    }
-
-    /**
-     * Count variables in content
-     */
-    static countVariables(content: string): number {
-        const parseResult = this.parseVariables(content);
-        return parseResult.validCount;
-    }
-
     // Private helper methods
 
     /**
@@ -219,7 +208,7 @@ export class VariableParser {
             // Validate variable name
             if (!this.isValidVariableName(name)) {
                 return {
-                    name: name || "invalid",
+                    name: fullMatch, // Show full variable as it appears in content
                     type: "dropdown",
                     isValid: false,
                     errorMessage: `Invalid variable name: "${name}"`,
@@ -274,7 +263,7 @@ export class VariableParser {
 
             if (!this.isValidVariableName(name)) {
                 return {
-                    name: name || "invalid",
+                    name: fullMatch, // Show full variable as it appears in content
                     type: "text",
                     isValid: false,
                     errorMessage: `Invalid variable name: "${name}"`,

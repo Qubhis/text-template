@@ -320,18 +320,28 @@ body {
     padding: 24px;
     background-color: #f8f9fa;
     border-left: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 .variable-inputs-section h3 {
     margin-bottom: 16px;
     color: #1f2937;
     font-size: 16px;
+    flex-shrink: 0;
 }
 
 .variable-inputs {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px; /* Space for scrollbar */
+    max-height: calc(100vh - 200px); /* Force a maximum height */
+    min-height: 0; /* Allow shrinking */
 }
 
 .variable-input-group {
@@ -359,6 +369,140 @@ body {
     font-style: italic;
     text-align: center;
     padding: 20px;
+}
+
+/* Variables Panel - Edit Mode Detected Variables */
+.detected-variables-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detected-variables-header {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.variable-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.variable-section.valid {
+    border-left: 3px solid #10b981;
+    padding-left: 12px;
+    background-color: #f0fdf4;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.variable-section.invalid {
+    border-left: 3px solid #ef4444;
+    padding-left: 12px;
+    background-color: #fef2f2;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.variable-section-header {
+    font-weight: 500;
+    color: #374151;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.variable-section.valid .variable-section-header {
+    color: #047857;
+}
+
+.variable-section.invalid .variable-section-header {
+    color: #dc2626;
+}
+
+.detected-variables-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detected-variable-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+}
+
+.detected-variable-item.valid {
+    border-color: #d1fae5;
+}
+
+.detected-variable-item.invalid {
+    border-color: #fecaca;
+}
+
+.variable-name {
+    font-weight: 500;
+    color: #1f2937;
+    font-size: 13px;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+.variable-type {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+.variable-options {
+    font-size: 12px;
+    color: #4b5563;
+    font-style: italic;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+.variable-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* Reset Values Button */
+.reset-values-btn {
+    margin-top: 12px;
+    width: 100%;
+    font-size: 12px;
+    padding: 8px 12px;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Variable Highlighting in Content */
+.variable-filled {
+    background-color: #dbeafe;
+    color: #1e40af;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+    border: 1px solid #bfdbfe;
+}
+
+.variable-empty {
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+    border: 1px solid #fde68a;
 }
 
 /* Buttons */
