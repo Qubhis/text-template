@@ -45,3 +45,5 @@ data/
 *.temp
 
 *.code-workspace
+
+.private/
