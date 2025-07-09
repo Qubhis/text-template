@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "module": "es2020", // ✅ Browser needs this
+        "moduleResolution": "node",
+        "outDir": "./dist/frontend",
+        "rootDir": "./src/frontend",
+        "strict": true,
+        "noImplicitAny": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "inlineSourceMap": true,
+        "inlineSources": true
+    },
+    "include": ["src/frontend/**/*"],
+    "exclude": ["node_modules", "src/backend"]
+}

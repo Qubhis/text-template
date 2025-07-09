@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Templates with Variables</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar: Template List -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Templates</h2>
+                <button class="btn btn-primary" id="createTemplateBtn">
+                    <span class="icon">+</span>
+                    New Template
+                </button>
+            </div>
+            
+            <div class="search-section">
+                <input type="text" id="templateSearch" placeholder="Search templates..." class="search-input">
+            </div>
+            
+            <div class="template-list" id="templateList">
+                <!-- Templates will be loaded here dynamically -->
+                <div class="loading">Loading templates...</div>
+            </div>
+            
+            <!-- Resize handle -->
+            <div class="resize-handle" id="resizeHandle"></div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header with template actions -->
+            <header class="content-header">
+                <div class="template-info">
+                    <h1 id="templateTitle">Select a template</h1>
+                    <div class="template-meta">
+                        <span id="templateCategory" class="category-badge"></span>
+                        <span id="templateModified" class="last-modified"></span>
+                    </div>
+                </div>
+                
+                <div class="template-actions">
+                    <button class="btn btn-secondary" id="editTemplateBtn" disabled>
+                        <span class="icon">✏️</span>
+                        Edit
+                    </button>
+                    <button class="btn btn-danger" id="deleteTemplateBtn" disabled>
+                        <span class="icon">🗑️</span>
+                        Delete
+                    </button>
+                </div>
+            </header>
+
+            <!-- Single Content Area  -->
+            <div class="content-container">
+                <div class="main-content-area">
+                    <!-- View Mode Content Display -->
+                    <div id="viewContent" class="view-content active">
+                        <div id="templateDescriptionDisplay" class="template-description"></div>
+                        <div id="templateContentDisplay" class="template-content"></div>
+                    </div>
+                    
+                    <!-- Edit Mode Content Form -->
+                    <div id="editContent" class="edit-content">
+                        <!-- Dynamic edit elements will be created here -->
+                    </div>
+                </div>
+                
+                <!-- Variable Inputs Section (will be redesigned in Phase 4) -->
+                <div class="variable-inputs-section" id="variableInputsSection">
+                    <h3>Variables</h3>
+                    <div class="variable-inputs" id="variableInputs">
+                        <p class="no-variables">No variables detected. Use {{variableName}} in your template.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="modal" id="confirmDialog">
+        <div class="modal-content">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="confirmYes">Yes</button>
+                <button class="btn btn-secondary" id="confirmNo">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
