@@ -81,7 +81,7 @@ A simple web application for managing and using text templates with variable sub
     "id": "unique-id",
     "title": "Template Title",
     "content": "Template content with {{variables}}",
-    "category": "category-id",
+    "categoryId": "category-id",
     "created": "2025-06-28T10:00:00Z",
     "modified": "2025-06-28T10:00:00Z",
     "description": "Optional description",
@@ -272,8 +272,10 @@ interface ApiResponse<T> {
           dataManager.ts                 👈 Data state management
           errorHandler.ts                👈 Error system, notifications
         ui/
-          templateHeader.ts              👈 Header with inline editing + mode-specific action buttons
-          templateForm.ts                👈 Single-mode view/edit + variable state management
+          editor/
+            templateHeader.ts            👈 Header with inline editing + mode-specific action buttons
+            templateForm.ts              👈 Single-mode view/edit + variable state management
+          templateEditor.ts              👈 State and orchestrator for templateHeader and templateForm
           templateList.ts                👈 Sidebar list + search + selection
           modalSystem.ts                 👈 Confirmation modals
           variablePanel.ts               👈 Right-Sidebar for variables
@@ -418,72 +420,71 @@ interface ApiResponse<T> {
 2. **Data Layer Foundation** (T7.1-T7.3) - API client, state management, error handling
 3. **Current Template State** (T7.4) - Basic CRUD operations (requires update for new layout)
 
-### 🔄 Phase 4: Template Editor Redesign (IN PROGRESS)
+### ✅ Phase 4: Template Editor Redesign (COMPLETED)
 
-1. **Variable Parser Foundation** (T10.1)
-    - [ ] Create `variableParser.ts` with Variable interface and parsing logic
-    - [ ] Implement `parseVariables()` and `processTemplate()` functions
-    - [ ] Add validation for variable syntax and edge cases
-    - [ ] Unit tests for variable detection and processing
+1. **Variable Parser Foundation**
+    - [x] Create `variableParser.ts` with Variable interface and parsing logic
+    - [x] Implement `parseVariables()` and `processTemplate()` functions
+    - [x] Add validation for variable syntax and edge cases
+    - [x] Unit tests for variable detection and processing
 
-2. **Header Inline Editing** (T9.3-Header)
-    - [ ] Modify `templateHeader.ts` for inline editing capabilities
-    - [ ] Add edit mode state management to header
-    - [ ] Convert title/category to input fields in edit mode
-    - [ ] Move Save/Cancel buttons from form to header
-    - [ ] Handle keyboard interactions (Enter/Escape)
+2. **Header Inline Editing**
+    - [x] Modify `templateHeader.ts` for inline editing capabilities
+    - [x] Add edit mode state management to header
+    - [x] Convert title/category to input fields in edit mode
+    - [x] Move Save/Cancel buttons from form to header
 
-3. **Content Area Redesign** (T9.3-Content)
-    - [ ] Remove tab HTML structure and CSS
-    - [ ] Create view mode content display (description + processed template)
-    - [ ] Modify edit mode to show form without title/category
-    - [ ] Add smooth transitions between view/edit modes
-    - [ ] Implement scrollable content area
+3. **Content Area Redesign**
+    - [x] Remove tab HTML structure and CSS
+    - [x] Create view mode content display (description + processed template)
+    - [x] Modify edit mode to show form without title/category
+    - [x] Add smooth transitions between view/edit modes
+    - [x] Implement scrollable content area
 
-4. **Variables Panel Redesign** (T10.2-T10.5)
-    - [ ] Create dynamic input field generation for view mode
-    - [ ] Implement text inputs and dropdown selects for variables
-    - [ ] Add "Reset Values" button and functionality
-    - [ ] Create read-only detected variables list for edit mode
-    - [ ] Handle variable value persistence per template
+4. **Variables Panel Redesign**
+    - [x] Create dynamic input field generation for view mode
+    - [x] Implement text inputs and dropdown selects for variables
+    - [x] Add "Reset Values" button and functionality
+    - [x] Create read-only detected variables list for edit mode
+    - [x] Handle variable value persistence per template
+        - values are cleared when user switched between templates
+        - values are cleared when browser refreshes
+        - values persist only while the same template is selected
 
-5. **Template Form Integration** (T9.1-T9.2)
-    - [ ] Remove tab-related logic from TemplateForm
-    - [ ] Add view/edit mode switching
-    - [ ] Integrate variable parser for real-time detection
-    - [ ] Connect header buttons to form operations
-    - [ ] Maintain unsaved changes detection and modal flow
+5. **Template Form Integration**
+    - [x] Remove tab-related logic from TemplateForm
+    - [x] Add view/edit mode switching
+    - [x] Integrate variable parser for real-time detection
+    - [x] Connect header buttons to form operations
+    - [x] Maintain unsaved changes detection and modal flow
 
-### 📋 Phase 5: CSS and Layout Updates (PLANNED)
+### ✅ Phase 5: CSS and Layout Updates (COMPLETED)
 
 1. **Remove Tab System CSS**
-    - [ ] Remove `.tab-nav`, `.tab-btn`, `.tab-content`, `.tab-pane` styles
-    - [ ] Update main content area layout for single mode
-    - [ ] Add inline editing styles for header elements
+    - [x] Remove `.tab-nav`, `.tab-btn`, `.tab-content`, `.tab-pane` styles
+    - [x] Update main content area layout for single mode
+    - [x] Add inline editing styles for header elements
 
 2. **Single-Mode Layout Styling**
-    - [ ] Style view mode content display area
-    - [ ] Style edit mode form layout
-    - [ ] Add smooth transitions between modes
-    - [ ] Update variables panel styling for both modes
+    - [x] Style view mode content display area
+    - [x] Style edit mode form layout
+    - [x] Add smooth transitions between modes
+    - [x] Update variables panel styling for both modes
 
 3. **Responsive Design Updates**
-    - [ ] Update media queries for single-mode interface
-    - [ ] Test and refine responsive behavior
+    - [x] Update media queries for single-mode interface
 
-### 📋 Phase 6: Integration and Testing (PLANNED)
+### ✅ Phase 6: Integration and Testing (COMPLETED)
 
 1. **Component Integration**
-    - [ ] Update `main.ts` to remove TabManager
-    - [ ] Connect all components with new event flow
-    - [ ] Test mode switching and state persistence
-    - [ ] Verify all existing CRUD functionality
+    - [x] Update `main.ts` to remove TabManager
+    - [x] Connect all components with new event flow
+    - [x] Test mode switching and state persistence
+    - [x] Verify all existing CRUD functionality
 
 2. **End-to-End Testing**
-    - [ ] Test create, edit, delete workflows
-    - [ ] Test variable detection and value filling
-    - [ ] Test responsive design and edge cases
-    - [ ] Polish animations and user feedback
+    - [x] Test create, edit, delete workflows
+    - [x] Test variable detection and value filling
 
 ### 📋 Phase 7: Copy & Output System (PLANNED)
 
@@ -494,29 +495,80 @@ interface ApiResponse<T> {
     - [ ] Handle copy errors gracefully
 
 2. **Output Format Options**
-    - [ ] Add format selector (raw, markdown, plain text)
-    - [ ] Implement different output processing modes
-    - [ ] Add format-specific copy functionality
+    - [ ] Implement different output processing modes to support rendering of markdown syntax
 
 ### 📋 Phase 8: Enhanced Features (PLANNED)
 
 1. **Single processing**:
-    - [ ] **T14.1** - Implement single template export (JSON download)
-    - [ ] **T14.3** - Add single template import (JSON upload)
-    - [ ] **T14.5** - Add import/export UI components
+    - [ ] Implement single template export (JSON download)
+    - [ ] Add single template import (JSON upload)
+    - [ ] Add import/export UI components
 
 2. **Bulk processing**:
-    - [ ] **T14.2** - Create bulk export (ZIP with all templates)
-    - [ ] **T14.4** - Implement bulk import with conflict resolution
-    - [ ] **T14.6** - Extend import/export UI
+    - [ ] Create bulk export (ZIP with all templates)
+    - [ ] Implement bulk import with conflict resolution
+    - [ ] Add import/export elements to UI
 
-## Success Criteria
+3. **Switch to database instead of JSON**:
+    - [ ] decide which database
+        - I think postrgres would be overkill
+        - we need a lightweight database for storing template and effective and fast searching withing it
 
-- Users can create, edit, and delete templates with inline header editing
-- Variable substitution works reliably with real-time feedback in view mode
-- Mode switching (view/edit) provides smooth user experience without layout jarring
-- Variable values persist when switching modes for the same template
-- Data persists across container restarts
-- UI is intuitive and responsive across desktop and mobile
-- Application starts quickly and runs smoothly in Docker
-- All existing functionality continues to work after redesign
+4. **Variable values persistence**:
+    - [ ] Save filled values into temporary state
+    - [ ] push the temporary state to persistent state (json data file - the same as is for the template)
+        - [ ] when users switched templates
+        - [ ] regularly, after 3 seconds of inactivity - must be nonblocking and shoudl be ignored in case of server error (but must be logged by server)
+            - provide UI notification when state is changing and changed. But it should be small and non-disturbing. I can imagine small pulsing dot during processing and then shining when the save is done.
+    - [ ] restore state into the variable panel
+    - [ ] handle removed or changed variables between restorations - missing or changed type (text to dropdown or vice versa) should be siletnly ignored and removed from the state
+
+5. **Search input in template list**: - [ ] a button to clear the search input - cross icon at the very right end of the input - [ ] enhance search to include category (search by name and not by id)
+
+6. **Variables panel:** - the reset button should be placed in the sticky header and the text shoudl be just clear or reset, should be small button
+
+7. **Template Content**: - we do have styling for detected variables and when values are provided, but only in the view mode. Can we do the same for edit mode and highlight detected variables which has correct syntax (yellow as in the view mode), and which has incorrect syntax (red tone colors)?
+
+8. **Testing and refinement of UI**
+    - [ ] **Proper colors**:
+        - [ ] e.g. background of a list should be different than elemetns in the list (e.g. template list background)
+        - [ ] check all colors and styling, is it modern? Do we need to use pure white everywhere, can we differntiate between elements? is it visually pleasing?
+        - [ ] Template description in view mode
+            - maybe the grey background is not best?
+        - [ ] Template form in edit view has currently white background and the inputs itself are white as well.
+        - [ ] search input in template list color should be different from the containing container - e.g. background color of the container - white input on white background look bad
+
+    - [ ] Test responsive design and edge cases
+
+    - [ ] and refine responsive behavior
+
+    - [ ] Polish animations and user feedback
+
+    - [ ] Dark mode - can we use css variables and switch between dark and light (current) mode?
+
+9. **Conditions on template content**
+    - to display blocks if condition is met supporting only equal and non-equal operators
+    - conditions would be highlighted with different color in the template content
+    - should be also displayed in detected variables panel during edit mode when it's properly defined or when not
+    - we should also define the conditional syntax - for know it's unknown.
+
+### Advanced Features (nice to have, can be dropped)
+
+1. **OPTION A - Plugin system for different syntaxes**:
+    - this is for defining a different syntax (like for JIRA) to be able to render the output into that sytax
+2. **OPTION B - Rich text editor for template content**:
+    - to provide headings, ordered lists, bold, intalic, underlined text
+    - and then have single syntax source which can be transformed (exported) to different syntax like markdown or JIRA markup, etc.
+    - the syntax support would be like plugin system to provide translation from our unified syntax to the targeted syntax.
+
+3. **Versioning system for templates**
+    - support versions for templates
+    - versions to be stored in database
+    - we should provide a delete for a specific version
+    - we should provide UI element for switching between versions
+    - the last version is always loaded on UI as default
+
+4. **Full text content search**:
+    - user shoudl be able to search across all templates and their contents
+    - by default only latest versions (if versioning is already implemented) are searched
+    - we might provide an option to search across versions, but it seem unecessary and overkill at this moment

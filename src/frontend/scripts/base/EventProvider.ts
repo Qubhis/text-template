@@ -1,3 +1,5 @@
+// src/frontend/scripts/base/EventProvider.ts
+
 export default abstract class EventProvider<E> {
     protected listeners: Map<E, Set<(event: E, data?: unknown) => void>>;
 

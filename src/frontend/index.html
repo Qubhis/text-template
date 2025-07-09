@@ -55,88 +55,26 @@
                 </div>
             </header>
 
-            <!-- Tab Navigation -->
-            <nav class="tab-nav">
-                <button class="tab-btn active" data-tab="edit">Edit</button>
-                <button class="tab-btn" data-tab="preview">Preview</button>
-                <button class="tab-btn" data-tab="output">Output</button>
-            </nav>
-
-            <!-- Tab Content -->
-            <div class="tab-content">
-                <!-- Edit Tab -->
-                <div class="tab-pane active" id="editTab">
-                    <div class="edit-container">
-                        <div class="template-form">
-                            <div class="form-group">
-                                <label for="templateTitleInput">Title</label>
-                                <input type="text" id="templateTitleInput" class="form-input" placeholder="Enter template title">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="templateCategorySelect">Category</label>
-                                <select id="templateCategorySelect" class="form-select select-arrow-formatted">
-                                    <option value="">Select category...</option>
-                                    <!-- Categories will be loaded dynamically -->
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="templateDescriptionInput">Description (optional)</label>
-                                <input type="text" id="templateDescriptionInput" class="form-input" placeholder="Brief description">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="templateContent">Template Content</label>
-                                <textarea id="templateContent" class="form-textarea" placeholder="Enter your template content with {{variables}}..."></textarea>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
-                                <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Variable Inputs Section -->
-                        <div class="variable-inputs-section" id="variableInputsSection">
-                            <h3>Variables</h3>
-                            <div class="variable-inputs" id="variableInputs">
-                                <p class="no-variables">No variables detected. Use {{variableName}} in your template.</p>
-                            </div>
-                        </div>
+            <!-- Single Content Area  -->
+            <div class="content-container">
+                <div class="main-content-area">
+                    <!-- View Mode Content Display -->
+                    <div id="viewContent" class="view-content active">
+                        <div id="templateDescriptionDisplay" class="template-description"></div>
+                        <div id="templateContentDisplay" class="template-content"></div>
+                    </div>
+                    
+                    <!-- Edit Mode Content Form -->
+                    <div id="editContent" class="edit-content">
+                        <!-- Dynamic edit elements will be created here -->
                     </div>
                 </div>
-
-                <!-- Preview Tab -->
-                <div class="tab-pane" id="previewTab">
-                    <div class="preview-container">
-                        <div class="preview-content" id="previewContent">
-                            <p class="no-content">Select a template to see preview</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Output Tab -->
-                <div class="tab-pane" id="outputTab">
-                    <div class="output-container">
-                        <div class="output-actions">
-                            <div class="output-format">
-                                <label>Format:</label>
-                                <select id="outputFormat" class="form-select">
-                                    <option value="formatted">Formatted (Markdown)</option>
-                                    <option value="plain">Plain Text</option>
-                                    <option value="raw">Raw Output</option>
-                                </select>
-                            </div>
-                            <button class="btn btn-primary" id="copyOutputBtn">
-                                <span class="icon">📋</span>
-                                Copy to Clipboard
-                            </button>
-                        </div>
-                        
-                        <div class="output-content">
-                            <pre id="outputContent">Select a template and fill variables to see output</pre>
-                        </div>
+                
+                <!-- Variable Inputs Section (will be redesigned in Phase 4) -->
+                <div class="variable-inputs-section" id="variableInputsSection">
+                    <h3>Variables</h3>
+                    <div class="variable-inputs" id="variableInputs">
+                        <p class="no-variables">No variables detected. Use {{variableName}} in your template.</p>
                     </div>
                 </div>
             </div>

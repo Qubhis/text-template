@@ -4,12 +4,7 @@
 // Handles sidebar template list display, selection, and search functionality
 
 import { isTemplate, Template } from "../core/apiClient.js";
-import DataManager, {
-    StateChangeEvent,
-    StateChangeListener,
-    SearchChangedEventParameters,
-    isSearchChangedEventParameters,
-} from "../core/dataManager.js";
+import DataManager, { StateChangeEvent, StateChangeListener, isSearchChangedEventParameters } from "../core/dataManager.js";
 import { getRequiredElement, clearChildren, addEventListenerWithCleanup, addClass, removeClass } from "../utils/domHelpers.js";
 import { escapeHtml, formatDate } from "../utils/formatters.js";
 
@@ -222,7 +217,7 @@ export class TemplateList {
         templateItem.innerHTML = `
             <div class="template-item-title">${escapeHtml(template.title)}</div>
             <div class="template-item-meta">
-                <span class="category-tag">${escapeHtml(template.category || "Uncategorized")}</span>
+                <span class="category-tag">${escapeHtml(this.dataManager.getCategoryNameById(template.categoryId))}</span>
                 <span class="template-date">${formatDate(template.modified)}</span>
             </div>
         `;
@@ -284,10 +279,8 @@ export class TemplateList {
         templateItems.forEach((item) => {
             const element = item as HTMLElement;
             if (interactive) {
-                element.style.pointerEvents = "";
                 removeClass(element, "disabled");
             } else {
-                element.style.pointerEvents = "none";
                 addClass(element, "disabled");
             }
         });
