@@ -1,6 +1,6 @@
 // src/frontend/scripts/ui/editor/templateForm.ts
 
-// Template Form Component - Redesigned for Single-Mode Interface
+// Template Form Component
 // Handles display elements in view mode, dynamic inputs in edit mode
 
 import { addEventListenerWithCleanup, getRequiredElement, setTextContent, addClass, removeClass } from "../../utils/domHelpers.js";
@@ -23,7 +23,7 @@ interface TemplateDisplayData {
 }
 
 /**
- * Template Form Component - Single-Mode View/Edit
+ * Template Form Component
  * Uses display elements in view mode, dynamic inputs in edit mode
  */
 export class TemplateForm {

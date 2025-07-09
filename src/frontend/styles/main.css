@@ -194,7 +194,7 @@ body {
     gap: 8px;
 }
 
-/* Single-Mode Main Content Area (replaces tab system) */
+/* Main Content Area  */
 .content-container {
     display: flex;
     flex-direction: row;

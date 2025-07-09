@@ -1,7 +1,6 @@
 // src/frontend/scripts/main.ts
 
 // Frontend Application Entry Point & Initialization
-// Updated for Phase 3: Single-Mode Interface (No Tab Manager)
 // Initializes all managers and sets up the application with TemplateEditor coordinator
 
 import DataManager, { StateChangeEvent } from "./core/dataManager.js";
@@ -12,7 +11,7 @@ import { ModalSystem } from "./ui/modalSystem.js";
 import { TemplateEditor } from "./ui/templateEditor.js";
 
 /**
- * Application class - main coordinator with single-mode interface
+ * Application class - main coordinator
  */
 class App {
     private dataManager: DataManager;
@@ -32,7 +31,7 @@ class App {
 
         this.modalSystem = new ModalSystem();
 
-        // Create template editor coordinator with single-mode interface
+        // Create template editor coordinator
         this.templateEditor = new TemplateEditor(this.dataManager, {
             onShowUnsavedChangesModal: (onConfirm) => this.modalSystem.showUnsavedChangesModal(onConfirm),
             onShowDeleteConfirmationModal: (templateTitle, onConfirm) => this.modalSystem.showDeleteConfirmationModal(templateTitle, onConfirm),
@@ -54,8 +53,8 @@ class App {
             console.log("🚀 Initializing data manager...");
             await this.dataManager.initialize();
 
-            // Initialize Template Editor (coordinates header + form with single-mode interface)
-            console.log("🎨 Initializing template editor with single-mode interface...");
+            // Initialize Template Editor (coordinates header + form)
+            console.log("🎨 Initializing template editor...");
             this.templateEditor.initialize();
 
             // Initialize Template List
@@ -66,7 +65,7 @@ class App {
             console.log("🎨 Initializing modal system...");
             this.modalSystem.initialize();
 
-            console.log("✅ Application UI initialized successfully with single-mode interface!");
+            console.log("✅ Application UI initialized successfully!");
 
             // Show success notification
             this.errorHandler.showSuccess("Application Ready", "Text Templates application loaded with new interface!");
@@ -104,7 +103,7 @@ class App {
             this.handleModeChange(data.mode);
         });
 
-        console.log("✅ Data manager listeners set up with single-mode interface");
+        console.log("✅ Data manager listeners set up");
     }
 
     /**
@@ -115,7 +114,7 @@ class App {
         this.templateList.setInteractive(mode === "view");
 
         // Log mode changes for debugging
-        console.log(`🎛️ App mode changed to: ${mode} (single-mode interface)`);
+        console.log(`🎛️ App mode changed to: ${mode}`);
     }
 
     /**
@@ -151,7 +150,7 @@ async function initializeApp(): Promise<void> {
         const dataManager = new DataManager();
 
         // Create app
-        console.log("🏗️ Creating application with single-mode interface...");
+        console.log("🏗️ Creating application...");
         appInstance = new App(dataManager);
 
         // Then initialize the app
