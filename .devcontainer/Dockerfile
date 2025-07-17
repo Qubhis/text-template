@@ -69,11 +69,31 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code
 
+# Instal Playwright and Chrome driver
+RUN npm install -g playwright@latest
+RUN npm install -g @playwright/mcp@latest
+
+# switch to root user
+USER root
+# install chromium driver
+RUN npx playwright install-deps chromium
+RUN npx playwright install chromium
+# RUN npx playwright install-deps chrome
+
+# Switch back to node user and install browsers
+USER node
+# Install browsers for the node user
+RUN npx playwright install chromium
+# RUN npx playwright install chrome
+
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/
 USER root
+
+# change ownership of /usr/local/bin/init-firewall.sh to run it
 # RUN chmod +x /usr/local/bin/init-firewall.sh && \
 #   echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
 #   chmod 0440 /etc/sudoers.d/node-firewall
 RUN chmod +x /usr/local/bin/init-firewall.sh
+
 USER node

@@ -9,6 +9,7 @@ import ErrorHandler from "./core/errorHandler.js";
 import { TemplateList } from "./ui/templateList.js";
 import { ModalSystem } from "./ui/modalSystem.js";
 import { TemplateEditor } from "./ui/templateEditor.js";
+import { DPICalculator } from "../utils/dpiCalculator.js";
 
 /**
  * Application class - main coordinator
@@ -19,6 +20,7 @@ class App {
     private templateList: TemplateList;
     private modalSystem: ModalSystem;
     private templateEditor: TemplateEditor; // Single interface to template editing with header integration
+    private dpiCalculator: DPICalculator;
 
     constructor(dataManager: DataManager) {
         this.dataManager = dataManager;
@@ -39,6 +41,8 @@ class App {
             onShowLoading: (message) => this.errorHandler.showLoading(message),
             onHideLoading: () => this.errorHandler.hideLoading(),
         });
+
+        this.dpiCalculator = new DPICalculator();
     }
 
     /**
@@ -46,6 +50,10 @@ class App {
      */
     async initialize(): Promise<void> {
         try {
+            // Initialize DPI calculation
+            console.log("📏 Initializing DPI calculator...");
+            this.dpiCalculator.setCSSVariable();
+
             // Setup data manager event listeners for UI updates
             console.log("🔗 Connecting data manager to UI...");
             this.setupDataManagerListeners();
@@ -64,6 +72,11 @@ class App {
             // Initialize Modal System
             console.log("🎨 Initializing modal system...");
             this.modalSystem.initialize();
+
+            // Setup window resize listener for DPI recalculation
+            window.addEventListener("resize", () => {
+                this.dpiCalculator.recalculate();
+            });
 
             console.log("✅ Application UI initialized successfully!");
 

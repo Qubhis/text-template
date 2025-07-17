@@ -4,93 +4,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Application Specification
 
-see file `docs/app_specification.md`
+see file @docs/app_specification.md for application information. Note,this is a living document, and some parts doesn't have to be up to date.
 
 ## Development Commands
 
-### Build and Development
-
-- `npm run build` - Full production build (frontend + backend)
-- `npm run build:dev` - Development build without test removal
-- `npm run dev` - Build and start development server
-- `npm run start` - Start production server (requires build first)
-- `npm run clean` - Remove dist directory
-
-### Type Checking and Testing
+### Development
 
 - `npm run type-check` - Run TypeScript type checking for both frontend and backend
 - `npm run type-check:backend` - Type check backend only
 - `npm run type-check:frontend` - Type check frontend only
 - `npm run test` - Run frontend test suite
 - `npm run validate` - Run type-check + lint + test (comprehensive validation)
+- `npm run dev` - Build and start development server
+- `npm run dev:watch` - Auto-reload development server (watches src/ for changes)
+- `npm run start` - Start production server (requires build first)
+- `npm run clean` - Remove dist directory
 
-## Architecture Overview
+### Build Commands
 
-### Technology Stack
+- `npm run build` - Production build (backend + frontend + cleanup)
+- `npm run build:dev` - Development build (backend + frontend)
+- `npm run build:backend` - Build backend only (TypeScript compilation)
+- `npm run build:frontend` - Build frontend only (Vite bundling with sourcemaps)
 
-- **Backend**: Node.js + Express + TypeScript (compiled to CommonJS)
-- **Frontend**: Vanilla TypeScript + HTML/CSS (compiled to ES2020 modules)
-- **Storage**: JSON files in filesystem (`/data/templates/`)
-- **Deployment**: Docker container with volume mount
+## Code Guidelines
 
-### Project Structure
+- Use comments sparingly. Only comment complex code.
 
-- **Backend** (`src/backend/`): Express server with file-based data persistence
-- **Frontend** (`src/frontend/`): Vanilla TypeScript with event-driven architecture
-- **Data** (`/data/`): JSON file storage for templates (Docker volume)
-- **Build** (`dist/`): Compiled output (backend as CommonJS, frontend as ES modules)
+## Workflow
 
-### Key Components
-
-#### Backend Architecture
-
-- **Server** (`server.ts`): Express server with route initialization and middleware
-- **Services**: `TemplateService` (CRUD operations), `CategoryService` (predefined categories)
-- **Models**: `Template` interface with validation (`TemplateValidator`, `TemplateUtils`)
-- **Routes**: REST API endpoints with centralized error handling (`BaseRoute` pattern)
-- **Utils**: `FileManager` for JSON file operations with Docker-aware error handling
-
-#### Frontend Architecture
-
-- **Event-Driven**: Components extend `EventProvider` for decoupled communication
-- **State Management**: `DataManager` provides centralized template state with event notifications
-- **UI Components**: Modular components for template list, editor, header, and variables
-- **Variable System**: `VariableParser` handles `{{variable}}` and `{{variable:option1|option2}}` syntax
-- **API Layer**: `ApiClient` provides typed HTTP client with error handling
-
-#### Data Flow
-
-1. **Templates**: Stored as individual JSON files in `/data/templates/`
-2. **API**: RESTful endpoints under `/api/templates` and `/api/categories`
-3. **State**: `DataManager` caches templates and emits events for UI updates
-4. **Variables**: Parsed client-side with real-time processing in view mode
-
-### Key Design Patterns
-
-- **Dependency Injection**: Services injected into routes and components
-- **Event-Driven UI**: Components communicate via events, not direct coupling
-- **Type Safety**: Comprehensive TypeScript with validation throughout
-- **Error Resilience**: Graceful handling of file system errors and API failures
-- **Real-time Processing**: Client-side variable substitution without server round-trips
-
-### Development Notes
-
-- **TypeScript Configs**: Separate configs for backend (CommonJS) and frontend (ES modules)
-- **File Storage**: Template IDs are filename-safe (alphanumeric + hyphens/underscores)
-- **Docker Integration**: File manager includes Docker-specific error handling
-- **Testing**: Frontend tests in `suite.test.ts` with utilities in `utils/` subdirectory
-- **No Framework**: Frontend uses vanilla TypeScript with DOM manipulation utilities
-
-### Variable System
-
-Templates support two variable types:
-
-- **Basic**: `{{variableName}}` - generates text input
-- **Dropdown**: `{{variableName:option1|option2|option3}}` - generates select dropdown
-
-Variables are:
-
-- Parsed client-side with real-time validation
-- Processed instantly as user types (view mode only)
-- Persistent per template during session
-- Cleared when switching templates or refreshing browser
+- You work in a smart way:
+    1. You work carefully, incrementally, and considering every aspect and decision for your task.
+    2. When you are done with a change, you check your work and offer yourself some criticism
+    3. if you find some inconsistencies or mistakes, you immediately fix them
+    4. you repeat step 1., 2., and step 3. until you cannot find any inconsistencies or mistakes, and until you are done with completing the whole task
+    5. you output the final version of your work.
+- anytime during your working (smart way) you realize you need my answers and clarification, you stop and ask me. Then, If my answer or decision is enough, you continue where you left off and still work in the smart way.
+- refrain from creating methods which are not needed immediately and only create what is needed to complete the task.
+- follow KISS principle
+- reserve time to make refactoring to keep code readable, modular, and maintainable.
+- if you are unsure, stop, take a moment, ask yourself questions to find a way, ask me for an opinion or decision.
+- you utilize a temporary file for storing a task list you create during the planning phase.
+- anytime you find the task list needs to be updated with the tasks (steps), you explain why and request my approval.
+- use scratchpad in a markdown file stored in the root of the project

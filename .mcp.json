@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--headless",
+        "--isolated",
+        "--no-sandbox",
+        "--browser",
+        "chromium",
+        "--executable-path",
+        "/home/node/.cache/ms-playwright/chromium_headless_shell-1181/chrome-linux/headless_shell"
+      ],
+      "env": {}
+    }
+  }
+}

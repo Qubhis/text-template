@@ -34,6 +34,8 @@ export class TemplateForm {
     private viewContent: HTMLElement;
     private descriptionDisplay: HTMLElement;
     private contentDisplay: HTMLElement;
+    private copyButton: HTMLButtonElement;
+    private copyFeedback: HTMLElement;
 
     // Edit Mode Container
     private editContent: HTMLElement;
@@ -54,6 +56,11 @@ export class TemplateForm {
         this.descriptionDisplay = getRequiredElement<HTMLElement>("templateDescriptionDisplay");
         this.contentDisplay = getRequiredElement<HTMLElement>("templateContentDisplay");
         this.editContent = getRequiredElement<HTMLElement>("editContent");
+        this.copyButton = getRequiredElement<HTMLButtonElement>("copyButton");
+        this.copyFeedback = getRequiredElement<HTMLElement>("copyFeedback");
+        
+        // Setup copy button (always present, never destroyed)
+        this.setupCopyButton();
     }
 
     /**
@@ -226,6 +233,49 @@ export class TemplateForm {
         }
 
         return chunks;
+    }
+
+    /**
+     * Setup copy button event listener
+     */
+    private setupCopyButton(): void {
+        const copyClickCleanup = addEventListenerWithCleanup(this.copyButton, "click", () => {
+            this.copyTemplateContent();
+        });
+        this.cleanupFunctions.push(copyClickCleanup);
+    }
+
+    /**
+     * Copy processed template content to clipboard
+     */
+    private async copyTemplateContent(): Promise<void> {
+        const content = this.currentData.content;
+        const variableValues = this.callbacks.getVariableValues?.() ?? {};
+        
+        // Use existing chunk logic to get processed content
+        const chunks = this.splitContentIntoChunks(content, variableValues);
+        const processedContent = chunks.map(chunk => chunk.text).join("");
+        
+        try {
+            await navigator.clipboard.writeText(processedContent);
+            this.showCopySuccess();
+        } catch (error) {
+            console.error("Failed to copy to clipboard:", error);
+        }
+    }
+
+    /**
+     * Show copy success animation
+     */
+    private showCopySuccess(): void {
+        addClass(this.copyButton, "copied");
+        addClass(this.copyFeedback, "show");
+        
+        // Reset after 2 seconds
+        setTimeout(() => {
+            removeClass(this.copyButton, "copied");
+            removeClass(this.copyFeedback, "show");
+        }, 2000);
     }
 
     // Private Methods - Edit Mode
