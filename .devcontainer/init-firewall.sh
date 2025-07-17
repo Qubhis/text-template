@@ -53,6 +53,7 @@ done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 # Resolve and add other allowed domains
 for domain in \
     "registry.npmjs.org" \
+    "m3.material.io" \
     "api.anthropic.com"; do
     echo "Resolving $domain..."
     ips=$(dig +short A "$domain")

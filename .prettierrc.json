@@ -21,6 +21,13 @@
         "parser": "json",
         "tabWidth": 2
       }
+    },
+    {
+      "files": ["*.css"],
+      "options": {
+        "parser": "css",
+        "tabWidth": 4
+      }
     }
   ]
 }

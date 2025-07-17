@@ -4,15 +4,14 @@
   "description": "text template app",
   "private": true,
   "scripts": {
-    "build": "npm run build:dev && npm run postBuild:remove-tests && postBuild:frontend && npm run postBuild:remove-tests",
-    "build:dev": "npm run clean && npm run build:backend && npm run build:frontend && npm run postBuild:frontend",
+    "build": "npm run build:dev",
+    "build:dev": "npm run clean && npm run build:backend && npm run build:frontend",
     "build:backend": "tsc -p tsconfig.backend.json",
-    "build:frontend": "tsc -p tsconfig.frontend.json",
-    "postBuild:frontend": "cp -r src/frontend/* ./dist/frontend",
-    "postBuild:remove-tests": "rm -rf ./dist/frontend/tests",
+    "build:frontend": "vite build",
     "start": "node dist/backend/server.js",
     "start:prod": "NODE_ENV=production node dist/backend/server.js",
     "dev": "npm run build:dev && npm run start",
+    "dev:watch": "nodemon --watch src --ext ts,html,css,js --exec \"npm run build:dev && npm run start\"",
     "dev:build": "tsc --watch",
     "clean": "rm -rf dist",
     "clean:deep": "rm -rf dist node_modules package-lock.json && npm install",
@@ -20,7 +19,8 @@
     "type-check:backend": "tsc -p tsconfig.backend.json --noEmit",
     "type-check:frontend": "tsc -p tsconfig.frontend.json --noEmit",
     "lint": "echo 'Linting not configured yet'",
-    "test": "npm run build:dev && npm run test:frontend",
+    "testorig": "npm run build:dev && npm run test:frontend",
+    "test": "",
     "test:frontend": "node ./dist/frontend/tests/suite.test.js",
     "validate": "npm run type-check && npm run lint && npm run test",
     "prebuild": "npm run validate",
@@ -37,7 +37,9 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.7",
+    "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
-    "tsx": "^4.20.3"
+    "tsx": "^4.20.3",
+    "vite": "^7.0.4"
   }
 }

@@ -7,25 +7,32 @@
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
+     <!-- Dark Mode Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+        <span id="themeIcon">🌙</span>
+    </button>
+
     <div class="app-container">
         <!-- Sidebar: Template List -->
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>Templates</h2>
-                <button class="btn btn-primary" id="createTemplateBtn">
-                    <span class="icon">+</span>
-                    New Template
-                </button>
-            </div>
-            
+
             <div class="search-section">
                 <input type="text" id="templateSearch" placeholder="Search templates..." class="search-input">
             </div>
+
+            <button class="btn btn-primary" id="createTemplateBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="icon" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                </svg>
+                New Template
+            </button>
             
             <div class="template-list" id="templateList">
                 <!-- Templates will be loaded here dynamically -->
                 <div class="loading">Loading templates...</div>
             </div>
+
+            
             
             <!-- Resize handle -->
             <div class="resize-handle" id="resizeHandle"></div>
@@ -37,48 +44,63 @@
             <header class="content-header">
                 <div class="template-info">
                     <h1 id="templateTitle">Select a template</h1>
-                    <div class="template-meta">
-                        <span id="templateCategory" class="category-badge"></span>
-                        <span id="templateModified" class="last-modified"></span>
-                    </div>
                 </div>
                 
                 <div class="template-actions">
                     <button class="btn btn-secondary" id="editTemplateBtn" disabled>
-                        <span class="icon">✏️</span>
-                        Edit
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="icon" viewBox="0 0 16 16">
+                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                        </svg>
                     </button>
                     <button class="btn btn-danger" id="deleteTemplateBtn" disabled>
-                        <span class="icon">🗑️</span>
-                        Delete
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="icon" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
                     </button>
                 </div>
             </header>
 
             <!-- Single Content Area  -->
             <div class="content-container">
-                <div class="main-content-area">
                     <!-- View Mode Content Display -->
                     <div id="viewContent" class="view-content active">
+                        <div class="template-meta">
+                            <span id="templateCategory" class="category-badge"></span>
+                            <span id="templateModified" class="last-modified"></span>
+                        </div>
                         <div id="templateDescriptionDisplay" class="template-description"></div>
-                        <div id="templateContentDisplay" class="template-content"></div>
+                        <div class="template-content-container">
+                            <div id="templateContentDisplay" class="template-content"></div>
+                            <button id="copyButton" class="copy-button" title="Copy template content">
+                                <!-- <span class="copy-icon">⧉</span> -->
+                                <svg class="copy-icon" aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true">
+                                    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path>
+                                    <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+                                </svg>
+                                <svg class="check-icon" aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true">
+                                    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+                                </svg>
+                                <!-- <span class="check-icon">✓</span> -->
+                            </button>
+                            <span class="copy-feedback" id="copyFeedback">Copied!</span>
+                        </div>
                     </div>
                     
                     <!-- Edit Mode Content Form -->
                     <div id="editContent" class="edit-content">
                         <!-- Dynamic edit elements will be created here -->
                     </div>
-                </div>
-                
-                <!-- Variable Inputs Section (will be redesigned in Phase 4) -->
-                <div class="variable-inputs-section" id="variableInputsSection">
-                    <h3>Variables</h3>
-                    <div class="variable-inputs" id="variableInputs">
-                        <p class="no-variables">No variables detected. Use {{variableName}} in your template.</p>
-                    </div>
-                </div>
             </div>
         </main>
+
+        <!-- Variable Inputs Section (will be redesigned in Phase 4) -->
+        <div class="variable-inputs-section" id="variableInputsSection">
+            <h3>Variables</h3>
+            <div class="variable-inputs" id="variableInputs">
+                <p class="no-variables">No variables detected. Use {{variableName}} in your template.</p>
+            </div>
+        </div>
     </div>
 
     <!-- Confirmation Dialog -->
@@ -103,6 +125,44 @@
     <div id="notificationContainer" class="notification-container"></div>
 
     <!-- Scripts -->
-    <script type="module" src="scripts/main.js"></script>
+    <script type="module" src="scripts/main.ts"></script>
+    <script>
+        // Dark mode toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        themeIcon.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            
+            // Add a subtle animation
+            this.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+
+        // Button click animations
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!this.disabled) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 100);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -47,3 +47,4 @@ data/
 *.code-workspace
 
 .private/
+current_task/

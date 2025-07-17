@@ -10,7 +10,8 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Copy package files
 COPY package*.json ./
-COPY tsconfig.json ./
+COPY tsconfig.*.json ./
+COPY vite.config.js ./
 
 # Install dependencies
 RUN npm ci && npm cache clean --force

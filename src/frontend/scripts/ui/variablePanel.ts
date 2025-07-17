@@ -48,7 +48,7 @@ export class VariablePanel {
      */
     public setMode(mode: "view" | "edit" | "create"): void {
         this.currentMode = mode;
-        
+
         if (mode === "view") {
             this.showViewMode();
         } else {
@@ -62,7 +62,7 @@ export class VariablePanel {
     public updateData(variables: Variable[], values: VariableValues = {}): void {
         this.currentVariables = variables;
         this.currentValues = values;
-        
+
         if (this.currentMode === "view") {
             this.renderVariableInputs();
         } else {
@@ -91,28 +91,22 @@ export class VariablePanel {
         this.clearContent();
 
         // Only show valid variables for input generation
-        const validVariables = this.currentVariables.filter(v => v.isValid);
+        const validVariables = this.currentVariables.filter((v) => v.isValid);
 
         if (validVariables.length === 0) {
             this.showEmptyState();
             return;
         }
 
-        // Create container for inputs
-        const inputsContainer = document.createElement("div");
-        inputsContainer.className = "variable-inputs-container";
-
         // Generate input fields for each valid variable
-        validVariables.forEach(variable => {
+        validVariables.forEach((variable) => {
             const inputGroup = this.createInputGroup(variable);
-            inputsContainer.appendChild(inputGroup);
+            this.variableInputs.appendChild(inputGroup);
         });
 
         // Add reset button
         this.resetButton = this.createResetButton();
-        inputsContainer.appendChild(this.resetButton);
-
-        this.variableInputs.appendChild(inputsContainer);
+        this.variableInputs.appendChild(this.resetButton);
     }
 
     /**
@@ -130,7 +124,7 @@ export class VariablePanel {
 
         // Input element
         let input: HTMLInputElement | HTMLSelectElement;
-        
+
         if (variable.type === "dropdown" && variable.options) {
             input = this.createDropdownInput(variable);
         } else {
@@ -179,7 +173,7 @@ export class VariablePanel {
         select.appendChild(emptyOption);
 
         // Add options
-        variable.options?.forEach(option => {
+        variable.options?.forEach((option) => {
             const optionElement = document.createElement("option");
             optionElement.value = option;
             optionElement.textContent = option;
@@ -217,7 +211,6 @@ export class VariablePanel {
         return button;
     }
 
-
     // Private methods - Edit Mode
 
     /**
@@ -240,8 +233,8 @@ export class VariablePanel {
         }
 
         // Separate valid and invalid variables
-        const validVariables = this.currentVariables.filter(v => v.isValid);
-        const invalidVariables = this.currentVariables.filter(v => !v.isValid);
+        const validVariables = this.currentVariables.filter((v) => v.isValid);
+        const invalidVariables = this.currentVariables.filter((v) => !v.isValid);
 
         // Create container for detected variables
         const detectedContainer = document.createElement("div");
@@ -285,21 +278,21 @@ export class VariablePanel {
         const variableList = document.createElement("div");
         variableList.className = "detected-variables-list";
 
-        variables.forEach(variable => {
+        variables.forEach((variable) => {
             const variableItem = document.createElement("div");
             variableItem.className = `detected-variable-item ${type}`;
-            
+
             const name = document.createElement("span");
             name.className = "variable-name";
             name.textContent = variable.name;
-            
+
             const typeSpan = document.createElement("span");
             typeSpan.className = "variable-type";
             typeSpan.textContent = variable.type;
-            
+
             variableItem.appendChild(name);
             variableItem.appendChild(typeSpan);
-            
+
             // Add options for dropdown variables
             if (variable.type === "dropdown" && variable.options) {
                 const options = document.createElement("span");
@@ -307,7 +300,7 @@ export class VariablePanel {
                 options.textContent = `[${variable.options.join(", ")}]`;
                 variableItem.appendChild(options);
             }
-            
+
             // Add error message for invalid variables
             if (!variable.isValid && variable.errorMessage) {
                 const errorMsg = document.createElement("span");
@@ -315,7 +308,7 @@ export class VariablePanel {
                 errorMsg.textContent = variable.errorMessage;
                 variableItem.appendChild(errorMsg);
             }
-            
+
             variableList.appendChild(variableItem);
         });
 
@@ -330,11 +323,11 @@ export class VariablePanel {
      */
     private showEmptyState(): void {
         this.clearContent();
-        
+
         const emptyMessage = document.createElement("p");
         emptyMessage.className = "no-variables";
         emptyMessage.textContent = "No variables detected. Use {{variableName}} in your template.";
-        
+
         this.variableInputs.appendChild(emptyMessage);
     }
 
@@ -351,11 +344,11 @@ export class VariablePanel {
      */
     public destroy(): void {
         this.clearContent();
-        
+
         // Remove all event listeners
-        this.cleanupFunctions.forEach(cleanup => cleanup());
+        this.cleanupFunctions.forEach((cleanup) => cleanup());
         this.cleanupFunctions = [];
-        
+
         console.log("🧹 Variable panel destroyed");
     }
 }

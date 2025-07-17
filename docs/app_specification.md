@@ -35,18 +35,16 @@ A simple web application for managing and using text templates with variable sub
 - **Basic variables**: `{{variable}}` - generates text input
 - **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates dropdown
 - **Real-time detection**: Variables detected as user types in template content
-- **Value persistence**: Variable values persist per template during session
+- **Value persistence**: Variable values persist per template during session (cleared on template switch or refresh)
 - **Reset functionality**: Clear all variable values on demand via "Reset Values" button
 - **Validation**: Variable names must be alphanumeric with underscores, no spaces
-- **Conditional logic**: Simple if/else blocks
-    ```
-    {{#if variable}}This shows when variable has value{{/if}}
-    ```
+- **Visual feedback**: Variables highlighted in template content during view mode
 
 ### 3. Template Processing
 
-- Real-time processing as variables are filled in view mode
+- Real-time processing as variables are filled in view mode with instant visual feedback
 - Client-side template processing for better performance
+- Variable highlighting in template content for better user experience
 - Unfilled variables remain as `{{variable}}` in output
 - Support for malformed variable syntax with user-friendly error handling
 - Copy functionality for processed template content (future phase)
@@ -58,7 +56,7 @@ A simple web application for managing and using text templates with variable sub
     - Template list with search functionality
     - Create new template button
 - **Header** (template information and actions):
-    - **View Mode**: Template title (inline-editable) + category badge (inline-editable) + last modified + Edit/Delete buttons
+    - **View Mode**: Template title + category badge + last modified + Edit/Delete buttons
     - **Edit Mode**: Title input field + category select dropdown + Save/Cancel buttons
 - **Main Content Area** (central area):
     - **View Mode**: Description (if present) + processed template content (scrollable)
@@ -71,6 +69,7 @@ A simple web application for managing and using text templates with variable sub
     - Save/Cancel buttons in header control mode switching
     - Unsaved changes trigger confirmation modal
     - Variable values persist when switching modes for same template
+    - Smooth transitions between view and edit modes
 
 ## Data Models
 
@@ -105,15 +104,15 @@ interface VariableValues {
 
 ## Template Processing Architecture
 
-### Frontend-Only Processing (Client-Side)
+### Client-Side Processing (Implemented)
 
-- **Variable Parsing**: Extract `{{variables}}` from template text using regex patterns
-- **Real-Time Processing**: Instant template updates as user fills variable values in view mode
-- **No Server Round-Trips**: All processing happens client-side for better performance
+- **Variable Parsing**: Extracts `{{variables}}` from template text using regex patterns
+- **Real-Time Processing**: Provides instant template updates as users fill variable values in view mode
+- **No Server Round-Trips**: All processing happens client-side for optimal performance
 - **Offline Capability**: Template processing works without server connection
-- **Error Handling**: Graceful handling of malformed variable syntax
+- **Error Handling**: Gracefully handles malformed variable syntax
 
-### Variable Types Supported
+### Supported Variable Types
 
 - **Basic variables**: `{{variable}}` - generates text input field
 - **Dropdown variables**: `{{variable:option1|option2|option3}}` - generates select dropdown
@@ -122,84 +121,30 @@ interface VariableValues {
 ### Processing Flow
 
 1. **Parse Template**: Extract variables and their types from template content
-2. **Generate Inputs**: Create appropriate input fields for each variable in variables panel (view mode only)
-3. **Real-Time Processing**: Replace variables with values as user types (view mode only)
+2. **Generate Inputs**: Create appropriate input fields for each variable in variables panel (view mode)
+3. **Real-Time Processing**: Replace variables with values as user types (view mode)
 4. **Preserve Unfilled**: Keep unfilled variables as `{{variable}}` in processed output
 
-## HTML Structure Changes
+## HTML Structure
 
-### Current Structure (Being Removed)
+### Implemented Single-Mode Interface
 
-```html
-<!-- Tab Navigation -->
-<nav class="tab-nav">
-    <button class="tab-btn active" data-tab="edit">Edit</button>
-    <button class="tab-btn" data-tab="preview">Preview</button>
-    <button class="tab-btn" data-tab="output">Output</button>
-</nav>
+The application uses a single-mode interface with three main areas:
 
-<!-- Tab Content -->
-<div class="tab-content">
-    <div class="tab-pane active" id="editTab">...</div>
-    <div class="tab-pane" id="previewTab">...</div>
-    <div class="tab-pane" id="outputTab">...</div>
-</div>
-```
+**Header with Inline Editing**
 
-### New Structure (Target Design)
+- View mode: Template title, category badge, modification date, Edit/Delete buttons
+- Edit mode: Title input, category dropdown, Save/Cancel buttons
 
-```html
-<!-- Header with inline editing -->
-<header class="content-header">
-    <div class="template-info">
-        <!-- View mode: displays, Edit mode: inputs -->
-        <h1 id="templateTitle" class="inline-editable">Template Title</h1>
-        <div class="template-meta">
-            <span id="templateCategory" class="category-badge inline-editable">Category</span>
-            <span id="templateModified" class="last-modified">Modified date</span>
-        </div>
-    </div>
-    <div class="template-actions">
-        <!-- View mode: Edit + Delete, Edit mode: Save + Cancel -->
-        <button class="btn btn-secondary" id="editTemplateBtn">Edit</button>
-        <button class="btn btn-danger" id="deleteTemplateBtn">Delete</button>
-    </div>
-</header>
+**Main Content Area**
 
-<!-- Single content area -->
-<div class="main-content-area">
-    <!-- View mode: processed template display -->
-    <div id="viewContent" class="view-content">
-        <p id="templateDescription" class="template-description"></p>
-        <div id="processedTemplate" class="processed-template"></div>
-    </div>
+- View mode: Template description (if present) + processed template content with variable highlighting
+- Edit mode: Template editing form with description and content fields
 
-    <!-- Edit mode: template form -->
-    <div id="editContent" class="edit-content hidden">
-        <form class="template-form">
-            <div class="form-group">
-                <label for="templateDescriptionInput">Description (optional)</label>
-                <input type="text" id="templateDescriptionInput" class="form-input" />
-            </div>
-            <div class="form-group">
-                <label for="templateContent">Template Content</label>
-                <textarea id="templateContent" class="form-textarea"></textarea>
-            </div>
-        </form>
-    </div>
-</div>
+**Variables Panel**
 
-<!-- Variables Panel -->
-<div class="variable-inputs-section">
-    <h3>Variables</h3>
-    <!-- View mode: input fields -->
-    <div id="variableInputs" class="variable-inputs"></div>
-    <button id="resetValuesBtn" class="btn btn-secondary btn-small">Reset Values</button>
-
-    <!-- Edit mode: detected variables list -->
-    <div id="detectedVariables" class="detected-variables hidden"></div>
-</div>
-```
+- View mode: Dynamic input fields for detected variables + Reset Values button
+- Edit mode: Read-only list of detected variables for validation
 
 ## API Endpoints (Implemented)
 
@@ -240,7 +185,7 @@ interface ApiResponse<T> {
     - **Response**: `{ success: true, message: string }`
     - **Errors**: 404 if not found
 
-## File System Structure - Planned
+## File System Structure
 
 ```
 /app/
@@ -254,9 +199,9 @@ interface ApiResponse<T> {
         templateService.ts
         categoryService.ts
       utils/
-        fileManager.ts                   👈 JSON file utilities
+        fileManager.ts
       routes/
-        baseRoute.ts                     👈 Base class for routes
+        baseRoute.ts
         templates.ts
         categories.ts
     frontend/
@@ -264,35 +209,28 @@ interface ApiResponse<T> {
       styles/
         main.css
       scripts/
-        main.ts                          👈 Frontend entry point & app initialization - coordinator
+        main.ts
         base/
-          EventProvider.ts               👈 Abstract class for components emitting events
+          EventProvider.ts
         core/
-          apiClient.ts                   👈 API communication
-          dataManager.ts                 👈 Data state management
-          errorHandler.ts                👈 Error system, notifications
+          apiClient.ts
+          dataManager.ts
+          errorHandler.ts
         ui/
           editor/
-            templateHeader.ts            👈 Header with inline editing + mode-specific action buttons
-            templateForm.ts              👈 Single-mode view/edit + variable state management
-          templateEditor.ts              👈 State and orchestrator for templateHeader and templateForm
-          templateList.ts                👈 Sidebar list + search + selection
-          modalSystem.ts                 👈 Confirmation modals
-          variablePanel.ts               👈 Right-Sidebar for variables
+            templateHeader.ts
+            templateForm.ts
+          templateEditor.ts
+          templateList.ts
+          modalSystem.ts
+          variablePanel.ts
         utils/
-          domHelpers.ts                  👈 DOM query utilities
-          formatters.ts                  👈 Date/text formatting
-          variableParser.ts              👈 NEW - Variable detection, parsing, and processing
-  data/                                  👈 Data directory (Docker volume)
-    templates/                           👈 Individual template JSON files
+          domHelpers.ts
+          formatters.ts
+          variableParser.ts
+  data/
+    templates/
 ```
-
-### Planned Breaking Changes
-
-- **Removed**: `tabManager.ts` - No longer needed with single-mode interface
-- **Modified**: `templateForm.ts` - Major restructure for view/edit modes
-- **Modified**: `templateHeader.ts` - Added inline editing capabilities
-- **Modified**: `main.ts` - Remove tab manager integration
 
 ## Future Enhancements (out of MVP scope)
 
@@ -387,10 +325,9 @@ interface ApiResponse<T> {
 
 #### T6.1-T6.4: Basic UI Structure
 
-- **Status**: 🔄 Major Update Required
-- **Current**: Tab-based layout with Edit/Preview/Output tabs
-- **Target**: Single-mode view/edit layout with inline header editing
-- **Breaking Changes**: Complete HTML structure redesign, CSS layout changes, removal of tab system
+- **Status**: ✅ Completed
+- **Implementation**: Single-mode view/edit layout with inline header editing
+- **Changes**: Complete HTML structure redesign, CSS layout changes, removal of tab system
 
 #### T7.1-T7.3: Frontend Data Layer Foundation
 
@@ -399,9 +336,8 @@ interface ApiResponse<T> {
 
 #### T7.4: Current Template State Management
 
-- **Status**: 🔄 Update Required
-- **Current**: Basic template CRUD with tab integration
-- **Target**: Mode-based state management with variable value persistence
+- **Status**: ✅ Completed
+- **Implementation**: Mode-based state management with variable value persistence
 
 ## Development Phases & Roadmap
 
@@ -416,88 +352,42 @@ interface ApiResponse<T> {
 
 ### ✅ Phase 3: Frontend Foundation (COMPLETED)
 
-1. **UI Structure** (T6.1-T6.4) - Basic layout and components (requires major update)
+1. **UI Structure** (T6.1-T6.4) - Single-mode layout with inline header editing
 2. **Data Layer Foundation** (T7.1-T7.3) - API client, state management, error handling
-3. **Current Template State** (T7.4) - Basic CRUD operations (requires update for new layout)
+3. **Current Template State** (T7.4) - Mode-based state management with variable persistence
 
 ### ✅ Phase 4: Template Editor Redesign (COMPLETED)
 
-1. **Variable Parser Foundation**
-    - [x] Create `variableParser.ts` with Variable interface and parsing logic
-    - [x] Implement `parseVariables()` and `processTemplate()` functions
-    - [x] Add validation for variable syntax and edge cases
-    - [x] Unit tests for variable detection and processing
-
-2. **Header Inline Editing**
-    - [x] Modify `templateHeader.ts` for inline editing capabilities
-    - [x] Add edit mode state management to header
-    - [x] Convert title/category to input fields in edit mode
-    - [x] Move Save/Cancel buttons from form to header
-
-3. **Content Area Redesign**
-    - [x] Remove tab HTML structure and CSS
-    - [x] Create view mode content display (description + processed template)
-    - [x] Modify edit mode to show form without title/category
-    - [x] Add smooth transitions between view/edit modes
-    - [x] Implement scrollable content area
-
-4. **Variables Panel Redesign**
-    - [x] Create dynamic input field generation for view mode
-    - [x] Implement text inputs and dropdown selects for variables
-    - [x] Add "Reset Values" button and functionality
-    - [x] Create read-only detected variables list for edit mode
-    - [x] Handle variable value persistence per template
-        - values are cleared when user switched between templates
-        - values are cleared when browser refreshes
-        - values persist only while the same template is selected
-
-5. **Template Form Integration**
-    - [x] Remove tab-related logic from TemplateForm
-    - [x] Add view/edit mode switching
-    - [x] Integrate variable parser for real-time detection
-    - [x] Connect header buttons to form operations
-    - [x] Maintain unsaved changes detection and modal flow
+- Single-mode interface with view/edit modes
+- Real-time variable detection and processing
+- Inline header editing with smooth transitions
+- Dynamic variables panel with input generation
+- Variable value persistence per template session
 
 ### ✅ Phase 5: CSS and Layout Updates (COMPLETED)
 
-1. **Remove Tab System CSS**
-    - [x] Remove `.tab-nav`, `.tab-btn`, `.tab-content`, `.tab-pane` styles
-    - [x] Update main content area layout for single mode
-    - [x] Add inline editing styles for header elements
-
-2. **Single-Mode Layout Styling**
-    - [x] Style view mode content display area
-    - [x] Style edit mode form layout
-    - [x] Add smooth transitions between modes
-    - [x] Update variables panel styling for both modes
-
-3. **Responsive Design Updates**
-    - [x] Update media queries for single-mode interface
+- Removed tab system styling
+- Single-mode layout with responsive design
+- Smooth mode transitions and visual feedback
 
 ### ✅ Phase 6: Integration and Testing (COMPLETED)
 
-1. **Component Integration**
-    - [x] Update `main.ts` to remove TabManager
-    - [x] Connect all components with new event flow
-    - [x] Test mode switching and state persistence
-    - [x] Verify all existing CRUD functionality
+- Component integration without TabManager
+- End-to-end testing of redesigned interface
+- Verified CRUD functionality and variable processing
 
-2. **End-to-End Testing**
-    - [x] Test create, edit, delete workflows
-    - [x] Test variable detection and value filling
-
-### 📋 Phase 7: Copy & Output System (PLANNED)
+### ✅ Phase 7: Copy & Output System (COMPLETED)
 
 1. **Copy Functionality**
-    - [ ] Add copy button for processed template content
-    - [ ] Implement clipboard API integration
-    - [ ] Add success notifications for copy operations
-    - [ ] Handle copy errors gracefully
-
-2. **Output Format Options**
-    - [ ] Implement different output processing modes to support rendering of markdown syntax
+    - Added copy button to copy current template content with clipboard API integration
+    - Success notifications for copy operations
 
 ### 📋 Phase 8: Enhanced Features (PLANNED)
+
+0. **Security**:
+    - [ ] sanitize user input to template content, description, title
+    - [ ] sanitize user input for variable values
+    - [ ] check owasp
 
 1. **Single processing**:
     - [ ] Implement single template export (JSON download)
@@ -511,28 +401,28 @@ interface ApiResponse<T> {
 
 3. **Switch to database instead of JSON**:
     - [ ] decide which database
-        - I think postrgres would be overkill
+        - I think postgres would be overkill
         - we need a lightweight database for storing template and effective and fast searching withing it
 
 4. **Variable values persistence**:
     - [ ] Save filled values into temporary state
-    - [ ] push the temporary state to persistent state (json data file - the same as is for the template)
+    - [ ] push the temporary state to persistent state (json data file/DB - the same as is for the template)
         - [ ] when users switched templates
-        - [ ] regularly, after 3 seconds of inactivity - must be nonblocking and shoudl be ignored in case of server error (but must be logged by server)
+        - [ ] regularly, after 3 seconds of inactivity - must be non-blocking and should be ignored in case of server error (but must be logged by server)
             - provide UI notification when state is changing and changed. But it should be small and non-disturbing. I can imagine small pulsing dot during processing and then shining when the save is done.
     - [ ] restore state into the variable panel
-    - [ ] handle removed or changed variables between restorations - missing or changed type (text to dropdown or vice versa) should be siletnly ignored and removed from the state
+    - [ ] handle removed or changed variables between restorations - missing or changed type (text to dropdown or vice versa) should be silently ignored and removed from the state
 
 5. **Search input in template list**: - [ ] a button to clear the search input - cross icon at the very right end of the input - [ ] enhance search to include category (search by name and not by id)
 
-6. **Variables panel:** - the reset button should be placed in the sticky header and the text shoudl be just clear or reset, should be small button
+6. **Variables panel:** - the reset button should be placed in the sticky header and the text should be just clear or reset, should be small button
 
 7. **Template Content**: - we do have styling for detected variables and when values are provided, but only in the view mode. Can we do the same for edit mode and highlight detected variables which has correct syntax (yellow as in the view mode), and which has incorrect syntax (red tone colors)?
 
 8. **Testing and refinement of UI**
     - [ ] **Proper colors**:
-        - [ ] e.g. background of a list should be different than elemetns in the list (e.g. template list background)
-        - [ ] check all colors and styling, is it modern? Do we need to use pure white everywhere, can we differntiate between elements? is it visually pleasing?
+        - [ ] e.g. background of a list should be different than elements in the list (e.g. template list background)
+        - [ ] check all colors and styling, is it modern? Do we need to use pure white everywhere, can we differentiate between elements? is it visually pleasing?
         - [ ] Template description in view mode
             - maybe the grey background is not best?
         - [ ] Template form in edit view has currently white background and the inputs itself are white as well.
@@ -551,6 +441,20 @@ interface ApiResponse<T> {
     - conditions would be highlighted with different color in the template content
     - should be also displayed in detected variables panel during edit mode when it's properly defined or when not
     - we should also define the conditional syntax - for know it's unknown.
+
+10. **Output formatting**:
+    - [ ] Implement different output processing modes to support rendering of markdown syntax
+        - raw:
+            - the text as it is defined
+            - only variables are replaced with values if provided
+            - everything else stays (if condition syntax)
+        - plain text:
+            - variables are visible even if no values are provided
+            - if conditions are not visible
+            - only text which satisfies if condition is visible
+        - Markdown rendering:
+            - behavior is same as for plain text
+            - renders text to markdown.
 
 ### Advanced Features (nice to have, can be dropped)
 
