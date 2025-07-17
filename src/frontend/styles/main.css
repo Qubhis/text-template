@@ -1,4 +1,6 @@
 /* Modern Material Design 3 Styles */
+/* Import fonts */
+@import url("./fonts.css");
 /* Import color palette */
 @import url("./color-palette.css");
 
@@ -11,7 +13,7 @@
 
 body {
     font-family:
-        "ComicRelief",
+        "Open Sans",
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
