@@ -5,6 +5,7 @@
 
 import { addEventListenerWithCleanup, getRequiredElement } from "../utils/domHelpers.js";
 import { Variable, VariableValues } from "../utils/variableParser.js";
+import { OutlinedTextField } from "../../components/text-fields/OutlinedTextField.js";
 
 export interface VariablePanelCallbacks {
     onVariableValueChange?: (variableName: string, value: string) => void;
@@ -22,6 +23,9 @@ export class VariablePanel {
     // DOM elements
     private variableInputs: HTMLElement;
     private resetButton: HTMLButtonElement | null = null;
+    
+    // Component instances
+    private textFieldComponents: Map<string, OutlinedTextField> = new Map();
 
     // State
     private currentVariables: Variable[] = [];
@@ -70,6 +74,19 @@ export class VariablePanel {
         }
     }
 
+    /**
+     * Update values in existing text field components (e.g., after reset)
+     */
+    public updateVariableValues(values: VariableValues): void {
+        this.currentValues = values;
+        
+        // Update existing OutlinedTextField components
+        this.textFieldComponents.forEach((component, variableName) => {
+            const newValue = values[variableName] || "";
+            component.setValue(newValue);
+        });
+    }
+
     // Private methods - View Mode
 
     /**
@@ -110,88 +127,42 @@ export class VariablePanel {
     }
 
     /**
-     * Create input group for a variable
+     * Create input group for a variable using OutlinedTextField
      */
     private createInputGroup(variable: Variable): HTMLElement {
         const group = document.createElement("div");
         group.className = "variable-input-group";
 
-        // Label
-        const label = document.createElement("label");
-        label.textContent = variable.name;
-        label.className = "variable-label";
-        label.setAttribute("for", `var-${variable.name}`);
+        // Create OutlinedTextField component
+        const textField = new OutlinedTextField({
+            label: variable.name,
+            multiline: true,  // Enable multiline for text variables
+            maxLines: 3,      // Cap at 3 lines with hidden scrollbar
+            value: this.currentValues[variable.name] || ""
+        }, {
+            onChange: (value: string) => {
+                this.callbacks.onVariableValueChange?.(variable.name, value);
+            },
+            onOptionSelect: (value: string) => {
+                this.callbacks.onVariableValueChange?.(variable.name, value);
+            }
+        });
 
-        // Input element
-        let input: HTMLInputElement | HTMLSelectElement;
-
+        // Convert to select mode if dropdown type
         if (variable.type === "dropdown" && variable.options) {
-            input = this.createDropdownInput(variable);
-        } else {
-            input = this.createTextInput(variable);
+            textField.setSelectMode(variable.options);
         }
 
-        group.appendChild(label);
-        group.appendChild(input);
+        // Store component reference for cleanup
+        this.textFieldComponents.set(variable.name, textField);
+
+        group.appendChild(textField.getElement());
 
         return group;
     }
 
-    /**
-     * Create text input for basic variables
-     */
-    private createTextInput(variable: Variable): HTMLInputElement {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.id = `var-${variable.name}`;
-        input.className = "variable-input";
-        input.placeholder = `Enter ${variable.name}...`;
-        input.value = this.currentValues[variable.name] || "";
-
-        // Add event listener for value changes
-        const changeCleanup = addEventListenerWithCleanup(input, "input", (e) => {
-            const target = e.target as HTMLInputElement;
-            this.callbacks.onVariableValueChange?.(variable.name, target.value);
-        });
-        this.cleanupFunctions.push(changeCleanup);
-
-        return input;
-    }
-
-    /**
-     * Create dropdown input for choice variables
-     */
-    private createDropdownInput(variable: Variable): HTMLSelectElement {
-        const select = document.createElement("select");
-        select.id = `var-${variable.name}`;
-        select.className = "variable-select";
-
-        // Add empty option
-        const emptyOption = document.createElement("option");
-        emptyOption.value = "";
-        emptyOption.textContent = `Select ${variable.name}...`;
-        select.appendChild(emptyOption);
-
-        // Add options
-        variable.options?.forEach((option) => {
-            const optionElement = document.createElement("option");
-            optionElement.value = option;
-            optionElement.textContent = option;
-            select.appendChild(optionElement);
-        });
-
-        // Set current value
-        select.value = this.currentValues[variable.name] || "";
-
-        // Add event listener for value changes
-        const changeCleanup = addEventListenerWithCleanup(select, "change", (e) => {
-            const target = e.target as HTMLSelectElement;
-            this.callbacks.onVariableValueChange?.(variable.name, target.value);
-        });
-        this.cleanupFunctions.push(changeCleanup);
-
-        return select;
-    }
+    // Note: createTextInput and createDropdownInput methods have been replaced 
+    // with OutlinedTextField components in createInputGroup method above.
 
     /**
      * Create reset button
@@ -332,9 +303,13 @@ export class VariablePanel {
     }
 
     /**
-     * Clear content
+     * Clear content and cleanup OutlinedTextField components
      */
     private clearContent(): void {
+        // Destroy all OutlinedTextField components
+        this.textFieldComponents.forEach(component => component.destroy());
+        this.textFieldComponents.clear();
+        
         this.variableInputs.innerHTML = "";
         this.resetButton = null;
     }

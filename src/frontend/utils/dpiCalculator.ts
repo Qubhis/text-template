@@ -7,7 +7,7 @@ export class DPICalculator {
             return this.cachedDPI;
         }
 
-        const testElement = document.createElement('div');
+        const testElement = document.createElement("div");
         testElement.style.cssText = `
             position: absolute;
             left: -9999px;
@@ -31,13 +31,27 @@ export class DPICalculator {
         }
 
         const actualDPI = this.measureDPI();
-        this.dpToPxRatio = actualDPI / 160;
+
+        // For responsive scaling, we need a baseline that works across devices
+        // Use a hybrid approach: devicePixelRatio as fallback, but prefer measured DPI
+        const devicePixelRatio = window.devicePixelRatio || 1;
+
+        // If measured DPI seems reasonable (between 72-300), use it with appropriate baseline
+        if (actualDPI >= 72 && actualDPI <= 300) {
+            // Use 96 as baseline for desktop-first approach
+            // On mobile, this will naturally scale up due to higher DPI
+            this.dpToPxRatio = actualDPI / 96;
+        } else {
+            // Fallback to devicePixelRatio if DPI measurement seems unreliable
+            this.dpToPxRatio = devicePixelRatio;
+        }
+
         return this.dpToPxRatio;
     }
 
     setCSSVariable(): void {
         const ratio = this.getDpToPxRatio();
-        document.documentElement.style.setProperty('--dp-to-px', ratio.toString());
+        document.documentElement.style.setProperty("--dp-to-px", `${ratio.toString()}px`);
     }
 
     recalculate(): void {

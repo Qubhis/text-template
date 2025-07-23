@@ -15,10 +15,8 @@ see file @docs/app_specification.md for application information. Note,this is a 
 - `npm run type-check:frontend` - Type check frontend only
 - `npm run test` - Run frontend test suite
 - `npm run validate` - Run type-check + lint + test (comprehensive validation)
-- `npm run dev` - Build and start development server
-- `npm run dev:watch` - Auto-reload development server (watches src/ for changes)
-- `npm run start` - Start production server (requires build first)
 - `npm run clean` - Remove dist directory
+- Start the APP on localhost:3010 -> Ask user to run a new terminal and start the application for you to use playwright tool.
 
 ### Build Commands
 

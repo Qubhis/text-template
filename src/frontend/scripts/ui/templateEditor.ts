@@ -48,6 +48,14 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private currentData: TemplateData = { title: "", categoryId: "", description: "", content: "" };
     private isDirty = false;
 
+    // Validation state tracking
+    private validationErrors = {
+        title: false,
+        category: false,
+        description: false,
+        content: false,
+    };
+
     // Variable state management - per template during session
     private variableValues: VariableValues = {};
 
@@ -59,7 +67,8 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         // Create components as pure views with callbacks
         this.templateHeader = new TemplateHeader({
             onTitleChange: (title) => this.handleDataChange({ title }),
-            onCategoryChange: (category) => this.handleDataChange({ categoryId: category }),
+            onTitleValidate: (title) => this.validateTitle(title),
+            onTitleBlur: () => this.handleFieldBlur(),
             onSave: () => this.handleSave(),
             onCancel: () => this.handleCancel(),
             onEdit: () => this.handleEdit(),
@@ -67,8 +76,15 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         });
 
         this.templateForm = new TemplateForm({
+            onCategoryChange: (categoryName) => this.handleCategoryNameChange(categoryName),
+            onCategoryValidate: (categoryId) => this.validateCategory(categoryId),
+            onCategoryBlur: () => this.handleFieldBlur(),
             onDescriptionChange: (description) => this.handleDataChange({ description }),
+            onDescriptionValidate: (description) => this.validateDescription(description),
+            onDescriptionBlur: () => this.handleFieldBlur(),
             onContentChange: (content) => this.handleDataChange({ content }),
+            onContentValidate: (content) => this.validateContent(content),
+            onContentBlur: () => this.handleFieldBlur(),
             getVariableValues: () => this.getVariableValues(),
         });
 
@@ -94,14 +110,14 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     }
 
     /**
-     * Load categories for header
+     * Load categories for form
      */
     private async loadCategories(): Promise<void> {
         try {
             const categories = this.dataManager.getCategories();
-            this.templateHeader.setCategories(categories);
+            this.templateForm.setCategories(categories);
         } catch (error) {
-            console.error("Failed to load categories for header:", error);
+            console.error("Failed to load categories for form:", error);
         }
     }
 
@@ -241,6 +257,16 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     }
 
     /**
+     * Handle category name change and convert to categoryId
+     */
+    private handleCategoryNameChange(categoryName: string): void {
+        const categories = this.dataManager.getCategories();
+        const category = categories.find((c) => c.name === categoryName);
+        const categoryId = category ? category.id : "";
+        this.handleDataChange({ categoryId });
+    }
+
+    /**
      * Update Variables panel from current content data (for real-time detection during editing)
      */
     private updateVariablePanelFromCurrentData(): void {
@@ -258,7 +284,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private handleVariableChange(variableName: string, value: string): void {
         this.setVariableValue(variableName, value);
         // Refresh the form display to show updated variable highlighting
-        this.templateForm.updateData(this.currentData);
+        this.templateForm.updateData(this.currentData, this.currentTemplate?.modified);
     }
 
     /**
@@ -268,6 +294,16 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.resetVariableValues();
         // Refresh both variable panel and form display
         this.syncData();
+    }
+
+    /**
+     * Handle field blur - in create mode, show errors for all empty required fields
+     */
+    private handleFieldBlur(): void {
+        if (this.currentMode === "create" || "edit") {
+            // Show validation errors for all required fields to guide user
+            this.showRequiredFieldErrors();
+        }
     }
 
     /**
@@ -312,7 +348,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
 
     private syncData(): void {
         this.templateHeader.updateData(this.currentData, this.currentTemplate?.modified);
-        this.templateForm.updateData(this.currentData);
+        this.templateForm.updateData(this.currentData, this.currentTemplate?.modified);
         this.variablePanel.updateData(this.getCurrentVariables(), this.variableValues);
     }
 
@@ -321,11 +357,10 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
      */
     private async handleSave(): Promise<void> {
         try {
-            // Validate data
-            const validation = this.validateTemplateData(this.currentData);
-            if (!validation.isValid) {
-                this.callbacks.onShowError?.("Validation Error", validation.errors.join("\n"));
-                return;
+            // Validate all fields and show inline errors - force show all errors on save attempt
+            const isValid = this.validateAllFields(true);
+            if (!isValid) {
+                return; // Errors are now shown inline, no need for toast
             }
 
             this.callbacks.onShowLoading?.("Saving template...");
@@ -386,6 +421,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     }
 
     private handleEdit(): void {
+        this.resetValidationState();
         this.setMode("edit");
         this.syncData();
     }
@@ -449,9 +485,13 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.currentTemplate = null;
         this.currentData = { title: "", categoryId: "", description: "", content: "" };
         this.resetVariableValues();
+        this.resetValidationState();
         this.setMode("create");
         this.syncData();
         this.isDirty = false;
+
+        // Initial validation - save button should be disabled for empty required fields
+        this.validateInitialState();
 
         console.log("➕ Starting template creation");
     }
@@ -475,49 +515,188 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     }
 
     /**
-     * Validate complete template data
+     * Validate all fields and show inline errors
+     * @param forceShowErrors - If true, show errors even if fields haven't been blurred yet
      */
-    private validateTemplateData(data: TemplateData): { isValid: boolean; errors: string[] } {
-        const errors: string[] = [];
+    private validateAllFields(forceShowErrors: boolean = false): boolean {
+        let isValid = true;
 
-        if (!data.title?.trim()) {
-            errors.push("Title is required");
+        // Validate title
+        const titleError = this.getTitleValidationError(this.currentData.title);
+        if (titleError) {
+            if (forceShowErrors) {
+                this.templateHeader.setTitleError(titleError);
+            }
+            isValid = false;
+        } else {
+            this.templateHeader.clearTitleError();
         }
 
-        if (!data.content?.trim()) {
-            errors.push("Content is required");
+        // Validate category
+        const categoryError = this.getCategoryValidationError(this.currentData.categoryId);
+        if (categoryError) {
+            if (forceShowErrors) {
+                this.templateForm.setCategoryError(categoryError);
+            }
+            isValid = false;
+        } else {
+            this.templateForm.clearCategoryError();
         }
 
-        if (data.title && data.title.length > 200) {
-            errors.push("Title cannot exceed 200 characters");
+        // Validate content
+        const contentError = this.getContentValidationError(this.currentData.content);
+        if (contentError) {
+            if (forceShowErrors) {
+                this.templateForm.setContentError(contentError);
+            }
+            isValid = false;
+        } else {
+            this.templateForm.clearContentError();
         }
 
-        if (!data.categoryId) {
-            errors.push("Category is required");
+        // Validate description
+        const descriptionError = this.getDescriptionValidationError(this.currentData.description);
+        if (descriptionError) {
+            if (forceShowErrors) {
+                this.templateForm.setDescriptionError(descriptionError);
+            }
+            isValid = false;
+        } else {
+            this.templateForm.clearDescriptionError();
         }
 
-        if (data.description && data.description.length > 500) {
-            errors.push("Description cannot exceed 500 characters");
+        return isValid;
+    }
+
+    /**
+     * Individual field validation methods - now track error state
+     */
+    private validateTitle(title: string): string | null {
+        const errorMessage = this.getTitleValidationError(title);
+        this.validationErrors.title = !!errorMessage;
+        this.updateSaveButtonState();
+        return errorMessage;
+    }
+
+    private validateCategory(categoryId: string): string | null {
+        const errorMessage = this.getCategoryValidationError(categoryId);
+        this.validationErrors.category = !!errorMessage;
+        this.updateSaveButtonState();
+        return errorMessage;
+    }
+
+    private validateContent(content: string): string | null {
+        const errorMessage = this.getContentValidationError(content);
+        this.validationErrors.content = !!errorMessage;
+        this.updateSaveButtonState();
+        return errorMessage;
+    }
+
+    private validateDescription(description: string): string | null {
+        const errorMessage = this.getDescriptionValidationError(description);
+        this.validationErrors.description = !!errorMessage;
+        this.updateSaveButtonState();
+        return errorMessage;
+    }
+
+    /**
+     * Pure validation logic methods (no side effects)
+     */
+    private getTitleValidationError(title: string): string | null {
+        if (!title?.trim()) {
+            return "Title is required";
+        }
+        if (title.length > 200) {
+            return "Title cannot exceed 200 characters";
+        }
+        return null;
+    }
+
+    private getCategoryValidationError(categoryId: string): string | null {
+        if (!categoryId) {
+            return "Category is required";
+        }
+        return null;
+    }
+
+    private getContentValidationError(content: string): string | null {
+        if (!content?.trim()) {
+            return "Content is required";
         }
 
         // Validate template variables
-        if (data.content?.trim()) {
-            const parseResult = VariableParser.parseVariables(data.content);
-            const invalidVariables = parseResult.variables.filter((v) => !v.isValid);
+        const parseResult = VariableParser.parseVariables(content);
+        const invalidVariables = parseResult.variables.filter((v) => !v.isValid);
 
-            if (invalidVariables.length > 0) {
-                errors.push("Template contains invalid variables:");
-                invalidVariables.forEach((variable) => {
-                    const errorMsg = variable.errorMessage || `Invalid variable: ${variable.name}`;
-                    errors.push(`  • ${errorMsg}`);
-                });
-            }
+        if (invalidVariables.length > 0) {
+            const errorMsg = invalidVariables[0].errorMessage || `Invalid variable: ${invalidVariables[0].name}`;
+            return `Template contains invalid variables: ${errorMsg}`;
         }
 
-        return {
-            isValid: errors.length === 0,
-            errors,
+        return null;
+    }
+
+    private getDescriptionValidationError(description: string): string | null {
+        if (description && description.length > 500) {
+            return "Description cannot exceed 500 characters";
+        }
+        return null;
+    }
+
+    /**
+     * Update save button enabled/disabled state based on validation errors
+     */
+    private updateSaveButtonState(): void {
+        const hasValidationErrors = Object.values(this.validationErrors).some((hasError) => hasError);
+        this.templateHeader.setSaveButtonEnabled(!hasValidationErrors);
+    }
+
+    /**
+     * Reset validation state (clear all error flags)
+     */
+    private resetValidationState(): void {
+        this.validationErrors = {
+            title: false,
+            category: false,
+            description: false,
+            content: false,
         };
+        this.updateSaveButtonState();
+    }
+
+    /**
+     * Validate initial state (without showing errors) to set save button state
+     */
+    private validateInitialState(): void {
+        this.validationErrors.title = !!this.getTitleValidationError(this.currentData.title);
+        this.validationErrors.category = !!this.getCategoryValidationError(this.currentData.categoryId);
+        this.validationErrors.content = !!this.getContentValidationError(this.currentData.content);
+        this.validationErrors.description = !!this.getDescriptionValidationError(this.currentData.description);
+
+        this.updateSaveButtonState();
+    }
+
+    /**
+     * Show validation errors for empty required fields
+     */
+    private showRequiredFieldErrors(): void {
+        // Show errors only for required fields that are empty
+        const titleError = this.getTitleValidationError(this.currentData.title);
+        if (titleError) {
+            this.templateHeader.setTitleError(titleError);
+        }
+
+        const categoryError = this.getCategoryValidationError(this.currentData.categoryId);
+        if (categoryError) {
+            this.templateForm.setCategoryError(categoryError);
+        }
+
+        const contentError = this.getContentValidationError(this.currentData.content);
+        if (contentError) {
+            this.templateForm.setContentError(contentError);
+        }
+
+        // Don't show description errors since it's optional
     }
 
     /**
