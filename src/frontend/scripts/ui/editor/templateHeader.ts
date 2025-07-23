@@ -3,21 +3,21 @@
 // Template Header Component - Pure View Component
 // Handles display and inline editing, communicates via callbacks
 
-import { Template, Category } from "../../core/apiClient.js";
+import { Template } from "../../core/apiClient.js";
 import {
     getRequiredElement,
     setTextContent,
-    setElementTransparent,
     addEventListenerWithCleanup,
     addClass,
     removeClass,
     setElementDisplayed,
 } from "../../utils/domHelpers.js";
-import { formatDate, escapeHtml } from "../../utils/formatters.js";
+import { FilledTextField } from "../../../components/text-fields/FilledTextField.js";
 
 export interface TemplateHeaderCallbacks {
     onTitleChange?: (title: string) => void;
-    onCategoryChange?: (category: string) => void;
+    onTitleValidate?: (title: string) => string | null; // Return error message or null
+    onTitleBlur?: () => void;
     onSave?: () => void;
     onCancel?: () => void;
     onEdit?: () => void;
@@ -44,28 +44,23 @@ export class TemplateHeader {
 
     // DOM Elements
     private titleElement: HTMLElement;
-    private categoryElement: HTMLElement;
-    private modifiedElement: HTMLElement;
     private editButton: HTMLButtonElement;
     private deleteButton: HTMLButtonElement;
 
     // Inline editing elements (created dynamically)
-    private titleInput: HTMLInputElement | null = null;
-    private categorySelect: HTMLSelectElement | null = null;
+    private titleField: FilledTextField | null = null;
     private saveButton: HTMLButtonElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
 
     // State
     private currentMode: "view" | "edit" | "create" = "view";
-    private categories: Category[] = [];
+    private hasBeenBlurred: boolean = false; // Track if title field has been blurred
 
     constructor(callbacks: TemplateHeaderCallbacks = {}) {
         this.callbacks = callbacks;
 
         // Get required DOM elements
         this.titleElement = getRequiredElement<HTMLElement>("templateTitle");
-        this.categoryElement = getRequiredElement<HTMLElement>("templateCategory");
-        this.modifiedElement = getRequiredElement<HTMLElement>("templateModified");
         this.editButton = getRequiredElement<HTMLButtonElement>("editTemplateBtn");
         this.deleteButton = getRequiredElement<HTMLButtonElement>("deleteTemplateBtn");
     }
@@ -116,7 +111,7 @@ export class TemplateHeader {
     public updateData(data: TemplateDisplayData, modifiedAt?: string): void {
         if (this.currentMode === "view") {
             if (modifiedAt) {
-                this.showTemplateInfo(data.title, data.categoryId, modifiedAt);
+                this.showTemplateInfo(data.title);
                 this.enableActionButtons(true);
             } else {
                 this.showEmptyState();
@@ -128,20 +123,38 @@ export class TemplateHeader {
     }
 
     /**
-     * Set categories for dropdown
-     */
-    public setCategories(categories: Category[]): void {
-        this.categories = categories;
-        // Update dropdown if it exists
-        this.updateCategoryDropdown();
-    }
-
-    /**
      * Focus title input (for create mode)
      */
     public focusTitleInput(): void {
-        if (this.titleInput) {
-            this.titleInput.focus();
+        if (this.titleField) {
+            this.titleField.focus();
+        }
+    }
+
+    /**
+     * Set title field error (called from coordinator)
+     */
+    public setTitleError(message: string): void {
+        if (this.titleField) {
+            this.titleField.setError(message);
+        }
+    }
+
+    /**
+     * Clear title field error (called from coordinator)
+     */
+    public clearTitleError(): void {
+        if (this.titleField) {
+            this.titleField.clearError();
+        }
+    }
+
+    /**
+     * Enable or disable save button based on validation state
+     */
+    public setSaveButtonEnabled(enabled: boolean): void {
+        if (this.saveButton) {
+            this.saveButton.disabled = !enabled;
         }
     }
 
@@ -150,14 +163,8 @@ export class TemplateHeader {
     /**
      * Show template information in header
      */
-    private showTemplateInfo(title: string, categoryId: string, modifiedAt: string): void {
+    private showTemplateInfo(title: string): void {
         setTextContent(this.titleElement, title);
-        setTextContent(this.categoryElement, this.getCategoryNameById(categoryId));
-        setTextContent(this.modifiedElement, `Modified ${formatDate(modifiedAt)}`);
-
-        // Show category and modified info
-        setElementTransparent(this.categoryElement, true);
-        setElementTransparent(this.modifiedElement, true);
     }
 
     /**
@@ -165,11 +172,6 @@ export class TemplateHeader {
      */
     private showEmptyState(): void {
         setTextContent(this.titleElement, "Select a template");
-        setTextContent(this.categoryElement, "Uncategorized");
-
-        // Hide category and modified info
-        setElementTransparent(this.categoryElement, false);
-        setElementTransparent(this.modifiedElement, false);
     }
 
     /**
@@ -177,7 +179,7 @@ export class TemplateHeader {
      */
     private enterEditMode(): void {
         console.trace("🎨 Entering edit mode...");
-        if (!this.titleInput) {
+        if (!this.titleField) {
             this.createInlineEditingElements();
             this.switchToEditLayout();
         } else {
@@ -197,19 +199,28 @@ export class TemplateHeader {
      * Create inline editing elements
      */
     private createInlineEditingElements(): void {
-        // Create title input
-        this.titleInput = document.createElement("input");
-        this.titleInput.type = "text";
-        this.titleInput.className = "inline-edit-title";
-        this.titleInput.value = "";
-        this.titleInput.maxLength = 200;
-        this.titleInput.placeholder = "Enter template title";
-
-        // Create category select
-        this.categorySelect = document.createElement("select");
-        this.categorySelect.className = "inline-edit-category";
-        this.updateCategoryDropdown();
-        this.categorySelect.value = "";
+        // Create title field using FilledTextField
+        this.titleField = new FilledTextField(
+            {
+                label: "Template Title",
+                value: "",
+            },
+            {
+                onChange: (value: string) => {
+                    this.callbacks.onTitleChange?.(value);
+                    
+                    // Validate on change only after first blur (immediate feedback when fixing)
+                    if (this.hasBeenBlurred) {
+                        this.validateTitleField();
+                    }
+                },
+                onBlur: () => {
+                    this.hasBeenBlurred = true;
+                    this.validateTitleField();
+                    this.callbacks.onTitleBlur?.();
+                },
+            }
+        );
 
         // Create save button
         this.saveButton = document.createElement("button");
@@ -226,57 +237,17 @@ export class TemplateHeader {
     }
 
     private updateInlineEditingElements(data: TemplateDisplayData): void {
-        if (!this.titleInput || !this.categorySelect) throw new Error("Inline editing elements not created");
-        this.titleInput.value = data.title;
-        this.categorySelect.value = data.categoryId;
-    }
-
-    private getCategoryNameById(categoryId: string): string {
-        const category = this.categories.find((c) => c.id === categoryId);
-        return category ? category.name : "Uncategorized";
-    }
-
-    /**
-     * Update category dropdown options
-     */
-    private updateCategoryDropdown(): void {
-        if (!this.categorySelect) return;
-
-        // Clear existing options
-        this.categorySelect.innerHTML = "";
-
-        // Add default option
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "Select category...";
-        this.categorySelect.appendChild(defaultOption);
-
-        // Add category options
-        this.categories.forEach((category) => {
-            const option = document.createElement("option");
-            option.value = category.id;
-            option.textContent = category.name;
-            this.categorySelect!.appendChild(option);
-        });
+        if (!this.titleField) throw new Error("Inline editing elements not created");
+        this.titleField.setValue(data.title);
     }
 
     /**
      * Setup event listeners for inline editing elements
      */
     private setupInlineEditingListeners(): void {
-        if (!this.titleInput || !this.categorySelect || !this.saveButton || !this.cancelButton) return;
+        if (!this.titleField || !this.saveButton || !this.cancelButton) return;
 
-        // Title input changes
-        const titleChangeCleanup = addEventListenerWithCleanup(this.titleInput, "input", (e) => {
-            this.callbacks.onTitleChange?.((e.target as HTMLInputElement).value);
-        });
-        this.cleanupFunctions.push(titleChangeCleanup);
-
-        // Category select changes
-        const categoryChangeCleanup = addEventListenerWithCleanup(this.categorySelect, "change", (e) => {
-            this.callbacks.onCategoryChange?.((e.target as HTMLSelectElement).value);
-        });
-        this.cleanupFunctions.push(categoryChangeCleanup);
+        // Note: Title changes are handled by FilledTextField callback in constructor
 
         // Save button
         const saveCleanup = addEventListenerWithCleanup(this.saveButton, "click", () => {
@@ -295,15 +266,11 @@ export class TemplateHeader {
      * Switch to edit layout
      */
     private switchToEditLayout(): void {
-        if (!this.titleInput || !this.categorySelect || !this.saveButton || !this.cancelButton) return;
+        if (!this.titleField || !this.saveButton || !this.cancelButton) return;
 
-        // Replace title element with input
+        // Replace title element with FilledTextField
         setElementDisplayed(this.titleElement, false);
-        this.titleElement.parentNode?.insertBefore(this.titleInput, this.titleElement);
-
-        // Replace category element with select
-        setElementDisplayed(this.categoryElement, false);
-        this.categoryElement.parentNode?.insertBefore(this.categorySelect, this.categoryElement);
+        this.titleElement.parentNode?.insertBefore(this.titleField.getElement(), this.titleElement);
 
         // Hide view mode buttons
         setElementDisplayed(this.editButton, false);
@@ -329,7 +296,6 @@ export class TemplateHeader {
     private switchToViewLayout(): void {
         // Show original elements
         setElementDisplayed(this.titleElement, true);
-        setElementDisplayed(this.categoryElement, true);
 
         // Show view mode buttons
         setElementDisplayed(this.deleteButton, true);
@@ -343,18 +309,32 @@ export class TemplateHeader {
     }
 
     /**
+     * Validate title field using coordinator callback
+     */
+    private validateTitleField(): void {
+        if (!this.titleField) return;
+        
+        const currentValue = this.titleField.getValue();
+        const errorMessage = this.callbacks.onTitleValidate?.(currentValue) || null;
+        
+        if (errorMessage) {
+            this.titleField.setError(errorMessage);
+        } else {
+            this.titleField.clearError();
+        }
+    }
+
+    /**
      * Cleanup inline editing elements
      */
     private cleanupInlineEditingElements(): void {
-        // Remove elements from DOM
-        if (this.titleInput) {
-            this.titleInput.remove();
-            this.titleInput = null;
-        }
-
-        if (this.categorySelect) {
-            this.categorySelect.remove();
-            this.categorySelect = null;
+        // Reset blur tracking when exiting edit mode
+        this.hasBeenBlurred = false;
+        
+        // Destroy FilledTextField component
+        if (this.titleField) {
+            this.titleField.destroy();
+            this.titleField = null;
         }
 
         if (this.saveButton) {

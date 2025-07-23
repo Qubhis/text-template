@@ -6,6 +6,8 @@ Text fields let users enter text into a UI. An outlined text field has a stroked
 
 ## Component Elements
 
+![component elements](component-elements.png)
+
 1. Container outline (enabled)
 2. Leading icon (optional)
 3. Label text (unpopulated)
@@ -72,7 +74,6 @@ Text fields let users enter text into a UI. An outlined text field has a stroked
 - **Type**: md.sys.typescale.body-large
 - **Prefix color**: `--md-sys-color-on-surface-variant`
 - **Suffix color**: `--md-sys-color-on-surface-variant`
-- **Placeholder color**: `--md-sys-color-on-surface-variant`
 
 #### Caret
 
@@ -185,6 +186,12 @@ States are visual representations used to communicate the status of a component 
 - Hovered (populated)
 
 ## Outlined Text Field Measurements
+
+![padding-and-size-without-icons](padding-and-size-without-icons.png)
+
+![padding-and-size-without-icons](padding-and-size-without-icons.png)
+
+![padding-and-size-supporting-text-and-char-count](padding-and-size-supporting-text-and-char-count.png)
 
 | Element         | Attribute                                             | Value               |
 | --------------- | ----------------------------------------------------- | ------------------- |

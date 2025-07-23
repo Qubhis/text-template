@@ -1,0 +1,350 @@
+/* Material Design 3 Text Fields - Component-Specific Styles */
+
+/* Component Variables - Text Field Specific */
+:root {
+    /* Field Heights */
+    --md-text-field-height: calc(56 * var(--dp-to-px));
+
+    /* Padding */
+    --md-text-field-padding-horizontal: calc(16 * var(--dp-to-px));
+    --md-text-field-padding-horizontal-with-icon: calc(12 * var(--dp-to-px));
+    --md-text-field-padding-vertical: calc(8 * var(--dp-to-px));
+    --md-text-field-icon-padding: calc(16 * var(--dp-to-px));
+    --md-text-field-supporting-text-padding: calc(4 * var(--dp-to-px));
+
+    --md-text-field-margin-vertical: calc(12 * var(--dp-to-px));
+
+    /* Border Widths */
+    --md-text-field-outline-width: calc(1 * var(--dp-to-px));
+    --md-text-field-outline-width-focused: calc(3 * var(--dp-to-px));
+    --md-text-field-outline-width-error: calc(2 * var(--dp-to-px));
+    --md-text-field-indicator-height: calc(1 * var(--dp-to-px));
+    --md-text-field-indicator-height-focused: calc(3 * var(--dp-to-px));
+    --md-text-field-indicator-height-error: calc(2 * var(--dp-to-px));
+
+    /* Icon Size */
+    --md-text-field-icon-size: calc(24 * var(--dp-to-px));
+
+    /* Label Positioning */
+    --md-text-field-label-padding: calc(4 * var(--dp-to-px));
+}
+
+/* Base Text Field Container */
+.md-text-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    font-family: inherit;
+}
+
+.md-text-field__container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: var(--md-text-field-height);
+}
+
+.md-text-field__input {
+    flex: 1;
+    padding: 0 var(--md-text-field-padding-horizontal);
+    border: none;
+    background: transparent;
+    color: var(--md-sys-color-on-surface);
+    font-size: var(--type-scale-body-medium);
+    font-family: inherit;
+    line-height: 1.5;
+    outline: none;
+    resize: none;
+    caret-color: var(--md-sys-color-primary);
+    align-self: center;
+}
+
+.md-text-field__input::placeholder {
+    color: transparent;
+}
+
+.md-text-field__label {
+    position: absolute;
+    left: var(--md-text-field-padding-horizontal);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: var(--type-scale-body-medium);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    padding: 0;
+    max-width: calc(100% - 2 * var(--md-text-field-padding-horizontal));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.md-text-field__supporting-text {
+    margin-top: var(--md-text-field-supporting-text-padding);
+    padding: 0 var(--md-text-field-padding-horizontal);
+    font-size: var(--type-scale-body-small);
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.33;
+}
+
+.md-text-field__icon {
+    width: var(--md-text-field-icon-size);
+    height: var(--md-text-field-icon-size);
+    color: var(--md-sys-color-on-surface-variant);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* States */
+.md-text-field--populated .md-text-field__label,
+.md-text-field--focused .md-text-field__label {
+    font-size: var(--type-scale-body-small);
+}
+
+.md-text-field--outlined.md-text-field--populated .md-text-field__label,
+.md-text-field--outlined.md-text-field--focused .md-text-field__label {
+    background-color: var(--md-sys-color-surface-container);
+}
+
+.md-text-field--filled.md-text-field--populated .md-text-field__label,
+.md-text-field--filled.md-text-field--focused .md-text-field__label {
+    background-color: var(--md-sys-color-surface-container-highest);
+}
+
+.md-text-field--focused .md-text-field__label {
+    color: var(--md-sys-color-primary);
+}
+
+.md-text-field--error .md-text-field__label {
+    color: var(--md-sys-color-error);
+}
+
+.md-text-field--error .md-text-field__supporting-text {
+    color: var(--md-sys-color-error);
+}
+
+.md-text-field--error .md-text-field__icon {
+    color: var(--md-sys-color-error);
+}
+
+.md-text-field--disabled {
+    opacity: 0.38;
+    pointer-events: none;
+}
+
+/* Multiline Support - Start as single line, grow when needed */
+.md-text-field--multiline .md-text-field__container {
+    height: var(--md-text-field-height); /* Start as single line height */
+    min-height: var(--md-text-field-height);
+    align-items: center; /* Center content initially */
+}
+
+.md-text-field--multiline .md-text-field__input {
+    height: calc(var(--md-text-field-height) - 2 * var(--md-text-field-padding-vertical));
+    line-height: 1.5;
+    resize: none;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    overflow-y: hidden; /* Hide scrollbar initially */
+    white-space: pre-wrap; /* Preserve line breaks, allow wrapping */
+}
+
+.md-text-field--outlined.md-text-field--multiline .md-text-field__input {
+    padding-top: var(--md-text-field-padding-vertical);
+}
+
+.md-text-field--filled .md-text-field__input {
+    margin-bottom: var(--md-text-field-padding-vertical);
+}
+
+/* When text field expands beyond single line */
+.md-text-field--multiline .md-text-field__container:has(.md-text-field__input[style*="height"]) {
+    height: auto;
+    align-items: flex-start;
+}
+
+/* Label positioning for multiline */
+.md-text-field--multiline .md-text-field__label {
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-text-field--multiline.md-text-field--populated .md-text-field__label,
+.md-text-field--multiline.md-text-field--focused .md-text-field__label {
+    top: var(--md-text-field-padding-vertical);
+    transform: translateY(0);
+}
+
+/* Hidden Scrollbar for Max Lines */
+.md-text-field--max-lines .md-text-field__input {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.md-text-field--max-lines .md-text-field__input::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Stretch Height */
+.md-text-field--stretch {
+    height: 100%;
+}
+
+.md-text-field--stretch .md-text-field__container {
+    height: 100%;
+}
+
+.md-text-field--stretch .md-text-field__input {
+    height: 100%;
+}
+
+/* FILLED TEXT FIELD */
+.md-text-field--filled .md-text-field__container {
+    background-color: var(--md-sys-color-surface-container-highest);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+/* Filled text field label positioning */
+.md-text-field--filled.md-text-field--populated .md-text-field__label,
+.md-text-field--filled.md-text-field--focused .md-text-field__label {
+    top: var(--md-text-field-padding-vertical);
+    transform: translateY(0);
+}
+
+.md-text-field--filled .md-text-field__input {
+    margin-top: calc(var(--md-text-field-margin-vertical) + var(--type-scale-body-small));
+}
+
+.md-text-field--filled .md-text-field__active-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--md-text-field-indicator-height);
+    background-color: var(--md-sys-color-on-surface-variant);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-text-field--filled.md-text-field--focused .md-text-field__active-indicator {
+    height: var(--md-text-field-indicator-height-focused);
+    background-color: var(--md-sys-color-primary);
+}
+
+.md-text-field--filled.md-text-field--error .md-text-field__active-indicator {
+    height: var(--md-text-field-indicator-height-error);
+    background-color: var(--md-sys-color-error);
+}
+
+.md-text-field--filled.md-text-field--hovered:not(.md-text-field--focused):not(.md-text-field--disabled) .md-text-field__container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* OUTLINED TEXT FIELD */
+.md-text-field--outlined .md-text-field__container {
+    border: var(--md-text-field-outline-width) solid var(--md-sys-color-outline);
+    border-radius: var(--radius-sm);
+    background-color: transparent;
+}
+
+.md-text-field--outlined .md-text-field__label {
+    padding: 0 var(--md-text-field-label-padding);
+    margin-left: calc(-1 * var(--md-text-field-label-padding));
+}
+
+.md-text-field--outlined.md-text-field--populated .md-text-field__label,
+.md-text-field--outlined.md-text-field--focused .md-text-field__label {
+    top: 0;
+    transform: translateY(-50%);
+}
+
+.md-text-field--outlined.md-text-field--focused .md-text-field__container {
+    border-width: var(--md-text-field-outline-width-focused);
+    border-color: var(--md-sys-color-primary);
+}
+
+.md-text-field--outlined.md-text-field--error .md-text-field__container {
+    border-width: var(--md-text-field-outline-width-error);
+    border-color: var(--md-sys-color-error);
+}
+
+.md-text-field--outlined.md-text-field--hovered:not(.md-text-field--focused):not(.md-text-field--disabled) .md-text-field__container::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    opacity: 0.08;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* SELECT MODE SPECIFIC */
+.md-text-field--select .md-text-field__input {
+    cursor: pointer;
+    user-select: none;
+}
+
+.md-text-field--select .md-text-field__dropdown-icon {
+    margin-left: var(--md-dp-spacing-8);
+    margin-right: var(--md-dp-spacing-4);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-text-field--select.md-text-field--opened .md-text-field__dropdown-icon {
+    transform: rotate(180deg);
+}
+
+/* Select Dropdown */
+.md-text-field__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--md-sys-color-surface-container);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--md-elevation-2);
+    max-height: 200px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-text-field--opened .md-text-field__dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.md-text-field__dropdown-option {
+    padding: var(--md-dp-spacing-12) var(--md-text-field-padding-horizontal);
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface);
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-text-field__dropdown-option:hover {
+    background-color: var(--md-sys-color-on-surface);
+    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+
+.md-text-field__dropdown-option--selected {
+    background-color: var(--md-sys-color-primary);
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+    color: var(--md-sys-color-primary);
+}
+
+.md-text-field__dropdown-option--highlighted {
+    background-color: var(--md-sys-color-on-surface);
+    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+}

@@ -1,0 +1,49 @@
+/* Material Design 3 DP Variables - Commonly Reused Values */
+
+:root {
+    /* Common spacing used across components */
+    --md-dp-spacing-4: calc(4 * var(--dp-to-px));
+    --md-dp-spacing-8: calc(8 * var(--dp-to-px));
+    --md-dp-spacing-12: calc(12 * var(--dp-to-px));
+    --md-dp-spacing-16: calc(16 * var(--dp-to-px));
+    --md-dp-spacing-24: calc(24 * var(--dp-to-px));
+    --md-dp-spacing-32: calc(32 * var(--dp-to-px));
+    --md-dp-spacing-48: calc(48 * var(--dp-to-px));
+    --md-dp-spacing-64: calc(64 * var(--dp-to-px));
+
+    /* Common border widths */
+    --md-dp-border-1: calc(1 * var(--dp-to-px));
+    --md-dp-border-2: calc(2 * var(--dp-to-px));
+    --md-dp-border-3: calc(3 * var(--dp-to-px));
+
+    /* Standard icon size */
+    --md-dp-icon-24: calc(24 * var(--dp-to-px));
+}
+
+/* Modern Border Radius System - DP-based */
+:root {
+    --radius-none: 0;
+    --radius-sm: calc(4 * var(--dp-to-px));
+    --radius-md: calc(8 * var(--dp-to-px));
+    --radius-lg: calc(12 * var(--dp-to-px));
+    --radius-xl: calc(16 * var(--dp-to-px));
+    --radius-2xl: calc(24 * var(--dp-to-px));
+    --radius-full: 100%;
+}
+
+/* Typography Scale - DP-based */
+:root {
+    --type-scale-headline-large: calc(32 * var(--dp-to-px));
+    --type-scale-headline-medium: calc(28 * var(--dp-to-px));
+    --type-scale-headline-small: calc(24 * var(--dp-to-px));
+    --type-scale-title-large: calc(22 * var(--dp-to-px));
+    --type-scale-title-medium: calc(16 * var(--dp-to-px));
+    --type-scale-title-small: calc(14 * var(--dp-to-px));
+    --type-scale-body-large: calc(16 * var(--dp-to-px));
+    --type-scale-body-medium: calc(14 * var(--dp-to-px));
+    --type-scale-body-small: calc(12 * var(--dp-to-px));
+    --type-scale-label-large: calc(14 * var(--dp-to-px));
+    --type-scale-label-medium: calc(12 * var(--dp-to-px));
+    --type-scale-label-small: calc(11 * var(--dp-to-px));
+    --type-scale-label-mini: calc(9 * var(--dp-to-px));
+}

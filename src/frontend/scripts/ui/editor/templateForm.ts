@@ -3,12 +3,29 @@
 // Template Form Component
 // Handles display elements in view mode, dynamic inputs in edit mode
 
-import { addEventListenerWithCleanup, getRequiredElement, setTextContent, addClass, removeClass } from "../../utils/domHelpers.js";
+import {
+    addEventListenerWithCleanup,
+    getRequiredElement,
+    setTextContent,
+    addClass,
+    removeClass,
+    setElementTransparent,
+} from "../../utils/domHelpers.js";
 import { VariableValues } from "../../utils/variableParser.js";
+import { FilledTextField } from "../../../components/text-fields/FilledTextField.js";
+import { Category } from "../../core/apiClient.js";
+import { formatDate } from "../../utils/formatters.js";
 
 export interface TemplateFormCallbacks {
+    onCategoryChange?: (category: string) => void;
+    onCategoryValidate?: (categoryId: string) => string | null;
+    onCategoryBlur?: () => void;
     onDescriptionChange?: (description: string) => void;
+    onDescriptionValidate?: (description: string) => string | null;
+    onDescriptionBlur?: () => void;
     onContentChange?: (content: string) => void;
+    onContentValidate?: (content: string) => string | null;
+    onContentBlur?: () => void;
     getVariableValues?: () => VariableValues; // Get current variable values
 }
 
@@ -32,6 +49,8 @@ export class TemplateForm {
 
     // View Mode Display Elements
     private viewContent: HTMLElement;
+    private categoryElement: HTMLElement;
+    private modifiedElement: HTMLElement;
     private descriptionDisplay: HTMLElement;
     private contentDisplay: HTMLElement;
     private copyButton: HTMLButtonElement;
@@ -41,24 +60,37 @@ export class TemplateForm {
     private editContent: HTMLElement;
 
     // Dynamic Edit Elements (created/destroyed on mode switch)
-    private descriptionInput: HTMLInputElement | null = null;
-    private contentTextarea: HTMLTextAreaElement | null = null;
+    private categoryField: FilledTextField | null = null;
+    private descriptionField: FilledTextField | null = null;
+    private contentField: FilledTextField | null = null;
+
+    // State
+    private categories: Category[] = [];
 
     // State
     private currentMode: "view" | "edit" | "create" = "view";
     private currentData: TemplateDisplayData = { title: "", categoryId: "", description: "", content: "" };
+    
+    // Validation tracking - track if fields have been blurred
+    private hasBeenBlurred = {
+        category: false,
+        description: false,
+        content: false
+    };
 
     constructor(callbacks: TemplateFormCallbacks = {}) {
         this.callbacks = callbacks;
 
         // Get required DOM elements
         this.viewContent = getRequiredElement<HTMLElement>("viewContent");
+        this.categoryElement = getRequiredElement<HTMLElement>("templateCategory");
+        this.modifiedElement = getRequiredElement<HTMLElement>("templateModified");
         this.descriptionDisplay = getRequiredElement<HTMLElement>("templateDescriptionDisplay");
         this.contentDisplay = getRequiredElement<HTMLElement>("templateContentDisplay");
         this.editContent = getRequiredElement<HTMLElement>("editContent");
         this.copyButton = getRequiredElement<HTMLButtonElement>("copyButton");
         this.copyFeedback = getRequiredElement<HTMLElement>("copyFeedback");
-        
+
         // Setup copy button (always present, never destroyed)
         this.setupCopyButton();
     }
@@ -95,14 +127,21 @@ export class TemplateForm {
     /**
      * Update data - used by coordinator
      */
-    public updateData(data: TemplateDisplayData): void {
+    public updateData(data: TemplateDisplayData, modifiedAt?: string): void {
         this.currentData = { ...data };
 
         if (this.currentMode === "view") {
-            this.updateViewDisplay();
+            this.updateViewDisplay(modifiedAt);
         } else if (this.currentMode === "edit" || this.currentMode === "create") {
             this.updateEditInputs();
         }
+    }
+
+    /**
+     * Set categories for dropdown
+     */
+    public setCategories(categories: Category[]): void {
+        this.categories = categories;
     }
 
     // Private Methods - View Mode
@@ -121,7 +160,18 @@ export class TemplateForm {
     /**
      * Update view mode display elements
      */
-    private updateViewDisplay(): void {
+    private updateViewDisplay(modifiedAt?: string): void {
+        // Update category and modified info
+        if (modifiedAt) {
+            setTextContent(this.categoryElement, this.getCategoryNameById(this.currentData.categoryId));
+            setTextContent(this.modifiedElement, `Modified ${formatDate(modifiedAt)}`);
+            setElementTransparent(this.categoryElement, true);
+            setElementTransparent(this.modifiedElement, true);
+        } else {
+            setElementTransparent(this.categoryElement, false);
+            setElementTransparent(this.modifiedElement, false);
+        }
+
         // Update description display
         if (this.currentData.description && this.currentData.description.trim()) {
             setTextContent(this.descriptionDisplay, this.currentData.description);
@@ -139,6 +189,11 @@ export class TemplateForm {
             setTextContent(this.contentDisplay, "No content");
             addClass(this.contentDisplay, "empty");
         }
+    }
+
+    private getCategoryNameById(categoryId: string): string {
+        const category = this.categories.find((c) => c.id === categoryId);
+        return category ? category.name : "Uncategorized";
     }
 
     /**
@@ -251,11 +306,11 @@ export class TemplateForm {
     private async copyTemplateContent(): Promise<void> {
         const content = this.currentData.content;
         const variableValues = this.callbacks.getVariableValues?.() ?? {};
-        
+
         // Use existing chunk logic to get processed content
         const chunks = this.splitContentIntoChunks(content, variableValues);
-        const processedContent = chunks.map(chunk => chunk.text).join("");
-        
+        const processedContent = chunks.map((chunk) => chunk.text).join("");
+
         try {
             await navigator.clipboard.writeText(processedContent);
             this.showCopySuccess();
@@ -270,7 +325,7 @@ export class TemplateForm {
     private showCopySuccess(): void {
         addClass(this.copyButton, "copied");
         addClass(this.copyFeedback, "show");
-        
+
         // Reset after 2 seconds
         setTimeout(() => {
             removeClass(this.copyButton, "copied");
@@ -295,7 +350,7 @@ export class TemplateForm {
      * Create dynamic edit input elements
      */
     private createEditElements(): void {
-        if (this.descriptionInput || this.contentTextarea) {
+        if (this.categoryField || this.descriptionField || this.contentField) {
             console.log("🔄 Edit elements already exist, skipping creation");
             return;
         }
@@ -306,94 +361,242 @@ export class TemplateForm {
         // Create form structure
         const form = document.createElement("form");
         form.className = "template-form";
+        
+        // Prevent form submission
+        form.addEventListener("submit", (e: Event) => {
+            e.preventDefault();
+        });
+
+        // Category field
+        const categoryGroup = document.createElement("div");
+        categoryGroup.className = "form-group";
+
+        this.categoryField = new FilledTextField(
+            {
+                label: "Category",
+                value: this.currentData.categoryId,
+            },
+            {
+                onOptionSelect: (value: string) => {
+                    this.callbacks.onCategoryChange?.(value);
+                    // Validate immediately on selection
+                    this.validateCategoryField();
+                },
+                onBlur: () => {
+                    this.hasBeenBlurred.category = true;
+                    this.validateCategoryField();
+                    this.callbacks.onCategoryBlur?.();
+                },
+            }
+        );
+
+        // Set up as select with category options
+        const categoryOptions = this.categories.map((cat) => cat.name);
+        if (categoryOptions.length > 0) {
+            this.categoryField.setSelectMode(categoryOptions);
+            // Set current value by name if we have a categoryId
+            if (this.currentData.categoryId) {
+                const categoryName = this.getCategoryNameById(this.currentData.categoryId);
+                this.categoryField.setValue(categoryName);
+            }
+        }
+
+        categoryGroup.appendChild(this.categoryField.getElement());
 
         // Description field
         const descriptionGroup = document.createElement("div");
         descriptionGroup.className = "form-group";
 
-        const descriptionLabel = document.createElement("label");
-        descriptionLabel.textContent = "Description (optional)";
-        descriptionLabel.setAttribute("for", "templateDescriptionEdit");
+        this.descriptionField = new FilledTextField(
+            {
+                label: "Description (optional)",
+                value: this.currentData.description,
+                multiline: true,
+                stretchHeight: true,
+            },
+            {
+                onChange: (value: string) => {
+                    this.callbacks.onDescriptionChange?.(value);
+                    
+                    // Validate on change only after first blur
+                    if (this.hasBeenBlurred.description) {
+                        this.validateDescriptionField();
+                    }
+                },
+                onBlur: () => {
+                    this.hasBeenBlurred.description = true;
+                    this.validateDescriptionField();
+                    this.callbacks.onDescriptionBlur?.();
+                },
+            }
+        );
 
-        this.descriptionInput = document.createElement("input");
-        this.descriptionInput.type = "text";
-        this.descriptionInput.id = "templateDescriptionEdit";
-        this.descriptionInput.className = "form-input";
-        this.descriptionInput.placeholder = "Brief description";
-        this.descriptionInput.maxLength = 500;
-
-        descriptionGroup.appendChild(descriptionLabel);
-        descriptionGroup.appendChild(this.descriptionInput);
+        descriptionGroup.appendChild(this.descriptionField.getElement());
 
         // Content field
         const contentGroup = document.createElement("div");
         contentGroup.className = "form-group";
 
-        const contentLabel = document.createElement("label");
-        contentLabel.textContent = "Template Content";
-        contentLabel.setAttribute("for", "templateContentEdit");
+        this.contentField = new FilledTextField(
+            {
+                label: "Template Content",
+                multiline: true,
+                stretchHeight: true,
+                value: this.currentData.content,
+            },
+            {
+                onChange: (value: string) => {
+                    this.callbacks.onContentChange?.(value);
+                    
+                    // Validate on change only after first blur
+                    if (this.hasBeenBlurred.content) {
+                        this.validateContentField();
+                    }
+                },
+                onBlur: () => {
+                    this.hasBeenBlurred.content = true;
+                    this.validateContentField();
+                    this.callbacks.onContentBlur?.();
+                },
+            }
+        );
 
-        this.contentTextarea = document.createElement("textarea");
-        this.contentTextarea.id = "templateContentEdit";
-        this.contentTextarea.className = "form-textarea";
-        this.contentTextarea.placeholder = "Enter your template content with {{variables}}...";
-        this.contentTextarea.rows = 12;
-
-        contentGroup.appendChild(contentLabel);
-        contentGroup.appendChild(this.contentTextarea);
+        contentGroup.appendChild(this.contentField.getElement());
 
         // Assemble form
+        form.appendChild(categoryGroup);
         form.appendChild(descriptionGroup);
         form.appendChild(contentGroup);
         this.editContent.appendChild(form);
 
-        // Setup event listeners for new elements
-        this.setupEditEventListeners();
-
-        console.log("🎨 Created dynamic edit elements");
-    }
-
-    /**
-     * Setup event listeners for edit elements
-     */
-    private setupEditEventListeners(): void {
-        if (!this.descriptionInput || !this.contentTextarea) return;
-
-        // Description input changes
-        const descriptionChangeCleanup = addEventListenerWithCleanup(this.descriptionInput, "input", (e) => {
-            this.callbacks.onDescriptionChange?.((e.target as HTMLInputElement).value);
-        });
-        this.cleanupFunctions.push(descriptionChangeCleanup);
-
-        // Content textarea changes
-        const contentChangeCleanup = addEventListenerWithCleanup(this.contentTextarea, "input", (e) => {
-            this.callbacks.onContentChange?.((e.target as HTMLTextAreaElement).value);
-        });
-        this.cleanupFunctions.push(contentChangeCleanup);
+        console.log("🎨 Created dynamic edit elements with FilledTextField components");
     }
 
     /**
      * Update edit input values
      */
     private updateEditInputs(): void {
-        if (!this.descriptionInput || !this.contentTextarea) return;
+        if (!this.categoryField || !this.descriptionField || !this.contentField) return;
 
-        this.descriptionInput.value = this.currentData.description;
-        this.contentTextarea.value = this.currentData.content;
+        // Update category field
+        if (this.currentData.categoryId) {
+            const categoryName = this.getCategoryNameById(this.currentData.categoryId);
+            this.categoryField.setValue(categoryName);
+        }
+
+        this.descriptionField.setValue(this.currentData.description);
+        this.contentField.setValue(this.currentData.content);
+    }
+
+    /**
+     * Public API methods for coordinator validation
+     */
+    public setCategoryError(message: string): void {
+        if (this.categoryField) {
+            this.categoryField.setError(message);
+        }
+    }
+
+    public clearCategoryError(): void {
+        if (this.categoryField) {
+            this.categoryField.clearError();
+        }
+    }
+
+    public setDescriptionError(message: string): void {
+        if (this.descriptionField) {
+            this.descriptionField.setError(message);
+        }
+    }
+
+    public clearDescriptionError(): void {
+        if (this.descriptionField) {
+            this.descriptionField.clearError();
+        }
+    }
+
+    public setContentError(message: string): void {
+        if (this.contentField) {
+            this.contentField.setError(message);
+        }
+    }
+
+    public clearContentError(): void {
+        if (this.contentField) {
+            this.contentField.clearError();
+        }
+    }
+
+    /**
+     * Private validation methods using coordinator callbacks
+     */
+    private validateCategoryField(): void {
+        if (!this.categoryField) return;
+        
+        // Convert category name back to ID for validation
+        const categoryName = this.categoryField.getValue();
+        const category = this.categories.find(c => c.name === categoryName);
+        const categoryId = category ? category.id : "";
+        
+        const errorMessage = this.callbacks.onCategoryValidate?.(categoryId) || null;
+        
+        if (errorMessage) {
+            this.categoryField.setError(errorMessage);
+        } else {
+            this.categoryField.clearError();
+        }
+    }
+
+    private validateDescriptionField(): void {
+        if (!this.descriptionField) return;
+        
+        const currentValue = this.descriptionField.getValue();
+        const errorMessage = this.callbacks.onDescriptionValidate?.(currentValue) || null;
+        
+        if (errorMessage) {
+            this.descriptionField.setError(errorMessage);
+        } else {
+            this.descriptionField.clearError();
+        }
+    }
+
+    private validateContentField(): void {
+        if (!this.contentField) return;
+        
+        const currentValue = this.contentField.getValue();
+        const errorMessage = this.callbacks.onContentValidate?.(currentValue) || null;
+        
+        if (errorMessage) {
+            this.contentField.setError(errorMessage);
+        } else {
+            this.contentField.clearError();
+        }
     }
 
     /**
      * Destroy edit elements
      */
     private destroyEditElements(): void {
-        if (this.descriptionInput) {
-            this.descriptionInput.remove();
-            this.descriptionInput = null;
+        // Reset blur tracking when destroying elements
+        this.hasBeenBlurred = {
+            category: false,
+            description: false,
+            content: false
+        };
+        
+        if (this.categoryField) {
+            this.categoryField.destroy();
+            this.categoryField = null;
         }
 
-        if (this.contentTextarea) {
-            this.contentTextarea.remove();
-            this.contentTextarea = null;
+        if (this.descriptionField) {
+            this.descriptionField.destroy();
+            this.descriptionField = null;
+        }
+
+        if (this.contentField) {
+            this.contentField.destroy();
+            this.contentField = null;
         }
 
         // Clear the edit container
