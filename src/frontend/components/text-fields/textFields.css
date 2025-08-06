@@ -142,6 +142,10 @@
     align-items: center; /* Center content initially */
 }
 
+.md-text-field--filled.md-text-field--multiline .md-text-field__container {
+    overflow: hidden;
+}
+
 .md-text-field--multiline .md-text-field__input {
     height: calc(var(--md-text-field-height) - 2 * var(--md-text-field-padding-vertical));
     line-height: 1.5;
@@ -157,12 +161,6 @@
 
 .md-text-field--filled .md-text-field__input {
     margin-bottom: var(--md-text-field-padding-vertical);
-}
-
-/* When text field expands beyond single line */
-.md-text-field--multiline .md-text-field__container:has(.md-text-field__input[style*="height"]) {
-    height: auto;
-    align-items: flex-start;
 }
 
 /* Label positioning for multiline */
@@ -191,6 +189,10 @@
 
 /* Stretch Height */
 .form-group .md-text-field--stretch {
+    height: 100%;
+}
+
+.form-group--stretch {
     height: 100%;
 }
 

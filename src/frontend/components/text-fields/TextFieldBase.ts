@@ -26,7 +26,7 @@ export const DROPDOWN_ARROW_SVG = `
 `;
 
 export abstract class TextFieldBase {
-    private readonly defaultMaxLines = 999;
+    private readonly defaultMaxLines = 10;
 
     protected element: HTMLElement;
     protected container: HTMLElement;
@@ -76,7 +76,6 @@ export abstract class TextFieldBase {
         if (this.options.multiline) {
             this.input = document.createElement("textarea");
             if (this.options.maxLines) {
-                this.input.style.maxHeight = `${this.options.maxLines * 1.5}em`;
                 this.element.classList.add("md-text-field--max-lines");
             }
         } else {
@@ -429,16 +428,14 @@ export abstract class TextFieldBase {
             this.container.style.height = "";
             this.container.style.alignItems = "center";
         } else {
-            let newHeight;
             // Multiple lines: expand height
             if (this.options.stretchHeight) {
-                newHeight = "100%";
+                textarea.style.height = `calc(100% - (${computedStyle.marginTop} + ${computedStyle.marginBottom}))`;
+                this.container.style.height = "100%";
             } else {
-                newHeight = actualLines * lineHeight + paddingTop + paddingBottom + "px";
+                textarea.style.height = actualLines * lineHeight + paddingTop + paddingBottom + "px";
+                this.container.style.height = "auto";
             }
-            textarea.style.height = newHeight;
-            this.container.style.height = "auto";
-            this.container.style.alignItems = "flex-start";
 
             // Enable scrollbar if content exceeds maxLines
             if (this.options.stretchHeight || (lines > maxLines && this.element.classList.contains("md-text-field--max-lines"))) {
