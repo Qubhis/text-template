@@ -70,12 +70,12 @@ export class TemplateForm {
     // State
     private currentMode: "view" | "edit" | "create" = "view";
     private currentData: TemplateDisplayData = { title: "", categoryId: "", description: "", content: "" };
-    
+
     // Validation tracking - track if fields have been blurred
     private hasBeenBlurred = {
         category: false,
         description: false,
-        content: false
+        content: false,
     };
 
     constructor(callbacks: TemplateFormCallbacks = {}) {
@@ -361,7 +361,7 @@ export class TemplateForm {
         // Create form structure
         const form = document.createElement("form");
         form.className = "template-form";
-        
+
         // Prevent form submission
         form.addEventListener("submit", (e: Event) => {
             e.preventDefault();
@@ -412,12 +412,12 @@ export class TemplateForm {
                 label: "Description (optional)",
                 value: this.currentData.description,
                 multiline: true,
-                stretchHeight: true,
+                maxLines: 10,
             },
             {
                 onChange: (value: string) => {
                     this.callbacks.onDescriptionChange?.(value);
-                    
+
                     // Validate on change only after first blur
                     if (this.hasBeenBlurred.description) {
                         this.validateDescriptionField();
@@ -435,7 +435,7 @@ export class TemplateForm {
 
         // Content field
         const contentGroup = document.createElement("div");
-        contentGroup.className = "form-group";
+        contentGroup.className = "form-group form-group--stretch";
 
         this.contentField = new FilledTextField(
             {
@@ -447,7 +447,7 @@ export class TemplateForm {
             {
                 onChange: (value: string) => {
                     this.callbacks.onContentChange?.(value);
-                    
+
                     // Validate on change only after first blur
                     if (this.hasBeenBlurred.content) {
                         this.validateContentField();
@@ -532,14 +532,14 @@ export class TemplateForm {
      */
     private validateCategoryField(): void {
         if (!this.categoryField) return;
-        
+
         // Convert category name back to ID for validation
         const categoryName = this.categoryField.getValue();
-        const category = this.categories.find(c => c.name === categoryName);
+        const category = this.categories.find((c) => c.name === categoryName);
         const categoryId = category ? category.id : "";
-        
+
         const errorMessage = this.callbacks.onCategoryValidate?.(categoryId) || null;
-        
+
         if (errorMessage) {
             this.categoryField.setError(errorMessage);
         } else {
@@ -549,10 +549,10 @@ export class TemplateForm {
 
     private validateDescriptionField(): void {
         if (!this.descriptionField) return;
-        
+
         const currentValue = this.descriptionField.getValue();
         const errorMessage = this.callbacks.onDescriptionValidate?.(currentValue) || null;
-        
+
         if (errorMessage) {
             this.descriptionField.setError(errorMessage);
         } else {
@@ -562,10 +562,10 @@ export class TemplateForm {
 
     private validateContentField(): void {
         if (!this.contentField) return;
-        
+
         const currentValue = this.contentField.getValue();
         const errorMessage = this.callbacks.onContentValidate?.(currentValue) || null;
-        
+
         if (errorMessage) {
             this.contentField.setError(errorMessage);
         } else {
@@ -581,9 +581,9 @@ export class TemplateForm {
         this.hasBeenBlurred = {
             category: false,
             description: false,
-            content: false
+            content: false,
         };
-        
+
         if (this.categoryField) {
             this.categoryField.destroy();
             this.categoryField = null;

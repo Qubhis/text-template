@@ -148,7 +148,6 @@
     resize: none;
     overflow-wrap: break-word;
     word-wrap: break-word;
-    overflow-y: hidden; /* Hide scrollbar initially */
     white-space: pre-wrap; /* Preserve line breaks, allow wrapping */
 }
 
@@ -191,6 +190,10 @@
 }
 
 /* Stretch Height */
+.form-group .md-text-field--stretch {
+    height: 100%;
+}
+
 .md-text-field--stretch {
     height: 100%;
 }
