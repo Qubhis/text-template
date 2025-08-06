@@ -26,11 +26,13 @@ export const DROPDOWN_ARROW_SVG = `
 `;
 
 export abstract class TextFieldBase {
-    protected element!: HTMLElement;
-    protected container!: HTMLElement;
-    protected input!: HTMLInputElement | HTMLTextAreaElement;
-    protected label!: HTMLElement;
-    protected supportingText!: HTMLElement;
+    private readonly defaultMaxLines = 10;
+
+    protected element: HTMLElement;
+    protected container: HTMLElement;
+    protected input: HTMLInputElement | HTMLTextAreaElement;
+    protected label: HTMLElement;
+    protected supportingText: HTMLElement;
 
     protected options: TextFieldOptions;
     protected callbacks: TextFieldCallbacks;
@@ -52,6 +54,10 @@ export abstract class TextFieldBase {
         this.callbacks = callbacks;
         this.currentValue = options.value || "";
 
+        if (this.options.multiline) {
+            this.options.maxLines ??= this.defaultMaxLines;
+        }
+
         this.createElement();
         this.setupEventListeners();
         this.updateState();
@@ -70,7 +76,6 @@ export abstract class TextFieldBase {
         if (this.options.multiline) {
             this.input = document.createElement("textarea");
             if (this.options.maxLines) {
-                this.input.style.maxHeight = `${this.options.maxLines * 1.5}em`;
                 this.element.classList.add("md-text-field--max-lines");
             }
         } else {
@@ -282,7 +287,7 @@ export abstract class TextFieldBase {
         // Handle keyboard navigation and form submission prevention
         this.input.addEventListener("keydown", (e: Event) => {
             const keyEvent = e as KeyboardEvent;
-            
+
             // Always prevent Enter key form submission for input-type fields
             if (keyEvent.key === "Enter" && this.input.tagName === "INPUT") {
                 keyEvent.preventDefault();
@@ -292,7 +297,7 @@ export abstract class TextFieldBase {
                 }
                 return;
             }
-            
+
             // Handle dropdown navigation only in select mode
             if (this.isSelectMode) {
                 switch (keyEvent.key) {
@@ -332,7 +337,7 @@ export abstract class TextFieldBase {
 
         this.isDropdownOpen = true;
         this.element.classList.add("md-text-field--opened");
-        
+
         // Set initial selection to current value if exists
         const currentIndex = this.selectOptions.indexOf(this.currentValue);
         this.selectedIndex = currentIndex >= 0 ? currentIndex : 0;
@@ -351,7 +356,7 @@ export abstract class TextFieldBase {
         if (!this.isDropdownOpen || this.selectOptions.length === 0) return;
 
         this.selectedIndex += direction;
-        
+
         // Wrap around
         if (this.selectedIndex < 0) {
             this.selectedIndex = this.selectOptions.length - 1;
@@ -393,7 +398,7 @@ export abstract class TextFieldBase {
         }
 
         const textarea = this.input as HTMLTextAreaElement;
-        const maxLines = this.options.maxLines || 999;
+        const maxLines = this.options.maxLines ?? this.defaultMaxLines;
 
         // Check if there are actual line breaks in the content
         const actualLineBreaks = (textarea.value.match(/\n/g) || []).length + 1;
@@ -424,17 +429,20 @@ export abstract class TextFieldBase {
             this.container.style.alignItems = "center";
         } else {
             // Multiple lines: expand height
-            const newHeight = actualLines * lineHeight + paddingTop + paddingBottom;
-            textarea.style.height = newHeight + "px";
-            this.container.style.height = "auto";
-            this.container.style.alignItems = "flex-start";
-        }
+            if (this.options.stretchHeight) {
+                textarea.style.height = `calc(100% - (${computedStyle.marginTop} + ${computedStyle.marginBottom}))`;
+                this.container.style.height = "100%";
+            } else {
+                textarea.style.height = actualLines * lineHeight + paddingTop + paddingBottom + "px";
+                this.container.style.height = "auto";
+            }
 
-        // Enable scrollbar if content exceeds maxLines
-        if (lines > maxLines && this.element.classList.contains("md-text-field--max-lines")) {
-            textarea.style.overflowY = "auto";
-        } else {
-            textarea.style.overflowY = "hidden";
+            // Enable scrollbar if content exceeds maxLines
+            if (this.options.stretchHeight || (lines > maxLines && this.element.classList.contains("md-text-field--max-lines"))) {
+                textarea.style.overflowY = "auto";
+            } else {
+                textarea.style.overflowY = "hidden";
+            }
         }
     }
 }
