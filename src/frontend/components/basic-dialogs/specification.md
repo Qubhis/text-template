@@ -6,7 +6,19 @@
 
 ## Anatomy
 
+![anatomy](anatomy.png)
+
 Container, Icon (optional), Headline, Supporting text, Divider (optional), Button (label text), Scrim
+
+### Container and scrim
+
+Dialog containers appear above other screen elements and hold the dialog’s headline, text, buttons, and list items.
+
+To focus attention on the dialog, surfaces behind the container are scrimmed with a temporary overlay to make them less prominent.
+
+## Behavior
+
+Dialogs use an enter and exit transition pattern to appear on screen.
 
 ## Basic Dialog Specifications
 
@@ -17,7 +29,7 @@ Container, Icon (optional), Headline, Supporting text, Divider (optional), Butto
 - **Dialog container color**: `md-sys-color-surface-container-high`
 - **Dialog container elevation**: `md-sys-elevation-level3`
 - **Dialog container surface tint layer color**: `md-sys-color-surface-tint`
-- **Dialog container shape**: `md-sys-shape-corner-extra-large`
+- **Dialog container shape**: `--radius-3xl`
 
 #### Label text
 
