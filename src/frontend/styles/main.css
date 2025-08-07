@@ -2,7 +2,8 @@
 /* Import fonts */
 @import url("./fonts.css");
 /* Import color palette */
-@import url("./color-palette.css");
+@import url("./color-palettes/color-palette-mustard-yellow.css");
+@import url("./color-palettes/color-palette-greenish.css");
 /* Import Material Design 3 DP variables */
 @import url("./material-design-dp-variables.css");
 /* Import Material Design 3 Text Fields */
@@ -871,12 +872,11 @@ body {
 
 .modal-content {
     background-color: var(--md-sys-color-surface-container-high);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-3xl);
     padding: var(--md-dp-spacing-32);
     min-width: 300px;
     max-width: 500px;
-    box-shadow: var(--md-elevation-5);
-    /* border: 1px solid var(--md-sys-color-outline-variant); */
+    box-shadow: var(--md-elevation-3);
 }
 
 .modal-content h3 {
