@@ -28,6 +28,7 @@
     --radius-lg: calc(12 * var(--dp-to-px));
     --radius-xl: calc(16 * var(--dp-to-px));
     --radius-2xl: calc(24 * var(--dp-to-px));
+    --radius-3xl: calc(28 * var(--dp-to-px));
     --radius-full: 100%;
 }
 
@@ -46,4 +47,14 @@
     --type-scale-label-medium: calc(12 * var(--dp-to-px));
     --type-scale-label-small: calc(11 * var(--dp-to-px));
     --type-scale-label-mini: calc(9 * var(--dp-to-px));
+}
+
+/* Elevation and Shadow System */
+:root {
+    --md-elevation-0: none;
+    --md-elevation-1: 0 1px 3px 0 var(--md-sys-color-shadow), 0 1px 2px 0 var(--md-sys-color-shadow);
+    --md-elevation-2: 0 1px 3px 0 var(--md-sys-color-shadow), 0 4px 8px 3px var(--md-sys-color-shadow);
+    --md-elevation-3: 0 1px 3px 0 var(--md-sys-color-shadow), 0 8px 14px 6px var(--md-sys-color-shadow);
+    --md-elevation-4: 0 2px 3px 0 var(--md-sys-color-shadow), 0 12px 20px 8px var(--md-sys-color-shadow);
+    --md-elevation-5: 0 4px 4px 0 var(--md-sys-color-shadow), 0 16px 24px 10px var(--md-sys-color-shadow);
 }

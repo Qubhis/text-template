@@ -127,6 +127,10 @@
     <!-- Scripts -->
     <script type="module" src="scripts/main.ts"></script>
     <script>
+        // Default color theme until theme manager feature is implemented
+        // document.documentElement.setAttribute('data-color-theme', 'mustard-yellow');
+        document.documentElement.setAttribute('data-color-theme', 'greenish');
+
         // Dark mode toggle functionality
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
