@@ -851,6 +851,39 @@ body {
     font-size: var(--type-scale-label-medium);
 }
 
+/* Icon Button Variant - MD3 specs */
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: var(--md-dp-spacing-8);
+    background-color: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover:not(:disabled) {
+    background-color: var(--md-sys-color-on-surface);
+    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+    color: var(--md-sys-color-on-surface);
+}
+
+.btn-icon:active:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+}
+
+/* Theme Settings Button Positioning */
+#themeSettingsBtn {
+    position: fixed;
+    top: var(--md-dp-spacing-16);
+    right: var(--md-dp-spacing-16);
+    z-index: 1000;
+}
+
 /* Modern Modal */
 .modal {
     position: fixed;
@@ -896,6 +929,60 @@ body {
     display: flex;
     gap: var(--md-dp-spacing-16);
     justify-content: flex-end;
+}
+
+/* Theme Settings Dialog - Positioned Popover */
+.theme-settings-dialog {
+    position: fixed;
+    top: calc(var(--md-dp-spacing-16) + 40px + 8px); /* settings button height + gap */
+    right: var(--md-dp-spacing-16);
+    z-index: 1001;
+    background-color: var(--md-sys-color-surface-container);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--md-elevation-3);
+    padding: 0;
+    width: 300px;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.theme-settings-dialog.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.theme-settings-dialog .dialog-content {
+    padding: var(--md-dp-spacing-24);
+}
+
+.theme-settings-dialog .dialog-title {
+    margin: 0 0 var(--md-dp-spacing-24) 0;
+    font-size: var(--type-scale-title-medium);
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+}
+
+.theme-option {
+    margin-bottom: var(--md-dp-spacing-24);
+}
+
+.theme-option:last-child {
+    margin-bottom: 0;
+}
+
+.theme-label {
+    display: block;
+    font-size: var(--type-scale-body-medium);
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: var(--md-dp-spacing-12);
+}
+
+.theme-toggle-btn {
+    min-width: 80px;
 }
 
 /* Loading Overlay */
