@@ -10,6 +10,8 @@ import { TemplateList } from "./ui/templateList.js";
 import { ModalSystem } from "./ui/modalSystem.js";
 import { TemplateEditor } from "./ui/templateEditor.js";
 import { DPICalculator } from "../utils/dpiCalculator.js";
+import { ThemeManager } from "./core/themeManager.js";
+import { ThemeSettingsDialog } from "./ui/themeSettingsDialog.js";
 
 /**
  * Application class - main coordinator
@@ -21,6 +23,8 @@ class App {
     private modalSystem: ModalSystem;
     private templateEditor: TemplateEditor; // Single interface to template editing with header integration
     private dpiCalculator: DPICalculator;
+    private themeManager: ThemeManager;
+    private themeDialog: ThemeSettingsDialog;
 
     constructor(dataManager: DataManager) {
         this.dataManager = dataManager;
@@ -43,6 +47,10 @@ class App {
         });
 
         this.dpiCalculator = new DPICalculator();
+
+        // Initialize theme management
+        this.themeManager = ThemeManager.getInstance();
+        this.themeDialog = new ThemeSettingsDialog();
     }
 
     /**
@@ -72,6 +80,10 @@ class App {
             // Initialize Modal System
             console.log("🎨 Initializing modal system...");
             this.modalSystem.initialize();
+
+            // Initialize Theme Settings Button
+            console.log("🎨 Initializing theme settings...");
+            this.initializeThemeSettings();
 
             // Setup window resize listener for DPI recalculation
             window.addEventListener("resize", () => {
@@ -142,6 +154,24 @@ class App {
      */
     private handleCreateTemplate(): void {
         this.templateEditor.startCreate();
+    }
+
+    /**
+     * Initialize theme settings button
+     */
+    private initializeThemeSettings(): void {
+        const themeSettingsBtn = document.getElementById("themeSettingsBtn") as HTMLButtonElement;
+        if (!themeSettingsBtn) {
+            console.warn("Theme settings button not found");
+            return;
+        }
+
+        themeSettingsBtn.addEventListener("click", (event) => {
+            this.themeDialog.show();
+            event.stopPropagation();
+        });
+
+        console.log("✅ Theme settings initialized");
     }
 }
 

@@ -1,7 +1,21 @@
-/* Material Design 3 Color Palette - CSS Custom Properties */
+/* Material Design 3 Color Palette Template - CSS Custom Properties */
+/* 
+ * TEMPLATE FILE for creating additional color themes
+ * 
+ * Instructions:
+ * 1. Copy this file and rename to: color-palette-[THEME_NAME].css 
+ * 2. Replace "THEME_NAME" with your actual theme name (e.g., "blue", "green", "purple")
+ * 3. Replace all rgb() values with your theme-specific colors
+ * 4. Import in main.css: @import url("./color-palette-[THEME_NAME].css");
+ * 5. Apply theme with: document.documentElement.setAttribute('data-color-theme', 'THEME_NAME');
+ */
 
-/* Light Theme (Default) */
-:root {
+/* Light Theme */
+[data-color-theme="mustard-yellow"] {
+    /* opacity */
+    --md-sys-shadow-opacity: 0.4;
+    --md-sys-scrim-opacity: 0.32;
+    /* md colors */
     --md-sys-color-primary: rgb(109 94 15);
     --md-sys-color-surface-tint: rgb(109 94 15);
     --md-sys-color-on-primary: rgb(255 255 255);
@@ -27,8 +41,8 @@
     --md-sys-color-on-surface-variant: rgb(75 71 57);
     --md-sys-color-outline: rgb(124 119 103);
     --md-sys-color-outline-variant: rgb(205 198 180);
-    --md-sys-color-shadow: rgba(0, 0, 0, 0.32);
-    --md-sys-color-scrim: rgba(0, 0, 0, 0.15);
+    --md-sys-color-shadow: rgba(0, 0, 0, var(--md-sys-shadow-opacity));
+    --md-sys-color-scrim: rgba(0, 0, 0, var(--md-sys-scrim-opacity));
     --md-sys-color-inverse-surface: rgb(51 48 39);
     --md-sys-color-inverse-on-surface: rgb(247 240 226);
     --md-sys-color-inverse-primary: rgb(219 198 110);
@@ -60,7 +74,11 @@
 }
 
 /* Dark Theme */
-[data-theme="dark"] {
+[data-color-theme="mustard-yellow"][data-theme="dark"] {
+    /* opacity */
+    --md-sys-shadow-opacity: 0.4;
+    --md-sys-scrim-opacity: 0.32;
+    /* md colors */
     --md-sys-color-primary: rgb(219 198 110);
     --md-sys-color-surface-tint: rgb(219 198 110);
     --md-sys-color-on-primary: rgb(58 48 0);
@@ -86,8 +104,8 @@
     --md-sys-color-on-surface-variant: rgb(205 198 180);
     --md-sys-color-outline: rgb(150 144 128);
     --md-sys-color-outline-variant: rgb(75 71 57);
-    --md-sys-color-shadow: rgba(0, 0, 0, 0.6);
-    --md-sys-color-scrim: rgba(0, 0, 0, 0.3);
+    --md-sys-color-shadow: rgba(0, 0, 0, var(--md-sys-shadow-opacity));
+    --md-sys-color-scrim: rgba(0, 0, 0, var(--md-sys-scrim-opacity));
     --md-sys-color-inverse-surface: rgb(232 226 212);
     --md-sys-color-inverse-on-surface: rgb(51 48 39);
     --md-sys-color-inverse-primary: rgb(109 94 15);
@@ -120,7 +138,11 @@
 
 /* Auto Dark Mode Support */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+    [data-color-theme="mustard-yellow"]:not([data-theme="light"]) {
+        /* opacity */
+        --md-sys-shadow-opacity: 0.4;
+        --md-sys-scrim-opacity: 0.32;
+        /* md colors */
         --md-sys-color-primary: rgb(219 198 110);
         --md-sys-color-surface-tint: rgb(219 198 110);
         --md-sys-color-on-primary: rgb(58 48 0);
@@ -146,8 +168,8 @@
         --md-sys-color-on-surface-variant: rgb(205 198 180);
         --md-sys-color-outline: rgb(150 144 128);
         --md-sys-color-outline-variant: rgb(75 71 57);
-        --md-sys-color-shadow: rgba(0, 0, 0, 0.6);
-        --md-sys-color-scrim: rgba(0, 0, 0, 0.3);
+        --md-sys-color-shadow: rgba(0, 0, 0, var(--md-sys-shadow-opacity));
+        --md-sys-color-scrim: rgba(0, 0, 0, var(--md-sys-scrim-opacity));
         --md-sys-color-inverse-surface: rgb(232 226 212);
         --md-sys-color-inverse-on-surface: rgb(51 48 39);
         --md-sys-color-inverse-primary: rgb(109 94 15);
@@ -177,14 +199,4 @@
         --md-sys-color-variable-empty: var(--md-sys-color-tertiary-container);
         --md-sys-color-on-variable-empty: var(--md-sys-color-on-tertiary-container);
     }
-}
-
-/* Elevation and Shadow System */
-:root {
-    --md-elevation-0: none;
-    --md-elevation-1: 0 1px 3px 0 var(--md-sys-color-shadow), 0 1px 2px 0 var(--md-sys-color-shadow);
-    --md-elevation-2: 0 1px 3px 0 var(--md-sys-color-shadow), 0 4px 8px 3px var(--md-sys-color-shadow);
-    --md-elevation-3: 0 1px 3px 0 var(--md-sys-color-shadow), 0 8px 14px 6px var(--md-sys-color-shadow);
-    --md-elevation-4: 0 2px 3px 0 var(--md-sys-color-shadow), 0 12px 20px 8px var(--md-sys-color-shadow);
-    --md-elevation-5: 0 4px 4px 0 var(--md-sys-color-shadow), 0 16px 24px 10px var(--md-sys-color-shadow);
 }
