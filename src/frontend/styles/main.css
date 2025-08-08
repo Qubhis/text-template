@@ -2,8 +2,10 @@
 /* Import fonts */
 @import url("./fonts.css");
 /* Import color palette */
-@import url("./color-palettes/color-palette-mustard-yellow.css");
+@import url("./color-palettes/color-palette-electric-amethyst.css");
 @import url("./color-palettes/color-palette-greenish.css");
+@import url("./color-palettes/color-palette-mustard-yellow.css");
+@import url("./color-palettes/color-palette-oceanic-mirage.css");
 /* Import Material Design 3 DP variables */
 @import url("./material-design-dp-variables.css");
 /* Import Material Design 3 Text Fields */
@@ -147,18 +149,20 @@ body {
 }
 
 .template-item.active {
-    background-color: var(--md-sys-color-primary-container);
+    background-color: var(--md-sys-color-secondary-container);
     border-left-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary-container);
+    color: var(--md-sys-color-on-secondary-container);
 }
 
 .template-item.active .template-item-title {
-    color: var(--md-sys-color-on-primary-container);
+    color: var(--md-sys-color-on-secondary-container);
     font-weight: 600;
 }
 
 .template-item.active .category-tag {
     background-color: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+    border: 1px solid var(--md-sys-color-on-tertiary-container);
 }
 
 .template-item-title {

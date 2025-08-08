@@ -5,10 +5,10 @@
 
 export class ThemeManager {
     private static instance: ThemeManager;
-    
+
     // Available themes
-    private readonly availableColorThemes = ['greenish', 'mustard-yellow'];
-    private readonly availableModes = ['light', 'dark'];
+    private readonly availableColorThemes = ["electric-amethyst", "greenish", "mustard-yellow", "oceanic-mirage"];
+    private readonly availableModes = ["light", "dark"];
 
     private constructor() {
         this.initializeTheme();
@@ -25,9 +25,9 @@ export class ThemeManager {
      * Initialize theme from localStorage or defaults
      */
     private initializeTheme(): void {
-        const savedMode = localStorage.getItem('theme-mode') || 'light';
-        const savedColorTheme = localStorage.getItem('color-theme') || 'greenish';
-        
+        const savedMode = localStorage.getItem("theme-mode") || "light";
+        const savedColorTheme = localStorage.getItem("color-theme") || "electric-amethyst";
+
         this.setMode(savedMode);
         this.setColorTheme(savedColorTheme);
     }
@@ -40,9 +40,9 @@ export class ThemeManager {
             console.warn(`Invalid theme mode: ${mode}`);
             return;
         }
-        
-        document.documentElement.setAttribute('data-theme', mode);
-        localStorage.setItem('theme-mode', mode);
+
+        document.documentElement.setAttribute("data-theme", mode);
+        localStorage.setItem("theme-mode", mode);
     }
 
     /**
@@ -53,20 +53,20 @@ export class ThemeManager {
             console.warn(`Invalid color theme: ${colorTheme}`);
             return;
         }
-        
-        document.documentElement.setAttribute('data-color-theme', colorTheme);
-        localStorage.setItem('color-theme', colorTheme);
+
+        document.documentElement.setAttribute("data-color-theme", colorTheme);
+        localStorage.setItem("color-theme", colorTheme);
     }
 
     /**
      * Convenience methods
      */
     setLightMode(): void {
-        this.setMode('light');
+        this.setMode("light");
     }
 
     setDarkMode(): void {
-        this.setMode('dark');
+        this.setMode("dark");
     }
 
     /**
@@ -74,8 +74,8 @@ export class ThemeManager {
      */
     getCurrentTheme(): { mode: string; colorTheme: string } {
         return {
-            mode: document.documentElement.getAttribute('data-theme') || 'light',
-            colorTheme: document.documentElement.getAttribute('data-color-theme') || 'greenish'
+            mode: document.documentElement.getAttribute("data-theme") || "light",
+            colorTheme: document.documentElement.getAttribute("data-color-theme") || "electric-amethyst",
         };
     }
 
