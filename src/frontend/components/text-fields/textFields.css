@@ -193,7 +193,7 @@
 }
 
 .form-group--stretch {
-    height: 100%;
+    max-height: 100%;
 }
 
 .md-text-field--stretch {

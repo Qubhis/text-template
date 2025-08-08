@@ -416,32 +416,48 @@ export abstract class TextFieldBase {
 
         // Use the actual line breaks count, not the calculated wrapped lines
         // Only expand if user has actually pressed Enter
-        const lines = actualLineBreaks;
-
-        // Limit to maxLines
-        const actualLines = Math.min(lines, maxLines);
+        this.container.style.alignItems = actualLineBreaks > 1 || this.options.stretchHeight ? "flex-start" : "center";
 
         // Set height based on actual line breaks, not wrapped content
-        if (lines === 1) {
+        if (actualLineBreaks === 1) {
             // Single line: use default height and center content
             textarea.style.height = "2rem";
             this.container.style.height = "";
-            this.container.style.alignItems = "center";
         } else {
             // Multiple lines: expand height
             if (this.options.stretchHeight) {
                 textarea.style.height = `calc(100% - (${computedStyle.marginTop} + ${computedStyle.marginBottom}))`;
                 this.container.style.height = "100%";
             } else {
+                // Limit to maxLines
+                const actualLines = Math.min(actualLineBreaks, maxLines);
                 textarea.style.height = actualLines * lineHeight + paddingTop + paddingBottom + "px";
                 this.container.style.height = "auto";
             }
-
             // Enable scrollbar if content exceeds maxLines
-            if (this.options.stretchHeight || (lines > maxLines && this.element.classList.contains("md-text-field--max-lines"))) {
+            if (this.options.stretchHeight || (actualLineBreaks > maxLines && this.element.classList.contains("md-text-field--max-lines"))) {
                 textarea.style.overflowY = "auto";
             } else {
                 textarea.style.overflowY = "hidden";
+            }
+        }
+
+        // Grow the parent form-group container to accommodate content, but with max-height constraint
+        const parentFormGroup = this.element.closest(".form-group--stretch") as HTMLElement;
+        if (parentFormGroup) {
+            const HEIGHT_1_REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            const MIN_FORM_GROUP_HEIGHT = HEIGHT_1_REM * 2;
+            if (this.options.stretchHeight) {
+                // Calculate required height: content height + label space + padding
+                const contentHeight = actualLineBreaks * lineHeight + paddingTop + paddingBottom;
+                const labelSpace = 24; // Space for floating label
+                const formGroupPadding = 16; // Form group internal padding
+                const requiredHeight = contentHeight + labelSpace + formGroupPadding;
+                // Set height to grow with content, but respect existing max-height
+                const minHeight = Math.max(requiredHeight, MIN_FORM_GROUP_HEIGHT); // Minimum 120px
+                parentFormGroup.style.height = `${minHeight}px`;
+            } else {
+                parentFormGroup.style.height = `${MIN_FORM_GROUP_HEIGHT}px`;
             }
         }
     }
