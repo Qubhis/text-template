@@ -12,6 +12,10 @@
 
 /* Light Theme */
 [data-color-theme="mustard-yellow"] {
+    /* opacity */
+    --md-sys-shadow-opacity: 0.4;
+    --md-sys-scrim-opacity: 0.32;
+    /* md colors */
     --md-sys-color-primary: rgb(109 94 15);
     --md-sys-color-surface-tint: rgb(109 94 15);
     --md-sys-color-on-primary: rgb(255 255 255);
@@ -37,8 +41,8 @@
     --md-sys-color-on-surface-variant: rgb(75 71 57);
     --md-sys-color-outline: rgb(124 119 103);
     --md-sys-color-outline-variant: rgb(205 198 180);
-    --md-sys-color-shadow: rgba(0, 0, 0, 0.32);
-    --md-sys-color-scrim: rgba(0, 0, 0, 0.15);
+    --md-sys-color-shadow: rgba(0, 0, 0, var(--md-sys-shadow-opacity));
+    --md-sys-color-scrim: rgba(0, 0, 0, var(--md-sys-scrim-opacity));
     --md-sys-color-inverse-surface: rgb(51 48 39);
     --md-sys-color-inverse-on-surface: rgb(247 240 226);
     --md-sys-color-inverse-primary: rgb(219 198 110);
@@ -71,6 +75,10 @@
 
 /* Dark Theme */
 [data-color-theme="mustard-yellow"][data-theme="dark"] {
+    /* opacity */
+    --md-sys-shadow-opacity: 0.4;
+    --md-sys-scrim-opacity: 0.32;
+    /* md colors */
     --md-sys-color-primary: rgb(219 198 110);
     --md-sys-color-surface-tint: rgb(219 198 110);
     --md-sys-color-on-primary: rgb(58 48 0);
@@ -96,8 +104,8 @@
     --md-sys-color-on-surface-variant: rgb(205 198 180);
     --md-sys-color-outline: rgb(150 144 128);
     --md-sys-color-outline-variant: rgb(75 71 57);
-    --md-sys-color-shadow: rgba(0, 0, 0, 0.6);
-    --md-sys-color-scrim: rgba(0, 0, 0, 0.3);
+    --md-sys-color-shadow: rgba(0, 0, 0, var(--md-sys-shadow-opacity));
+    --md-sys-color-scrim: rgba(0, 0, 0, var(--md-sys-scrim-opacity));
     --md-sys-color-inverse-surface: rgb(232 226 212);
     --md-sys-color-inverse-on-surface: rgb(51 48 39);
     --md-sys-color-inverse-primary: rgb(109 94 15);
@@ -131,6 +139,10 @@
 /* Auto Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     [data-color-theme="mustard-yellow"]:not([data-theme="light"]) {
+        /* opacity */
+        --md-sys-shadow-opacity: 0.4;
+        --md-sys-scrim-opacity: 0.32;
+        /* md colors */
         --md-sys-color-primary: rgb(219 198 110);
         --md-sys-color-surface-tint: rgb(219 198 110);
         --md-sys-color-on-primary: rgb(58 48 0);
@@ -156,8 +168,8 @@
         --md-sys-color-on-surface-variant: rgb(205 198 180);
         --md-sys-color-outline: rgb(150 144 128);
         --md-sys-color-outline-variant: rgb(75 71 57);
-        --md-sys-color-shadow: rgba(0, 0, 0, 0.6);
-        --md-sys-color-scrim: rgba(0, 0, 0, 0.3);
+        --md-sys-color-shadow: rgba(0, 0, 0, var(--md-sys-shadow-opacity));
+        --md-sys-color-scrim: rgba(0, 0, 0, var(--md-sys-scrim-opacity));
         --md-sys-color-inverse-surface: rgb(232 226 212);
         --md-sys-color-inverse-on-surface: rgb(51 48 39);
         --md-sys-color-inverse-primary: rgb(109 94 15);
