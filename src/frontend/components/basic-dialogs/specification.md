@@ -16,9 +16,12 @@ Dialog containers appear above other screen elements and hold the dialog’s hea
 
 To focus attention on the dialog, surfaces behind the container are scrimmed with a temporary overlay to make them less prominent.
 
+The dialog's scrim only fades in and out.
+
 ## Behavior
 
 Dialogs use an enter and exit transition pattern to appear on screen.
+The dialog's scrim only fades in and out.
 
 ## Basic Dialog Specifications
 
