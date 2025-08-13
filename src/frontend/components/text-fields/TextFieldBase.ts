@@ -28,11 +28,11 @@ export const DROPDOWN_ARROW_SVG = `
 export abstract class TextFieldBase {
     private readonly defaultMaxLines = 10;
 
-    protected element: HTMLElement;
-    protected container: HTMLElement;
-    protected input: HTMLInputElement | HTMLTextAreaElement;
-    protected label: HTMLElement;
-    protected supportingText: HTMLElement;
+    protected element!: HTMLElement;
+    protected container!: HTMLElement;
+    protected input!: HTMLInputElement | HTMLTextAreaElement;
+    protected label!: HTMLElement;
+    protected supportingText!: HTMLElement;
 
     protected options: TextFieldOptions;
     protected callbacks: TextFieldCallbacks;
