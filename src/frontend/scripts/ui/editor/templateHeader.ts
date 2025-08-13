@@ -204,11 +204,12 @@ export class TemplateHeader {
             {
                 label: "Template Title",
                 value: "",
+                maxLength: 25,
             },
             {
                 onChange: (value: string) => {
                     this.callbacks.onTitleChange?.(value);
-                    
+
                     // Validate on change only after first blur (immediate feedback when fixing)
                     if (this.hasBeenBlurred) {
                         this.validateTitleField();
@@ -313,10 +314,10 @@ export class TemplateHeader {
      */
     private validateTitleField(): void {
         if (!this.titleField) return;
-        
+
         const currentValue = this.titleField.getValue();
         const errorMessage = this.callbacks.onTitleValidate?.(currentValue) || null;
-        
+
         if (errorMessage) {
             this.titleField.setError(errorMessage);
         } else {
@@ -330,7 +331,7 @@ export class TemplateHeader {
     private cleanupInlineEditingElements(): void {
         // Reset blur tracking when exiting edit mode
         this.hasBeenBlurred = false;
-        
+
         // Destroy FilledTextField component
         if (this.titleField) {
             this.titleField.destroy();

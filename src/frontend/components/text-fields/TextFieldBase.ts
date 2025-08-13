@@ -9,6 +9,7 @@ export interface TextFieldOptions {
     maxLines?: number; // For outlined fields with hidden scrollbar
     stretchHeight?: boolean; // For filled content field
     value?: string;
+    maxLength?: number; // Character limit for the input
 }
 
 export interface TextFieldCallbacks {
@@ -28,11 +29,13 @@ export const DROPDOWN_ARROW_SVG = `
 export abstract class TextFieldBase {
     private readonly defaultMaxLines = 10;
 
-    protected element: HTMLElement;
-    protected container: HTMLElement;
-    protected input: HTMLInputElement | HTMLTextAreaElement;
-    protected label: HTMLElement;
-    protected supportingText: HTMLElement;
+    protected element!: HTMLElement;
+    protected container!: HTMLElement;
+    protected input!: HTMLInputElement | HTMLTextAreaElement;
+    protected label!: HTMLElement;
+    protected supportingTextContainer!: HTMLElement;
+    protected supportingTextLeft!: HTMLElement;
+    protected supportingTextRight!: HTMLElement;
 
     protected options: TextFieldOptions;
     protected callbacks: TextFieldCallbacks;
@@ -91,15 +94,30 @@ export abstract class TextFieldBase {
         this.input.className = "md-text-field__input";
         this.input.value = this.currentValue;
 
+        if (this.options.maxLength) {
+            this.input.setAttribute("maxlength", this.options.maxLength.toString());
+        }
+
         // Create label
         this.label = document.createElement("label");
         this.label.className = "md-text-field__label";
         this.label.textContent = this.options.label;
 
-        // Create supporting text (hidden by default)
-        this.supportingText = document.createElement("div");
-        this.supportingText.className = "md-text-field__supporting-text";
-        this.supportingText.style.display = "none";
+        // Create supporting text container with left and right sections
+        this.supportingTextContainer = document.createElement("div");
+        this.supportingTextContainer.className = "md-text-field__supporting-text";
+        this.supportingTextContainer.style.display = "flex";
+        this.supportingTextContainer.style.justifyContent = "space-between";
+        this.supportingTextContainer.style.visibility = "hidden"; // Reserve space but hide initially
+
+        this.supportingTextLeft = document.createElement("div");
+        this.supportingTextLeft.style.flex = "1";
+
+        this.supportingTextRight = document.createElement("div");
+        this.supportingTextRight.style.flexShrink = "0";
+
+        this.supportingTextContainer.appendChild(this.supportingTextLeft);
+        this.supportingTextContainer.appendChild(this.supportingTextRight);
 
         // Assemble DOM
         this.container.appendChild(this.input);
@@ -107,7 +125,7 @@ export abstract class TextFieldBase {
         this.addVariantSpecificElements();
 
         this.element.appendChild(this.container);
-        this.element.appendChild(this.supportingText);
+        this.element.appendChild(this.supportingTextContainer);
 
         // Initial auto-resize for pre-existing content
         setTimeout(() => this.autoResizeTextarea(), 0);
@@ -150,6 +168,7 @@ export abstract class TextFieldBase {
     private updateState(): void {
         const isPopulated = this.currentValue.length > 0;
         const hasError = this.errorMessage !== null;
+        const shouldShowCharCount = this.options.maxLength && isPopulated;
 
         // Update classes
         this.element.classList.toggle("md-text-field--populated", isPopulated);
@@ -157,12 +176,21 @@ export abstract class TextFieldBase {
         this.element.classList.toggle("md-text-field--hovered", this.isHovered);
         this.element.classList.toggle("md-text-field--error", hasError);
 
-        // Update supporting text
-        if (hasError) {
-            this.supportingText.textContent = this.errorMessage;
-            this.supportingText.style.display = "block";
+        // Update supporting text - both error and character count can display simultaneously
+        const shouldShowContainer = hasError || shouldShowCharCount;
+
+        // Always reserve space for supporting text, but control visibility
+        this.supportingTextContainer.style.visibility = shouldShowContainer ? "visible" : "hidden";
+
+        // Left side: error message or empty (space always reserved)
+        this.supportingTextLeft.textContent = hasError ? this.errorMessage! : "";
+
+        // Right side: character count or empty
+        if (shouldShowCharCount) {
+            const charCount = `${this.currentValue.length} / ${this.options.maxLength}`;
+            this.supportingTextRight.textContent = charCount;
         } else {
-            this.supportingText.style.display = "none";
+            this.supportingTextRight.textContent = "";
         }
     }
 
