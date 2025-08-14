@@ -1,14 +1,78 @@
 # Basic Dialogs - Material Design 3 Specification
 
-> **1:1 extraction from Material Design 3 Specs**  
-> Source: https://m3.material.io/components/dialogs/specs#23e479cf-c5a6-4a8b-87b3-1202d51855ac  
-> Extracted: All accordions systematically expanded for complete coverage
+## Guidelines
+
+### Headline
+
+A dialog’s purpose should be communicated by its headline and buttons or actionable items.
+
+Headlines should:
+
+- Contain a brief, clear statement or question
+- Avoid apologies (“Sorry for the interruption”), alarm (“Warning!”), or ambiguity (“Are you sure?”)
+
+Headlines should always be succinct. They can wrap to a second line if necessary, and be truncated.
+
+### Buttons (label text)
+
+Dialog actions are most often represented as buttons and allow users to confirm, dismiss, or acknowledge something.
+
+Buttons are aligned to the trailing edge of the dialog for easier interaction. The confirmation button is always closest to the edge.
+
+Button alignment responds automatically for right-to-left languages, where the confirmation button is aligned to the left edge.
+
+A single action may be provided only if it’s an acknowledgement.
+Avoid presenting users with unclear choices. “Cancel” doesn't make sense here because no clear action is proposed.
+
+Dialogs should contain a maximum of two actions.
+
+- If a single action is provided, it must be an acknowledgement action
+- If two actions are provided, one must be a confirming action, and the other a dismissing action
+
+![Disable confirming actions (1) until a choice is made. Dismissive actions are never disabled](button-do.png)
+
+![Don’t place dismissive actions (1) to the right of confirming actions. Instead, place them to the left of confirming actions.](button-dont.png)
+
+### Usage
+
+A dialog is a modal window that appears in front of app content to provide critical information or ask for a decision. Dialogs disable all app functionality when they appear, and remain on screen until confirmed, dismissed, or a required action has been taken.
+
+Dialogs are purposefully interruptive, so they should be used sparingly. A less disruptive alternative is to use a dropdown menu, which provides options without interrupting a user’s experience.
+
+#### Do
+
+Use dialogs for prompts that block an app’s normal operation, and for critical information that requires a specific user task, decision, or acknowledgement
+
+#### Don't
+
+Don’t use dialogs for low- or medium-priority information. Instead use a snackbar, which can be dismissed or disappear automatically.
+
+### Behavior
+
+Dialogs use an enter and exit transition pattern to appear on screen.
+The dialog's scrim only fades in and out.
+
+### Position
+
+Dialogs retain focus until dismissed or an action has been taken, such as choosing a setting. They shouldn’t be obscured by other elements or appear partially on screen, with the exception of full-screen dialogs.
+
+### Scrolling
+
+Most dialog content should avoid scrolling. Even when scrolling is required, the dialog title is pinned at the top, with buttons pinned at the bottom. This ensures selected content remains visible alongside the title and buttons, even upon scroll.
+
+Dialogs don’t scroll with elements outside of the dialog, such as the background.
 
 ## Anatomy
 
 ![anatomy](anatomy.png)
 
-Container, Icon (optional), Headline, Supporting text, Divider (optional), Button (label text), Scrim
+1. Container
+2. Icon (optional) - out of scope for our component!
+3. Headline
+4. Supporting text - a.k.a. our content
+5. Divider (optional) - out of scope for our component@
+6. Button (label text)
+7. Scrim
 
 ### Container and scrim
 
@@ -16,11 +80,6 @@ Dialog containers appear above other screen elements and hold the dialog’s hea
 
 To focus attention on the dialog, surfaces behind the container are scrimmed with a temporary overlay to make them less prominent.
 
-The dialog's scrim only fades in and out.
-
-## Behavior
-
-Dialogs use an enter and exit transition pattern to appear on screen.
 The dialog's scrim only fades in and out.
 
 ## Basic Dialog Specifications
@@ -42,20 +101,6 @@ The dialog's scrim only fades in and out.
 - **Dialog action label text weight**: `md-sys-typescale-label-large-weight`
 - **Dialog action label text tracking**: `md-sys-typescale-label-large-tracking`
 - **Dialog action label text color**: `md-sys-color-primary`
-
-#### Icon
-
-- **Dialog icon size**: `24dp`
-- **Dialog icon color**: `md-sys-color-secondary`
-
-#### Subhead
-
-- **Dialog subhead font**: `md-sys-typescale-headline-small-font`
-- **Dialog subhead line height**: `md-sys-typescale-headline-small-line-height`
-- **Dialog subhead size**: `md-sys-typescale-headline-small-size`
-- **Dialog subhead weight**: `md-sys-typescale-headline-small-weight`
-- **Dialog subhead tracking**: `md-sys-typescale-headline-small-tracking`
-- **Dialog subhead color**: `md-sys-color-on-surface`
 
 #### Headline
 
@@ -117,6 +162,8 @@ The dialog's scrim only fades in and out.
 
 Color values are implemented through design tokens. For design, this means working with color values that correspond with tokens. For implementation, a color value will be a token that references a value.
 
+![dialog colors](dialog-colors.png)
+
 **Basic dialog color roles used for light and dark schemes:**
 
 - Surface container high
@@ -127,6 +174,8 @@ Color values are implemented through design tokens. For design, this means worki
 - Scrim
 
 ## Basic Dialog Measurements
+
+![dialog-measurements](dialog-measurements.png)
 
 | Attribute                        | Value                |
 | -------------------------------- | -------------------- |
