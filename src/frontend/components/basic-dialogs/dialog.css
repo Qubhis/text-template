@@ -1,0 +1,165 @@
+/* Material Design 3 Basic Dialog Styles */
+
+/* Scrim - Background overlay */
+.md-dialog-scrim {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--md-sys-color-scrim);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+    backdrop-filter: blur(1px);
+}
+
+.md-dialog-scrim.md-dialog-scrim-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Dialog Container */
+.md-dialog-container {
+    background-color: var(--md-sys-color-surface-container-high);
+    border-radius: var(--radius-3xl);
+    padding: var(--md-dp-spacing-24);
+    min-width: 280px;
+    max-width: 560px;
+    max-height: 90vh;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-dp-spacing-16);
+    transform: scale(0.9) translateY(-20px);
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    opacity: 0;
+    overflow: hidden;
+    /* Focus management */
+    outline: none;
+}
+
+.md-dialog-container.md-dialog-container-visible {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Dialog Title - MD3 Headline Small */
+.md-dialog-title {
+    font-size: var(--type-scale-headline-small);
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+}
+
+/* Dialog Content - MD3 Body Medium */
+.md-dialog-content {
+    font-size: var(--type-scale-body-medium);
+    line-height: 1.5;
+    color: var(--md-sys-color-on-surface-variant);
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Dialog Actions Container */
+.md-dialog-actions {
+    display: flex;
+    gap: var(--md-dp-spacing-8);
+    justify-content: flex-end;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: var(--md-dp-spacing-8);
+}
+
+/* Dialog Buttons - MD3 Label Large */
+.md-dialog-button {
+    font-size: var(--type-scale-label-large);
+    font-weight: 600;
+    padding: var(--md-dp-spacing-8) var(--md-dp-spacing-16);
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 40px;
+    outline-offset: 2px;
+}
+
+/* Primary button (confirming action) */
+.md-dialog-button-primary {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.md-dialog-button-primary:hover:not(:disabled) {
+    background-color: var(--md-sys-color-primary);
+    box-shadow: var(--md-elevation-1);
+}
+
+.md-dialog-button-primary:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+}
+
+.md-dialog-button-primary:active:not(:disabled) {
+    box-shadow: var(--md-elevation-0);
+}
+
+/* Secondary button (dismissive action) */
+.md-dialog-button-secondary {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+.md-dialog-button-secondary:hover:not(:disabled) {
+    background-color: var(--md-sys-color-secondary-container);
+    box-shadow: var(--md-elevation-1);
+}
+
+.md-dialog-button-secondary:focus-visible {
+    outline: 2px solid var(--md-sys-color-secondary);
+}
+
+.md-dialog-button-secondary:active:not(:disabled) {
+    box-shadow: var(--md-elevation-0);
+}
+
+/* Disabled state */
+.md-dialog-button:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Simple state effects */
+.md-dialog-button {
+    position: relative;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .md-dialog-container {
+        margin: var(--md-dp-spacing-16);
+        max-width: calc(100vw - 2 * var(--md-dp-spacing-16));
+        min-width: calc(100vw - 2 * var(--md-dp-spacing-16));
+    }
+
+    .md-dialog-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .md-dialog-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+

@@ -7,7 +7,7 @@ import DataManager, { StateChangeEvent } from "./core/dataManager.js";
 import { isTemplate } from "./core/apiClient.js";
 import ErrorHandler from "./core/errorHandler.js";
 import { TemplateList } from "./ui/templateList.js";
-import { ModalSystem } from "./ui/modalSystem.js";
+import { DialogSystem } from "../components/basic-dialogs/DialogSystem.js";
 import { TemplateEditor } from "./ui/templateEditor.js";
 import { DPICalculator } from "../utils/dpiCalculator.js";
 import { ThemeManager } from "./core/themeManager.js";
@@ -20,7 +20,7 @@ class App {
     private dataManager: DataManager;
     private errorHandler: ErrorHandler;
     private templateList: TemplateList;
-    private modalSystem: ModalSystem;
+    private dialogSystem: DialogSystem;
     private templateEditor: TemplateEditor; // Single interface to template editing with header integration
     private dpiCalculator: DPICalculator;
     private themeManager: ThemeManager;
@@ -35,12 +35,12 @@ class App {
             onCreateTemplate: () => this.handleCreateTemplate(),
         });
 
-        this.modalSystem = new ModalSystem();
+        this.dialogSystem = new DialogSystem();
 
         // Create template editor coordinator
         this.templateEditor = new TemplateEditor(this.dataManager, {
-            onShowUnsavedChangesModal: (onConfirm) => this.modalSystem.showUnsavedChangesModal(onConfirm),
-            onShowDeleteConfirmationModal: (templateTitle, onConfirm) => this.modalSystem.showDeleteConfirmationModal(templateTitle, onConfirm),
+            onShowUnsavedChangesModal: (onConfirm) => this.dialogSystem.showUnsavedChangesModal(onConfirm),
+            onShowDeleteConfirmationModal: (templateTitle, onConfirm) => this.dialogSystem.showDeleteConfirmationModal(templateTitle, onConfirm),
             onShowError: (title, message) => this.errorHandler.showError(title, message),
             onShowLoading: (message) => this.errorHandler.showLoading(message),
             onHideLoading: () => this.errorHandler.hideLoading(),
@@ -77,9 +77,9 @@ class App {
             console.log("🎨 Initializing template list...");
             this.templateList.initialize();
 
-            // Initialize Modal System
-            console.log("🎨 Initializing modal system...");
-            this.modalSystem.initialize();
+            // Initialize Dialog System
+            console.log("🎨 Initializing dialog system...");
+            this.dialogSystem.initialize();
 
             // Initialize Theme Settings Button
             console.log("🎨 Initializing theme settings...");

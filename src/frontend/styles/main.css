@@ -10,6 +10,8 @@
 @import url("./material-design-dp-variables.css");
 /* Import Material Design 3 Text Fields */
 @import url("../components/text-fields/textFields.css");
+/* Import Material Design 3 Dialog Component */
+@import url("../components/basic-dialogs/dialog.css");
 
 /* Reset and Base Styles */
 * {
@@ -344,7 +346,7 @@ body {
     font-size: var(--type-scale-body-medium);
     line-height: 1.6;
     color: var(--md-sys-color-on-surface);
-    background-color: var(--md-sys-color-surface-container-highest);
+    background-color: var(--md-sys-color-surface-container-high);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     padding: var(--md-dp-spacing-16);
     white-space: pre-wrap;
@@ -886,53 +888,6 @@ body {
     top: var(--md-dp-spacing-16);
     right: var(--md-dp-spacing-16);
     z-index: 1000;
-}
-
-/* Modern Modal */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--md-sys-color-scrim);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-content {
-    background-color: var(--md-sys-color-surface-container-high);
-    border-radius: var(--radius-3xl);
-    padding: var(--md-dp-spacing-32);
-    min-width: 300px;
-    max-width: 500px;
-    box-shadow: var(--md-elevation-3);
-}
-
-.modal-content h3 {
-    margin-bottom: var(--md-dp-spacing-16);
-    color: var(--md-sys-color-on-surface);
-    font-size: var(--type-scale-title-medium);
-    font-weight: 600;
-}
-
-.modal-content p {
-    margin-bottom: var(--md-dp-spacing-24);
-    color: var(--md-sys-color-on-surface-variant);
-    line-height: 1.6;
-}
-
-.modal-actions {
-    display: flex;
-    gap: var(--md-dp-spacing-16);
-    justify-content: flex-end;
 }
 
 /* Theme Settings Dialog - Positioned Popover */
