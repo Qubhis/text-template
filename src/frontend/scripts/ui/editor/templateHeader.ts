@@ -204,7 +204,7 @@ export class TemplateHeader {
             {
                 label: "Template Title",
                 value: "",
-                maxLength: 25,
+                maxLength: 50,
             },
             {
                 onChange: (value: string) => {
