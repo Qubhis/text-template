@@ -449,7 +449,7 @@ export abstract class TextFieldBase {
         // Set height based on actual line breaks, not wrapped content
         if (actualLineBreaks === 1) {
             // Single line: use default height and center content
-            textarea.style.height = "2rem";
+            textarea.style.height = "1.5rem";
             this.container.style.height = "";
         } else {
             // Multiple lines: expand height
