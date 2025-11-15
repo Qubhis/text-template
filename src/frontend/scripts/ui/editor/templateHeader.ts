@@ -29,6 +29,7 @@ export interface TemplateHeaderCallbacks {
  */
 interface TemplateDisplayData {
     title: string;
+    // TODO: remove unused attributes - leftovers from refactoring
     categoryId: string;
     description: string;
     content: string;

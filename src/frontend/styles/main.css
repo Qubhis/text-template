@@ -241,10 +241,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: anchor-center;
-    /* background-color: var(--md-sys-color-surface-container-low); */
     transition: all 0.3s ease;
-    /*     
-    height: calc(var(--md-dp-spacing-8) + 6rem); /* yeah I know - I should really use grid layout instead of this pixel perfect calc */
 }
 
 .template-info {
@@ -253,6 +250,7 @@ body {
 
 .content-header.edit-mode .template-info {
     margin-bottom: 0px;
+    width: 25rem;
 }
 
 .template-info h1 {
