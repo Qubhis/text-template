@@ -19,6 +19,11 @@ export interface TextFieldCallbacks {
     onOptionSelect?: (value: string) => void;
 }
 
+export enum TextFieldType {
+    Filled = "Filled",
+    Outlined = "Outlined",
+}
+
 // Simple dropdown arrow SVG
 export const DROPDOWN_ARROW_SVG = `
 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -28,6 +33,8 @@ export const DROPDOWN_ARROW_SVG = `
 
 export abstract class TextFieldBase {
     private readonly defaultMaxLines = 10;
+
+    readonly fieldType!: TextFieldType;
 
     protected element!: HTMLElement;
     protected container!: HTMLElement;
@@ -444,12 +451,14 @@ export abstract class TextFieldBase {
 
         // Use the actual line breaks count, not the calculated wrapped lines
         // Only expand if user has actually pressed Enter
+        // BUG: this is wrong logic, if we don't use enter then the field never expands - I realize that we had a trouble
+        // with previous solution for calculating wrapped lines, but let's explore this again
         this.container.style.alignItems = actualLineBreaks > 1 || this.options.stretchHeight ? "flex-start" : "center";
 
         // Set height based on actual line breaks, not wrapped content
         if (actualLineBreaks === 1) {
             // Single line: use default height and center content
-            textarea.style.height = "1.5rem";
+            textarea.style.height = this.fieldType === TextFieldType.Outlined ? "2rem" : "1.5rem";
             this.container.style.height = "";
         } else {
             // Multiple lines: expand height
