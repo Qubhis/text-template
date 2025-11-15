@@ -19,8 +19,7 @@
     "type-check:backend": "tsc -p tsconfig.backend.json --noEmit",
     "type-check:frontend": "tsc -p tsconfig.frontend.json --noEmit",
     "lint": "echo 'Linting not configured yet'",
-    "testorig": "npm run build:dev && npm run test:frontend",
-    "test": "",
+    "test": "npm run build:dev && npm run test:frontend",
     "test:frontend": "node ./dist/frontend/tests/suite.test.js",
     "validate": "npm run type-check && npm run lint && npm run test",
     "prebuild": "npm run validate",
@@ -40,6 +39,6 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "tsx": "^4.20.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.8"
   }
 }
