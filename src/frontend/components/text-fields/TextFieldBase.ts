@@ -5,6 +5,7 @@
 
 export interface TextFieldOptions {
     label: string;
+    isRequired?: boolean;
     multiline?: boolean;
     maxLines?: number; // For outlined fields with hidden scrollbar
     stretchHeight?: boolean; // For filled content field
@@ -19,6 +20,11 @@ export interface TextFieldCallbacks {
     onOptionSelect?: (value: string) => void;
 }
 
+export enum TextFieldType {
+    Filled = "Filled",
+    Outlined = "Outlined",
+}
+
 // Simple dropdown arrow SVG
 export const DROPDOWN_ARROW_SVG = `
 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -28,6 +34,8 @@ export const DROPDOWN_ARROW_SVG = `
 
 export abstract class TextFieldBase {
     private readonly defaultMaxLines = 10;
+
+    readonly fieldType!: TextFieldType;
 
     protected element!: HTMLElement;
     protected container!: HTMLElement;
@@ -78,6 +86,7 @@ export abstract class TextFieldBase {
         // Create input element
         if (this.options.multiline) {
             this.input = document.createElement("textarea");
+            this.input.setAttribute("rows", "1");
             if (this.options.maxLines) {
                 this.element.classList.add("md-text-field--max-lines");
             }
@@ -101,7 +110,8 @@ export abstract class TextFieldBase {
         // Create label
         this.label = document.createElement("label");
         this.label.className = "md-text-field__label";
-        this.label.textContent = this.options.label;
+        this.label.textContent = `${this.options.label}${(this.options.isRequired ?? false) ? "*" : ""}`;
+        const isRequiredField = this.options.isRequired ?? false;
 
         // Create supporting text container with left and right sections
         this.supportingTextContainer = document.createElement("div");
@@ -112,6 +122,10 @@ export abstract class TextFieldBase {
 
         this.supportingTextLeft = document.createElement("div");
         this.supportingTextLeft.style.flex = "1";
+        if (isRequiredField) {
+            this.supportingTextLeft.textContent = "*required";
+            this.supportingTextContainer.style.visibility = "visible";
+        }
 
         this.supportingTextRight = document.createElement("div");
         this.supportingTextRight.style.flexShrink = "0";
@@ -134,7 +148,9 @@ export abstract class TextFieldBase {
     private setupEventListeners(): void {
         // Input events
         this.input.addEventListener("input", () => {
-            this.currentValue = this.input.value;
+            const trimmedValue = this.input.value.trimStart();
+            this.input.value = trimmedValue;
+            this.currentValue = trimmedValue;
             this.clearError(); // Auto-clear error on input
             this.autoResizeTextarea();
             this.updateState();
@@ -169,6 +185,7 @@ export abstract class TextFieldBase {
         const isPopulated = this.currentValue.length > 0;
         const hasError = this.errorMessage !== null;
         const shouldShowCharCount = this.options.maxLength && isPopulated;
+        const isRequired = this.options.isRequired ?? false;
 
         // Update classes
         this.element.classList.toggle("md-text-field--populated", isPopulated);
@@ -177,13 +194,13 @@ export abstract class TextFieldBase {
         this.element.classList.toggle("md-text-field--error", hasError);
 
         // Update supporting text - both error and character count can display simultaneously
-        const shouldShowContainer = hasError || shouldShowCharCount;
+        const shouldShowContainer = hasError || shouldShowCharCount || isRequired;
 
         // Always reserve space for supporting text, but control visibility
         this.supportingTextContainer.style.visibility = shouldShowContainer ? "visible" : "hidden";
 
-        // Left side: error message or empty (space always reserved)
-        this.supportingTextLeft.textContent = hasError ? this.errorMessage! : "";
+        // Left side: error message or default supporting text
+        this.supportingTextLeft.textContent = hasError ? this.errorMessage! : isRequired ? "*required" : "";
 
         // Right side: character count or empty
         if (shouldShowCharCount) {
@@ -429,7 +446,7 @@ export abstract class TextFieldBase {
         const maxLines = this.options.maxLines ?? this.defaultMaxLines;
 
         // Check if there are actual line breaks in the content
-        const actualLineBreaks = (textarea.value.match(/\n/g) || []).length + 1;
+        // const actualLineBreaks = (textarea.value.match(/\n/g) || []).length + 1;
 
         // Reset height to calculate scroll height
         textarea.style.height = "auto";
@@ -439,17 +456,14 @@ export abstract class TextFieldBase {
         const lineHeight = parseFloat(computedStyle.lineHeight);
         const paddingTop = parseFloat(computedStyle.paddingTop);
         const paddingBottom = parseFloat(computedStyle.paddingBottom);
+        // Compute visible lines
+        const actualLines = Math.floor(textarea.scrollHeight / parseInt(computedStyle.lineHeight));
+        // Only expand if user has actually pressed Enter or the text is wrapped
+        this.container.style.alignItems = actualLines > 1 || this.options.stretchHeight ? "flex-start" : "center";
 
-        // Calculate number of lines needed based on scroll height
-
-        // Use the actual line breaks count, not the calculated wrapped lines
-        // Only expand if user has actually pressed Enter
-        this.container.style.alignItems = actualLineBreaks > 1 || this.options.stretchHeight ? "flex-start" : "center";
-
-        // Set height based on actual line breaks, not wrapped content
-        if (actualLineBreaks === 1) {
+        if (actualLines === 1) {
             // Single line: use default height and center content
-            textarea.style.height = "2rem";
+            textarea.style.height = this.fieldType === TextFieldType.Outlined ? "2rem" : "1.5rem";
             this.container.style.height = "";
         } else {
             // Multiple lines: expand height
@@ -458,12 +472,12 @@ export abstract class TextFieldBase {
                 this.container.style.height = "100%";
             } else {
                 // Limit to maxLines
-                const actualLines = Math.min(actualLineBreaks, maxLines);
-                textarea.style.height = actualLines * lineHeight + paddingTop + paddingBottom + "px";
+                const linesCount = Math.min(actualLines, maxLines);
+                textarea.style.height = linesCount * lineHeight + paddingTop + paddingBottom + "px";
                 this.container.style.height = "auto";
             }
             // Enable scrollbar if content exceeds maxLines
-            if (this.options.stretchHeight || (actualLineBreaks > maxLines && this.element.classList.contains("md-text-field--max-lines"))) {
+            if (this.options.stretchHeight || (actualLines > maxLines && this.element.classList.contains("md-text-field--max-lines"))) {
                 textarea.style.overflowY = "auto";
             } else {
                 textarea.style.overflowY = "hidden";
@@ -477,10 +491,12 @@ export abstract class TextFieldBase {
             const MIN_FORM_GROUP_HEIGHT = HEIGHT_1_REM * 2;
             if (this.options.stretchHeight) {
                 // Calculate required height: content height + label space + padding
-                const contentHeight = actualLineBreaks * lineHeight + paddingTop + paddingBottom;
-                const labelSpace = 24; // Space for floating label
-                const formGroupPadding = 16; // Form group internal padding
-                const requiredHeight = contentHeight + labelSpace + formGroupPadding;
+                const contentHeight = actualLines * lineHeight + paddingTop + paddingBottom;
+                const labelSpace = 1.5 * HEIGHT_1_REM; // Space for floating label
+                const formGroupPadding = HEIGHT_1_REM; // Form group internal padding
+                const supportingTextSpace = HEIGHT_1_REM; //
+
+                const requiredHeight = contentHeight + labelSpace + formGroupPadding + ((this.options.isRequired ?? false) ? supportingTextSpace : 0);
                 // Set height to grow with content, but respect existing max-height
                 const minHeight = Math.max(requiredHeight, MIN_FORM_GROUP_HEIGHT); // Minimum 120px
                 parentFormGroup.style.height = `${minHeight}px`;

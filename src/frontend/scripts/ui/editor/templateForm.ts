@@ -55,6 +55,7 @@ export class TemplateForm {
     private contentDisplay: HTMLElement;
     private copyButton: HTMLButtonElement;
     private copyFeedback: HTMLElement;
+    private copyWithWarningFeedback: HTMLElement;
 
     // Edit Mode Container
     private editContent: HTMLElement;
@@ -71,13 +72,6 @@ export class TemplateForm {
     private currentMode: "view" | "edit" | "create" = "view";
     private currentData: TemplateDisplayData = { title: "", categoryId: "", description: "", content: "" };
 
-    // Validation tracking - track if fields have been blurred
-    private hasBeenBlurred = {
-        category: false,
-        description: false,
-        content: false,
-    };
-
     constructor(callbacks: TemplateFormCallbacks = {}) {
         this.callbacks = callbacks;
 
@@ -90,6 +84,7 @@ export class TemplateForm {
         this.editContent = getRequiredElement<HTMLElement>("editContent");
         this.copyButton = getRequiredElement<HTMLButtonElement>("copyButton");
         this.copyFeedback = getRequiredElement<HTMLElement>("copyFeedback");
+        this.copyWithWarningFeedback = getRequiredElement<HTMLElement>("copyWithWarningFeedback");
 
         // Setup copy button (always present, never destroyed)
         this.setupCopyButton();
@@ -223,7 +218,8 @@ export class TemplateForm {
                     if (index > 0) {
                         this.contentDisplay.appendChild(document.createElement("br"));
                     }
-                    if (line.trim()) {
+                    const containOnlySpacesRegex = /^ [ ]*$/;
+                    if (containOnlySpacesRegex.test(line) || line.trim()) {
                         const textNode = document.createTextNode(line);
                         this.contentDisplay.appendChild(textNode);
                     }
@@ -309,11 +305,12 @@ export class TemplateForm {
 
         // Use existing chunk logic to get processed content
         const chunks = this.splitContentIntoChunks(content, variableValues);
+        const isSomeVariableValueMissing = chunks.some((chunk) => chunk.isVariable && !chunk.isFilled);
         const processedContent = chunks.map((chunk) => chunk.text).join("");
 
         try {
             await navigator.clipboard.writeText(processedContent);
-            this.showCopySuccess();
+            isSomeVariableValueMissing ? this.showCopySuccessWithWarning() : this.showCopySuccess();
         } catch (error) {
             console.error("Failed to copy to clipboard:", error);
         }
@@ -331,6 +328,20 @@ export class TemplateForm {
             removeClass(this.copyButton, "copied");
             removeClass(this.copyFeedback, "show");
         }, 2000);
+    }
+
+    /**
+     * Show copy success animation
+     */
+    private showCopySuccessWithWarning(): void {
+        addClass(this.copyButton, "copied-with-warning");
+        addClass(this.copyWithWarningFeedback, "show");
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+            removeClass(this.copyButton, "copied-with-warning");
+            removeClass(this.copyWithWarningFeedback, "show");
+        }, 3500);
     }
 
     // Private Methods - Edit Mode
@@ -374,18 +385,13 @@ export class TemplateForm {
         this.categoryField = new FilledTextField(
             {
                 label: "Category",
+                isRequired: true,
                 value: this.currentData.categoryId,
             },
             {
                 onOptionSelect: (value: string) => {
                     this.callbacks.onCategoryChange?.(value);
-                    // Validate immediately on selection
                     this.validateCategoryField();
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred.category = true;
-                    this.validateCategoryField();
-                    this.callbacks.onCategoryBlur?.();
                 },
             }
         );
@@ -409,7 +415,7 @@ export class TemplateForm {
 
         this.descriptionField = new FilledTextField(
             {
-                label: "Description (optional)",
+                label: "Description",
                 value: this.currentData.description,
                 multiline: true,
                 maxLines: 10,
@@ -417,16 +423,7 @@ export class TemplateForm {
             {
                 onChange: (value: string) => {
                     this.callbacks.onDescriptionChange?.(value);
-
-                    // Validate on change only after first blur
-                    if (this.hasBeenBlurred.description) {
-                        this.validateDescriptionField();
-                    }
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred.description = true;
                     this.validateDescriptionField();
-                    this.callbacks.onDescriptionBlur?.();
                 },
             }
         );
@@ -439,7 +436,8 @@ export class TemplateForm {
 
         this.contentField = new FilledTextField(
             {
-                label: "Template Content",
+                label: "Content",
+                isRequired: true,
                 multiline: true,
                 stretchHeight: true,
                 value: this.currentData.content,
@@ -447,16 +445,7 @@ export class TemplateForm {
             {
                 onChange: (value: string) => {
                     this.callbacks.onContentChange?.(value);
-
-                    // Validate on change only after first blur
-                    if (this.hasBeenBlurred.content) {
-                        this.validateContentField();
-                    }
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred.content = true;
                     this.validateContentField();
-                    this.callbacks.onContentBlur?.();
                 },
             }
         );
@@ -577,13 +566,6 @@ export class TemplateForm {
      * Destroy edit elements
      */
     private destroyEditElements(): void {
-        // Reset blur tracking when destroying elements
-        this.hasBeenBlurred = {
-            category: false,
-            description: false,
-            content: false,
-        };
-
         if (this.categoryField) {
             this.categoryField.destroy();
             this.categoryField = null;
@@ -611,6 +593,7 @@ export class TemplateForm {
     public destroy(): void {
         this.destroyEditElements();
 
+        // TODO: use AbortController to cleanup event handlers
         // Remove all event listeners
         this.cleanupFunctions.forEach((cleanup) => cleanup());
         this.cleanupFunctions = [];

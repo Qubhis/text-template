@@ -17,7 +17,6 @@ import { FilledTextField } from "../../../components/text-fields/FilledTextField
 export interface TemplateHeaderCallbacks {
     onTitleChange?: (title: string) => void;
     onTitleValidate?: (title: string) => string | null; // Return error message or null
-    onTitleBlur?: () => void;
     onSave?: () => void;
     onCancel?: () => void;
     onEdit?: () => void;
@@ -29,6 +28,7 @@ export interface TemplateHeaderCallbacks {
  */
 interface TemplateDisplayData {
     title: string;
+    // TODO: remove unused attributes - leftovers from refactoring
     categoryId: string;
     description: string;
     content: string;
@@ -54,7 +54,6 @@ export class TemplateHeader {
 
     // State
     private currentMode: "view" | "edit" | "create" = "view";
-    private hasBeenBlurred: boolean = false; // Track if title field has been blurred
 
     constructor(callbacks: TemplateHeaderCallbacks = {}) {
         this.callbacks = callbacks;
@@ -202,23 +201,15 @@ export class TemplateHeader {
         // Create title field using FilledTextField
         this.titleField = new FilledTextField(
             {
-                label: "Template Title",
+                label: "Title",
+                isRequired: true,
                 value: "",
-                maxLength: 25,
+                maxLength: 50,
             },
             {
                 onChange: (value: string) => {
                     this.callbacks.onTitleChange?.(value);
-
-                    // Validate on change only after first blur (immediate feedback when fixing)
-                    if (this.hasBeenBlurred) {
-                        this.validateTitleField();
-                    }
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred = true;
                     this.validateTitleField();
-                    this.callbacks.onTitleBlur?.();
                 },
             }
         );
@@ -329,9 +320,6 @@ export class TemplateHeader {
      * Cleanup inline editing elements
      */
     private cleanupInlineEditingElements(): void {
-        // Reset blur tracking when exiting edit mode
-        this.hasBeenBlurred = false;
-
         // Destroy FilledTextField component
         if (this.titleField) {
             this.titleField.destroy();
