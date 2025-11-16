@@ -672,29 +672,6 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.updateSaveButtonState();
     }
 
-    // /**
-    //  * Show validation errors for empty required fields
-    //  */
-    // private showRequiredFieldErrors(): void {
-    //     // Show errors only for required fields that are empty
-    //     const titleError = this.getTitleValidationError(this.currentData.title);
-    //     if (titleError) {
-    //         this.templateHeader.setTitleError(titleError);
-    //     }
-
-    //     const categoryError = this.getCategoryValidationError(this.currentData.categoryId);
-    //     if (categoryError) {
-    //         this.templateForm.setCategoryError(categoryError);
-    //     }
-
-    //     const contentError = this.getContentValidationError(this.currentData.content);
-    //     if (contentError) {
-    //         this.templateForm.setContentError(contentError);
-    //     }
-
-    //     // Don't show description errors since it's optional
-    // }
-
     /**
      * Cleanup coordinator
      */
