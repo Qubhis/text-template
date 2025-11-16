@@ -218,7 +218,8 @@ export class TemplateForm {
                     if (index > 0) {
                         this.contentDisplay.appendChild(document.createElement("br"));
                     }
-                    if (line.trim()) {
+                    const containOnlySpacesRegex = /^ [ ]*$/;
+                    if (containOnlySpacesRegex.test(line) || line.trim()) {
                         const textNode = document.createTextNode(line);
                         this.contentDisplay.appendChild(textNode);
                     }
