@@ -5,6 +5,7 @@
 
 export interface TextFieldOptions {
     label: string;
+    isRequired?: boolean;
     multiline?: boolean;
     maxLines?: number; // For outlined fields with hidden scrollbar
     stretchHeight?: boolean; // For filled content field
@@ -109,7 +110,8 @@ export abstract class TextFieldBase {
         // Create label
         this.label = document.createElement("label");
         this.label.className = "md-text-field__label";
-        this.label.textContent = this.options.label;
+        this.label.textContent = `${this.options.label}${(this.options.isRequired ?? false) ? "*" : ""}`;
+        const isRequiredField = this.options.isRequired ?? false;
 
         // Create supporting text container with left and right sections
         this.supportingTextContainer = document.createElement("div");
@@ -120,6 +122,10 @@ export abstract class TextFieldBase {
 
         this.supportingTextLeft = document.createElement("div");
         this.supportingTextLeft.style.flex = "1";
+        if (isRequiredField) {
+            this.supportingTextLeft.textContent = "*required";
+            this.supportingTextContainer.style.visibility = "visible";
+        }
 
         this.supportingTextRight = document.createElement("div");
         this.supportingTextRight.style.flexShrink = "0";
@@ -179,6 +185,7 @@ export abstract class TextFieldBase {
         const isPopulated = this.currentValue.length > 0;
         const hasError = this.errorMessage !== null;
         const shouldShowCharCount = this.options.maxLength && isPopulated;
+        const isRequired = this.options.isRequired ?? false;
 
         // Update classes
         this.element.classList.toggle("md-text-field--populated", isPopulated);
@@ -187,13 +194,13 @@ export abstract class TextFieldBase {
         this.element.classList.toggle("md-text-field--error", hasError);
 
         // Update supporting text - both error and character count can display simultaneously
-        const shouldShowContainer = hasError || shouldShowCharCount;
+        const shouldShowContainer = hasError || shouldShowCharCount || isRequired;
 
         // Always reserve space for supporting text, but control visibility
         this.supportingTextContainer.style.visibility = shouldShowContainer ? "visible" : "hidden";
 
-        // Left side: error message or empty (space always reserved)
-        this.supportingTextLeft.textContent = hasError ? this.errorMessage! : "";
+        // Left side: error message or default supporting text
+        this.supportingTextLeft.textContent = hasError ? this.errorMessage! : isRequired ? "*required" : "";
 
         // Right side: character count or empty
         if (shouldShowCharCount) {

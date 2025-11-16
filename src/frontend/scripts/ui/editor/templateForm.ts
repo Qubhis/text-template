@@ -384,6 +384,7 @@ export class TemplateForm {
         this.categoryField = new FilledTextField(
             {
                 label: "Category",
+                isRequired: true,
                 value: this.currentData.categoryId,
             },
             {
@@ -413,7 +414,7 @@ export class TemplateForm {
 
         this.descriptionField = new FilledTextField(
             {
-                label: "Description (optional)",
+                label: "Description",
                 value: this.currentData.description,
                 multiline: true,
                 maxLines: 10,
@@ -434,7 +435,8 @@ export class TemplateForm {
 
         this.contentField = new FilledTextField(
             {
-                label: "Template Content",
+                label: "Content",
+                isRequired: true,
                 multiline: true,
                 stretchHeight: true,
                 value: this.currentData.content,

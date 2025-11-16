@@ -201,7 +201,8 @@ export class TemplateHeader {
         // Create title field using FilledTextField
         this.titleField = new FilledTextField(
             {
-                label: "Template Title",
+                label: "Title",
+                isRequired: true,
                 value: "",
                 maxLength: 50,
             },
