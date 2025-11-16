@@ -292,16 +292,6 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.syncData();
     }
 
-    // /**
-    //  * Handle field blur - in create mode, show errors for all empty required fields
-    //  */
-    // private handleFieldBlur(): void {
-    //     if (this.currentMode === "create" || "edit") {
-    //         // Show validation errors for all required fields to guide user
-    //         this.showRequiredFieldErrors();
-    //     }
-    // }
-
     /**
      * Update dirty state based on current vs original data
      */
