@@ -415,6 +415,10 @@ body {
     display: none;
 }
 
+.copy-button .warning-icon {
+    display: none;
+}
+
 .copy-button.copied .copy-icon {
     display: none;
 }
@@ -423,7 +427,16 @@ body {
     display: block;
 }
 
-.copy-button.copied {
+.copy-button.copied-with-warning .copy-icon {
+    display: none;
+}
+
+.copy-button.copied-with-warning .warning-icon {
+    display: block;
+}
+
+.copy-button.copied,
+.copy-button.copied-with-warning {
     background: var(--md-sys-color-success-container);
     border-color: var(--md-sys-color-success);
     color: var(--md-sys-color-on-success-container);
@@ -431,7 +444,8 @@ body {
     box-shadow: var(--md-elevation-1);
 }
 
-.copy-button.copied:hover {
+.copy-button.copied:hover,
+.copy-button.copied-with-warning:hover {
     background: var(--md-sys-color-success-container);
     color: var(--md-sys-color-on-success-container);
     box-shadow: var(--md-elevation-1);

@@ -55,6 +55,7 @@ export class TemplateForm {
     private contentDisplay: HTMLElement;
     private copyButton: HTMLButtonElement;
     private copyFeedback: HTMLElement;
+    private copyWithWarningFeedback: HTMLElement;
 
     // Edit Mode Container
     private editContent: HTMLElement;
@@ -90,6 +91,7 @@ export class TemplateForm {
         this.editContent = getRequiredElement<HTMLElement>("editContent");
         this.copyButton = getRequiredElement<HTMLButtonElement>("copyButton");
         this.copyFeedback = getRequiredElement<HTMLElement>("copyFeedback");
+        this.copyWithWarningFeedback = getRequiredElement<HTMLElement>("copyWithWarningFeedback");
 
         // Setup copy button (always present, never destroyed)
         this.setupCopyButton();
@@ -309,11 +311,12 @@ export class TemplateForm {
 
         // Use existing chunk logic to get processed content
         const chunks = this.splitContentIntoChunks(content, variableValues);
+        const isSomeVariableValueMissing = chunks.some((chunk) => chunk.isVariable && !chunk.isFilled);
         const processedContent = chunks.map((chunk) => chunk.text).join("");
 
         try {
             await navigator.clipboard.writeText(processedContent);
-            this.showCopySuccess();
+            isSomeVariableValueMissing ? this.showCopySuccessWithWarning() : this.showCopySuccess();
         } catch (error) {
             console.error("Failed to copy to clipboard:", error);
         }
@@ -331,6 +334,20 @@ export class TemplateForm {
             removeClass(this.copyButton, "copied");
             removeClass(this.copyFeedback, "show");
         }, 2000);
+    }
+
+    /**
+     * Show copy success animation
+     */
+    private showCopySuccessWithWarning(): void {
+        addClass(this.copyButton, "copied-with-warning");
+        addClass(this.copyWithWarningFeedback, "show");
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+            removeClass(this.copyButton, "copied-with-warning");
+            removeClass(this.copyWithWarningFeedback, "show");
+        }, 3500);
     }
 
     // Private Methods - Edit Mode
@@ -611,6 +628,7 @@ export class TemplateForm {
     public destroy(): void {
         this.destroyEditElements();
 
+        // TODO: use AbortController to cleanup event handlers
         // Remove all event listeners
         this.cleanupFunctions.forEach((cleanup) => cleanup());
         this.cleanupFunctions = [];
