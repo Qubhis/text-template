@@ -492,9 +492,11 @@ export abstract class TextFieldBase {
             if (this.options.stretchHeight) {
                 // Calculate required height: content height + label space + padding
                 const contentHeight = actualLines * lineHeight + paddingTop + paddingBottom;
-                const labelSpace = 24; // Space for floating label
-                const formGroupPadding = 16; // Form group internal padding
-                const requiredHeight = contentHeight + labelSpace + formGroupPadding;
+                const labelSpace = 1.5 * HEIGHT_1_REM; // Space for floating label
+                const formGroupPadding = HEIGHT_1_REM; // Form group internal padding
+                const supportingTextSpace = HEIGHT_1_REM; //
+
+                const requiredHeight = contentHeight + labelSpace + formGroupPadding + ((this.options.isRequired ?? false) ? supportingTextSpace : 0);
                 // Set height to grow with content, but respect existing max-height
                 const minHeight = Math.max(requiredHeight, MIN_FORM_GROUP_HEIGHT); // Minimum 120px
                 parentFormGroup.style.height = `${minHeight}px`;
