@@ -72,13 +72,6 @@ export class TemplateForm {
     private currentMode: "view" | "edit" | "create" = "view";
     private currentData: TemplateDisplayData = { title: "", categoryId: "", description: "", content: "" };
 
-    // Validation tracking - track if fields have been blurred
-    private hasBeenBlurred = {
-        category: false,
-        description: false,
-        content: false,
-    };
-
     constructor(callbacks: TemplateFormCallbacks = {}) {
         this.callbacks = callbacks;
 
@@ -396,13 +389,7 @@ export class TemplateForm {
             {
                 onOptionSelect: (value: string) => {
                     this.callbacks.onCategoryChange?.(value);
-                    // Validate immediately on selection
                     this.validateCategoryField();
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred.category = true;
-                    this.validateCategoryField();
-                    this.callbacks.onCategoryBlur?.();
                 },
             }
         );
@@ -434,16 +421,7 @@ export class TemplateForm {
             {
                 onChange: (value: string) => {
                     this.callbacks.onDescriptionChange?.(value);
-
-                    // Validate on change only after first blur
-                    if (this.hasBeenBlurred.description) {
-                        this.validateDescriptionField();
-                    }
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred.description = true;
                     this.validateDescriptionField();
-                    this.callbacks.onDescriptionBlur?.();
                 },
             }
         );
@@ -464,16 +442,7 @@ export class TemplateForm {
             {
                 onChange: (value: string) => {
                     this.callbacks.onContentChange?.(value);
-
-                    // Validate on change only after first blur
-                    if (this.hasBeenBlurred.content) {
-                        this.validateContentField();
-                    }
-                },
-                onBlur: () => {
-                    this.hasBeenBlurred.content = true;
                     this.validateContentField();
-                    this.callbacks.onContentBlur?.();
                 },
             }
         );
@@ -594,13 +563,6 @@ export class TemplateForm {
      * Destroy edit elements
      */
     private destroyEditElements(): void {
-        // Reset blur tracking when destroying elements
-        this.hasBeenBlurred = {
-            category: false,
-            description: false,
-            content: false,
-        };
-
         if (this.categoryField) {
             this.categoryField.destroy();
             this.categoryField = null;

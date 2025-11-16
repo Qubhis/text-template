@@ -68,7 +68,6 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.templateHeader = new TemplateHeader({
             onTitleChange: (title) => this.handleDataChange({ title }),
             onTitleValidate: (title) => this.validateTitle(title),
-            onTitleBlur: () => this.handleFieldBlur(),
             onSave: () => this.handleSave(),
             onCancel: () => this.handleCancel(),
             onEdit: () => this.handleEdit(),
@@ -78,13 +77,10 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.templateForm = new TemplateForm({
             onCategoryChange: (categoryName) => this.handleCategoryNameChange(categoryName),
             onCategoryValidate: (categoryId) => this.validateCategory(categoryId),
-            onCategoryBlur: () => this.handleFieldBlur(),
             onDescriptionChange: (description) => this.handleDataChange({ description }),
             onDescriptionValidate: (description) => this.validateDescription(description),
-            onDescriptionBlur: () => this.handleFieldBlur(),
             onContentChange: (content) => this.handleDataChange({ content }),
             onContentValidate: (content) => this.validateContent(content),
-            onContentBlur: () => this.handleFieldBlur(),
             getVariableValues: () => this.getVariableValues(),
         });
 
@@ -296,15 +292,15 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.syncData();
     }
 
-    /**
-     * Handle field blur - in create mode, show errors for all empty required fields
-     */
-    private handleFieldBlur(): void {
-        if (this.currentMode === "create" || "edit") {
-            // Show validation errors for all required fields to guide user
-            this.showRequiredFieldErrors();
-        }
-    }
+    // /**
+    //  * Handle field blur - in create mode, show errors for all empty required fields
+    //  */
+    // private handleFieldBlur(): void {
+    //     if (this.currentMode === "create" || "edit") {
+    //         // Show validation errors for all required fields to guide user
+    //         this.showRequiredFieldErrors();
+    //     }
+    // }
 
     /**
      * Update dirty state based on current vs original data
@@ -676,28 +672,28 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.updateSaveButtonState();
     }
 
-    /**
-     * Show validation errors for empty required fields
-     */
-    private showRequiredFieldErrors(): void {
-        // Show errors only for required fields that are empty
-        const titleError = this.getTitleValidationError(this.currentData.title);
-        if (titleError) {
-            this.templateHeader.setTitleError(titleError);
-        }
+    // /**
+    //  * Show validation errors for empty required fields
+    //  */
+    // private showRequiredFieldErrors(): void {
+    //     // Show errors only for required fields that are empty
+    //     const titleError = this.getTitleValidationError(this.currentData.title);
+    //     if (titleError) {
+    //         this.templateHeader.setTitleError(titleError);
+    //     }
 
-        const categoryError = this.getCategoryValidationError(this.currentData.categoryId);
-        if (categoryError) {
-            this.templateForm.setCategoryError(categoryError);
-        }
+    //     const categoryError = this.getCategoryValidationError(this.currentData.categoryId);
+    //     if (categoryError) {
+    //         this.templateForm.setCategoryError(categoryError);
+    //     }
 
-        const contentError = this.getContentValidationError(this.currentData.content);
-        if (contentError) {
-            this.templateForm.setContentError(contentError);
-        }
+    //     const contentError = this.getContentValidationError(this.currentData.content);
+    //     if (contentError) {
+    //         this.templateForm.setContentError(contentError);
+    //     }
 
-        // Don't show description errors since it's optional
-    }
+    //     // Don't show description errors since it's optional
+    // }
 
     /**
      * Cleanup coordinator
