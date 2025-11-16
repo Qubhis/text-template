@@ -142,7 +142,9 @@ export abstract class TextFieldBase {
     private setupEventListeners(): void {
         // Input events
         this.input.addEventListener("input", () => {
-            this.currentValue = this.input.value;
+            const trimmedValue = this.input.value.trimStart();
+            this.input.value = trimmedValue;
+            this.currentValue = trimmedValue;
             this.clearError(); // Auto-clear error on input
             this.autoResizeTextarea();
             this.updateState();
