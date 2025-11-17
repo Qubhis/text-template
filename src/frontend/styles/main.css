@@ -844,13 +844,13 @@ body {
 
 /* Danger Button */
 .btn-danger {
-    background-color: var(--md-sys-color-error);
-    color: var(--md-sys-color-on-error);
+    background-color: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
     transition: all 0.2s ease;
 }
 
 .btn-danger:hover:not(:disabled) {
-    background-color: var(--md-sys-color-error);
+    background-color: var(--md-sys-color-tertiary-container);
     box-shadow: var(--md-elevation-1);
     transition: all 0.2s ease;
 }
