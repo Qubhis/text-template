@@ -304,7 +304,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private handleResetValues(): void {
         this.resetVariableValues();
         // Refresh both variable panel and form display
-        this.syncData();
+        this.variablePanel.updateVariableValues(this.getVariableValues());
     }
 
     /**
