@@ -21,6 +21,7 @@ export interface TemplateHeaderCallbacks {
     onCancel?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
+    onExport?: () => void;
 }
 
 /**
@@ -45,6 +46,7 @@ export class TemplateHeader {
     // DOM Elements
     private titleElement: HTMLElement;
     private editButton: HTMLButtonElement;
+    private exportButton: HTMLButtonElement;
     private deleteButton: HTMLButtonElement;
 
     // Inline editing elements (created dynamically)
@@ -61,6 +63,7 @@ export class TemplateHeader {
         // Get required DOM elements
         this.titleElement = getRequiredElement<HTMLElement>("templateTitle");
         this.editButton = getRequiredElement<HTMLButtonElement>("editTemplateBtn");
+        this.exportButton = getRequiredElement<HTMLButtonElement>("exportTemplateBtn");
         this.deleteButton = getRequiredElement<HTMLButtonElement>("deleteTemplateBtn");
     }
 
@@ -81,6 +84,12 @@ export class TemplateHeader {
             this.callbacks.onEdit?.();
         });
         this.cleanupFunctions.push(editCleanup);
+
+        // Export button
+        const exportCleanup = addEventListenerWithCleanup(this.exportButton, "click", () => {
+            this.callbacks.onExport?.();
+        });
+        this.cleanupFunctions.push(exportCleanup);
 
         // Delete button
         const deleteCleanup = addEventListenerWithCleanup(this.deleteButton, "click", () => {
@@ -266,6 +275,7 @@ export class TemplateHeader {
 
         // Hide view mode buttons
         setElementDisplayed(this.editButton, false);
+        setElementDisplayed(this.exportButton, false);
         setElementDisplayed(this.deleteButton, false);
 
         // Show edit mode buttons
@@ -290,8 +300,9 @@ export class TemplateHeader {
         setElementDisplayed(this.titleElement, true);
 
         // Show view mode buttons
-        setElementDisplayed(this.deleteButton, true);
         setElementDisplayed(this.editButton, true);
+        setElementDisplayed(this.exportButton, true);
+        setElementDisplayed(this.deleteButton, true);
 
         // Remove edit mode class from header
         const header = this.titleElement.closest(".content-header");
@@ -342,6 +353,7 @@ export class TemplateHeader {
      */
     private enableActionButtons(enabled: boolean): void {
         this.editButton.disabled = !enabled;
+        this.exportButton.disabled = !enabled;
         this.deleteButton.disabled = !enabled;
     }
 

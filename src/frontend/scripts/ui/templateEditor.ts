@@ -72,6 +72,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
             onCancel: () => this.handleCancel(),
             onEdit: () => this.handleEdit(),
             onDelete: () => this.handleDelete(),
+            onExport: () => this.handleExport(),
         });
 
         this.templateForm = new TemplateForm({
@@ -450,6 +451,18 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
                 this.callbacks.onHideLoading?.();
             }
         });
+    }
+
+    /**
+     * Handle export action from header
+     */
+    private handleExport(): void {
+        if (!this.currentTemplate) {
+            this.callbacks.onShowError?.("No Template Selected", "Please select a template to export.");
+            return;
+        }
+
+        window.open(`/api/templates/${this.currentTemplate.id}/export`, "_blank", "noopener,noreferrer");
     }
 
     // Private methods - Mode Transitions
