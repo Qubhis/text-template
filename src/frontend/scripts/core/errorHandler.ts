@@ -34,6 +34,7 @@ export interface LoadingState {
     operation?: string;
 }
 
+// REFACTOR: rename this to notification handler
 /**
  * UI Error Handler
  * Manages error display, loading states, and user feedback
