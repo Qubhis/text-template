@@ -85,15 +85,8 @@ body {
 
 .sidebar .btn.btn-tertiary {
     margin-bottom: var(--md-dp-spacing-24);
-    box-shadow: var(--md-elevation-0);
-    transition: all 0.2s ease;
     padding: var(--md-dp-spacing-16);
     align-self: flex-start;
-}
-
-.sidebar .btn.btn-tertiary:hover:not(:disabled) {
-    box-shadow: var(--md-elevation-1);
-    /* transition: all 0.2s ease; */
 }
 
 /* Modern Borderless Search Input */
@@ -755,28 +748,22 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.02em;
     font-weight: 600;
-    border-radius: var(--radius-xl);
 }
 
 /* Variable Highlighting in Content */
 .variable-filled {
     background-color: var(--md-sys-color-variable-filled);
     color: var(--md-sys-color-on-variable-filled);
-    /* padding: var(--md-dp-spacing-4) var(--md-dp-spacing-8); */
     padding: 0.5px;
     border-radius: var(--radius-sm);
     font-weight: 500;
-    /* border: 1px solid var(--md-sys-color-primary); */
 }
 
 .variable-empty {
     background-color: var(--md-sys-color-variable-empty);
     color: var(--md-sys-color-on-variable-empty);
-    /* padding: var(--md-dp-spacing-4) var(--md-dp-spacing-8); */
-
     border-radius: var(--radius-sm);
     font-weight: 500;
-    /* border: 1px solid var(--md-sys-color-tertiary); */
 }
 
 /* Modern Buttons with Larger Radius */
@@ -786,8 +773,7 @@ body {
     gap: var(--md-dp-spacing-8);
     padding: var(--md-dp-spacing-8) var(--md-dp-spacing-16);
     border: none;
-    border-radius: var(--radius-lg); /* Larger radius as requested */
-    /* font-size: var(--type-scale-label-large); */
+    border-radius: var(--radius-xl);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -812,57 +798,51 @@ body {
 .btn-primary {
     background-color: var(--md-sys-color-primary);
     color: var(--md-sys-color-on-primary);
-    box-shadow: var(--md-elevation-0);
     transition: all 0.2s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background-color: var(--md-sys-color-primary);
-    box-shadow: var(--md-elevation-1);
-    /* transform: translateY(-1px); */
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 90%, transparent);
+    transition: all 0.2s ease;
 }
 
 .btn-primary:active:not(:disabled) {
-    /* transform: translateY(0); */
-    box-shadow: var(--md-elevation-0);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
 
 /* Secondary Button */
 .btn-secondary {
     background-color: var(--md-sys-color-secondary-container);
     color: var(--md-sys-color-on-secondary-container);
-    box-shadow: var(--md-elevation-0);
     transition: all 0.2s ease;
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background-color: var(--md-sys-color-secondary-container);
-    box-shadow: var(--md-elevation-1);
+    background-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 90%, transparent);
     transition: all 0.2s ease;
 }
 
 .btn-secondary:active:not(:disabled) {
-    /* transform: translateY(0); */
-    box-shadow: var(--md-elevation-0);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
 
 /* Tertiary Button */
 .btn-tertiary {
     background-color: var(--md-sys-color-tertiary-fixed-dim);
     color: var(--md-sys-color-on-tertiary-fixed-variant);
-    box-shadow: var(--md-elevation-0);
     transition: all 0.2s ease;
 }
 
 .btn-tertiary:hover:not(:disabled) {
-    background-color: var(--md-sys-color-tertiary-fixed-dim);
-    box-shadow: var(--md-elevation-1);
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-fixed-dim) 90%, transparent);
     transition: all 0.2s ease;
 }
 
 .btn-tertiary:active:not(:disabled) {
-    /* transform: translateY(0); */
-    box-shadow: var(--md-elevation-0);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
 
 /* Danger Button */
@@ -873,27 +853,30 @@ body {
 }
 
 .btn-danger:hover:not(:disabled) {
-    background-color: var(--md-sys-color-tertiary-container);
-    box-shadow: var(--md-elevation-1);
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-container) 90%, transparent);
     transition: all 0.2s ease;
 }
 
 .btn-danger:active:not(:disabled) {
-    box-shadow: var(--md-elevation-0);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
 
 .btn-transparent {
     background-color: transparent;
     color: var(--md-sys-color-primary);
     box-shadow: var(--md-elevation-0);
+    transition: all 0.2s ease;
 }
 
 .btn-transparent:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--md-sys-color-on-primary-container) 8%, transparent);
+    background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 12%, transparent);
+    transition: all 0.2s ease;
 }
 
 .btn-transparent:active:not(:disabled) {
-    background-color: color-mix(in srgb, var(--md-sys-color-on-primary-container) 12%, transparent);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
 
 .btn.btn-transparent.secondary {
@@ -909,7 +892,6 @@ body {
     padding: var(--md-dp-spacing-8) var(--md-dp-spacing-16);
     font-size: var(--type-scale-label-medium);
     min-height: 32px;
-    border-radius: var(--radius-lg);
 }
 
 .icon {
@@ -925,7 +907,6 @@ body {
     padding: var(--md-dp-spacing-8);
     background-color: transparent;
     color: var(--md-sys-color-on-surface-variant);
-    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -934,10 +915,12 @@ body {
 .btn-global-utility:hover:not(:disabled) {
     background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
     color: var(--md-sys-color-on-surface);
+    transition: all 0.2s ease;
 }
 
 .btn-global-utility:active:not(:disabled) {
-    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
 }
 
 /* Import Template Button Positioning */
