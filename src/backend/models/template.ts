@@ -33,6 +33,15 @@ export interface UpdateTemplateInput {
     tags?: string[];
 }
 
+// Template export data (excludes auto-generated fields)
+export interface ExportTemplateData {
+    title: string;
+    content: string;
+    categoryId?: string;
+    description?: string;
+    tags?: string[];
+}
+
 /**
  * Validation utilities for template data
  */
@@ -277,5 +286,49 @@ export class TemplateUtils {
         }
 
         return updated;
+    }
+
+    /**
+     * Sanitize a title for use in a filename
+     * Removes special characters and replaces spaces with hyphens
+     */
+    static sanitizeFilename(title: string): string {
+        return title
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+            .replace(/\s+/g, "-") // Replace spaces with hyphens
+            .replace(/-+/g, "-") // Remove duplicate hyphens
+            .replace(/^-|-$/g, "") // Remove leading/trailing hyphens
+            .substring(0, 50); // Limit length
+    }
+
+    /**
+     * Generate export filename with title and timestamp
+     * Format: {sanitized-title}-{YYYY-MM-DD-HHmmss}.json
+     */
+    static generateExportFilename(title: string): string {
+        const sanitized = this.sanitizeFilename(title);
+        const now = new Date();
+        const timestamp = now
+            .toISOString()
+            .replace(/T/, "-")
+            .replace(/:/g, "")
+            .replace(/\.\d+Z$/, "");
+
+        const filename = sanitized ? `${sanitized}-${timestamp}` : `template-${timestamp}`;
+        return `${filename}.json`;
+    }
+
+    /**
+     * Create export data from a template (excludes id, created, modified)
+     */
+    static createExportData(template: Template): ExportTemplateData {
+        return {
+            title: template.title,
+            content: template.content,
+            categoryId: template.categoryId,
+            description: template.description,
+            tags: template.tags,
+        };
     }
 }

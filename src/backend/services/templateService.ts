@@ -1,5 +1,5 @@
 import { FileManager } from "../utils/fileManager";
-import { Template, CreateTemplateInput, UpdateTemplateInput, TemplateValidator, TemplateUtils } from "../models/template";
+import { Template, CreateTemplateInput, UpdateTemplateInput, ExportTemplateData, TemplateValidator, TemplateUtils } from "../models/template";
 
 /**
  * Service for template CRUD operations
@@ -131,6 +131,21 @@ export class TemplateService {
             await this.fileManager.deleteFile(templatePath);
         } catch (error) {
             throw new Error(`Failed to delete template: ${error}`);
+        }
+    }
+
+    /**
+     * Get export data for a template (excludes id, created, modified)
+     */
+    async getExportData(id: string): Promise<{ data: ExportTemplateData; filename: string }> {
+        try {
+            const template = await this.getTemplateById(id);
+            const exportData = TemplateUtils.createExportData(template);
+            const filename = TemplateUtils.generateExportFilename(template.title);
+
+            return { data: exportData, filename };
+        } catch (error) {
+            throw new Error(`Failed to get export data: ${error}`);
         }
     }
 }
