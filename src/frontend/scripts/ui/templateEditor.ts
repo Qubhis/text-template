@@ -147,6 +147,20 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     }
 
     /**
+     * Populate editor with imported template data
+     * Opens the editor in create mode with pre-filled data for review
+     */
+    public populateFromImport(importedData: { title: string; content: string; categoryId?: string; description?: string; tags?: string[] }): void {
+        if (this.isDirtyState()) {
+            this.callbacks.onShowUnsavedChangesModal?.(() => {
+                this.proceedWithImport(importedData);
+            });
+        } else {
+            this.proceedWithImport(importedData);
+        }
+    }
+
+    /**
      * Set mode for entire editor
      */
     public setMode(mode: "view" | "edit" | "create"): void {
@@ -480,6 +494,28 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.validateInitialState();
 
         console.log("➕ Starting template creation");
+    }
+
+    private proceedWithImport(importedData: { title: string; content: string; categoryId?: string; description?: string; tags?: string[] }): void {
+        this.currentTemplate = null;
+        this.currentData = {
+            title: importedData.title,
+            categoryId: importedData.categoryId || "",
+            description: importedData.description || "",
+            content: importedData.content,
+        };
+        this.resetVariableValues();
+        this.resetValidationState();
+        this.setMode("create");
+        this.syncData();
+        this.isDirty = true; // Mark as dirty since we have imported data
+
+        // Update variable panel before validation
+        this.updateVariablePanelFromCurrentData();
+        // Validate imported data
+        this.validateInitialState();
+
+        console.log("📥 Template imported and ready for review:", importedData.title);
     }
 
     private proceedWithCancel(): void {
