@@ -896,6 +896,14 @@ body {
     background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
 }
 
+/* Import Template Button Positioning */
+#importTemplateBtn {
+    position: fixed;
+    top: var(--md-dp-spacing-16);
+    right: calc(var(--md-dp-spacing-16) + 40px + var(--md-dp-spacing-8)); /* 16px + button width + gap */
+    z-index: 1000;
+}
+
 /* Theme Settings Button Positioning */
 #themeSettingsBtn {
     position: fixed;
