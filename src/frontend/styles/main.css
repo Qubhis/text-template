@@ -873,6 +873,10 @@ body {
     background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 8%, transparent);
 }
 
+.btn.btn-transparent.secondary {
+    color: var(--md-sys-color-secondary);
+}
+
 .btn-action {
     padding: var(--md-dp-spacing-8) var(--md-dp-spacing-12);
 }
