@@ -20,8 +20,8 @@ export interface DialogConfig {
  * Creates and manages dialogs according to MD3 specifications
  */
 export class Dialog {
-    private scrim: HTMLElement;
-    private container: HTMLElement;
+    private scrim!: HTMLElement;
+    private container!: HTMLElement;
     private isVisible: boolean = false;
 
     constructor(private config: DialogConfig) {
@@ -34,19 +34,19 @@ export class Dialog {
      */
     private createElements(): void {
         // Create scrim
-        this.scrim = this.createElement('div', 'md-dialog-scrim', { role: 'presentation' });
-        
+        this.scrim = this.createElement("div", "md-dialog-scrim", { role: "presentation" });
+
         // Create container
-        this.container = this.createElement('div', 'md-dialog-container', { 
-            role: 'dialog', 
-            'aria-modal': 'true', 
-            'aria-labelledby': 'dialog-title' 
+        this.container = this.createElement("div", "md-dialog-container", {
+            role: "dialog",
+            "aria-modal": "true",
+            "aria-labelledby": "dialog-title",
         });
 
         // Apply optional sizing
         if (this.config.contentWidth) this.container.style.width = this.config.contentWidth;
         if (this.config.contentHeight) {
-            const content = this.container.querySelector('.md-dialog-content') as HTMLElement;
+            const content = this.container.querySelector(".md-dialog-content") as HTMLElement;
             if (content) content.style.height = this.config.contentHeight;
         }
 
@@ -72,26 +72,28 @@ export class Dialog {
      * Create buttons HTML string
      */
     private createButtonsHTML(): string {
-        const buttons = this.config.buttons || [{ text: 'Close', action: () => this.hide() }];
-        
+        const buttons = this.config.buttons || [{ text: "Close", action: () => this.hide() }];
+
         if (buttons.length > 2) {
-            console.warn('MD3 Dialog: Maximum of 2 buttons recommended.');
+            console.warn("MD3 Dialog: Maximum of 2 buttons recommended.");
         }
 
-        return buttons.map((button, index) => {
-            const buttonType = buttons.length === 1 ? 'primary' : (index === 0 ? 'secondary' : 'primary');
-            return `<button class="md-dialog-button md-dialog-button-${buttonType}" data-action="${index}">${button.text}</button>`;
-        }).join('');
+        return buttons
+            .map((button, index) => {
+                const buttonType = buttons.length === 1 ? "primary" : index === 0 ? "secondary" : "primary";
+                return `<button class="md-dialog-button md-dialog-button-${buttonType}" data-action="${index}">${button.text}</button>`;
+            })
+            .join("");
     }
 
     /**
      * Attach event listeners to buttons
      */
     private attachButtonListeners(): void {
-        const buttons = this.config.buttons || [{ text: 'Close', action: () => this.hide() }];
-        
-        this.container.querySelectorAll('[data-action]').forEach((button, index) => {
-            button.addEventListener('click', (e) => {
+        const buttons = this.config.buttons || [{ text: "Close", action: () => this.hide() }];
+
+        this.container.querySelectorAll("[data-action]").forEach((button, index) => {
+            button.addEventListener("click", (e) => {
                 e.preventDefault();
                 buttons[index].action();
             });
@@ -103,12 +105,12 @@ export class Dialog {
      */
     private setupEventListeners(): void {
         // Close on scrim click and escape key
-        this.scrim.addEventListener('click', (e) => {
+        this.scrim.addEventListener("click", (e) => {
             if (e.target === this.scrim) this.hide();
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (this.isVisible && e.key === 'Escape') {
+        document.addEventListener("keydown", (e) => {
+            if (this.isVisible && e.key === "Escape") {
                 e.preventDefault();
                 this.hide();
             }
@@ -126,12 +128,12 @@ export class Dialog {
 
         // Animate in
         requestAnimationFrame(() => {
-            this.scrim.classList.add('md-dialog-scrim-visible');
-            this.container.classList.add('md-dialog-container-visible');
+            this.scrim.classList.add("md-dialog-scrim-visible");
+            this.container.classList.add("md-dialog-container-visible");
         });
 
         // Focus first button
-        const firstButton = this.container.querySelector('button') as HTMLElement;
+        const firstButton = this.container.querySelector("button") as HTMLElement;
         firstButton?.focus();
     }
 
@@ -141,7 +143,7 @@ export class Dialog {
     public hide(): void {
         if (!this.isVisible) return;
 
-        this.scrim.classList.remove('md-dialog-scrim-visible', 'md-dialog-container-visible');
+        this.scrim.classList.remove("md-dialog-scrim-visible", "md-dialog-container-visible");
 
         setTimeout(() => {
             if (this.scrim.parentNode) {
