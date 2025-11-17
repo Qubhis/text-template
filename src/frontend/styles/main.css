@@ -239,8 +239,10 @@ body {
 
 /* Modern Content Header */
 .content-header {
-    padding: var(--md-dp-spacing-16);
+    padding-left: var(--md-dp-spacing-16);
     padding-top: var(--md-dp-spacing-32);
+    padding-right: 0px;
+    padding-bottom: var(--md-dp-spacing-16);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -740,7 +742,7 @@ body {
     margin-top: var(--md-dp-spacing-4);
 }
 
-/* Modern Reset Values Button */
+/* Modern Clear Values Button */
 .reset-values-btn {
     margin-top: var(--md-dp-spacing-16);
     margin-left: var(--md-dp-spacing-4);

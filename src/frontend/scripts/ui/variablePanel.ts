@@ -172,8 +172,8 @@ export class VariablePanel {
      */
     private createResetButton(): HTMLButtonElement {
         const button = document.createElement("button");
-        button.className = "btn btn-secondary btn-small reset-values-btn";
-        button.textContent = "Reset Values";
+        button.className = "btn btn-transparent btn-small reset-values-btn";
+        button.textContent = "Clear All";
         button.type = "button";
 
         // Add event listener
