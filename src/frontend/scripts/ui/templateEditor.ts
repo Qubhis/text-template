@@ -72,6 +72,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
             onCancel: () => this.handleCancel(),
             onEdit: () => this.handleEdit(),
             onDelete: () => this.handleDelete(),
+            onExport: () => this.handleExport(),
         });
 
         this.templateForm = new TemplateForm({
@@ -143,6 +144,20 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
             });
         } else {
             this.proceedWithCreate();
+        }
+    }
+
+    /**
+     * Populate editor with imported template data
+     * Opens the editor in create mode with pre-filled data for review
+     */
+    public populateFromImport(importedData: { title: string; content: string; categoryId?: string; description?: string; tags?: string[] }): void {
+        if (this.isDirtyState()) {
+            this.callbacks.onShowUnsavedChangesModal?.(() => {
+                this.proceedWithImport(importedData);
+            });
+        } else {
+            this.proceedWithImport(importedData);
         }
     }
 
@@ -289,7 +304,7 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
     private handleResetValues(): void {
         this.resetVariableValues();
         // Refresh both variable panel and form display
-        this.syncData();
+        this.variablePanel.updateVariableValues(this.getVariableValues());
     }
 
     /**
@@ -438,6 +453,18 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         });
     }
 
+    /**
+     * Handle export action from header
+     */
+    private handleExport(): void {
+        if (!this.currentTemplate) {
+            this.callbacks.onShowError?.("No Template Selected", "Please select a template to export.");
+            return;
+        }
+
+        window.open(`/api/templates/${this.currentTemplate.id}/export`, "_blank", "noopener,noreferrer");
+    }
+
     // Private methods - Mode Transitions
 
     private proceedWithTemplateLoad(template: Template): void {
@@ -480,6 +507,28 @@ export class TemplateEditor extends EventProvider<TemplateEditorEvent> {
         this.validateInitialState();
 
         console.log("➕ Starting template creation");
+    }
+
+    private proceedWithImport(importedData: { title: string; content: string; categoryId?: string; description?: string; tags?: string[] }): void {
+        this.currentTemplate = null;
+        this.currentData = {
+            title: importedData.title,
+            categoryId: importedData.categoryId || "",
+            description: importedData.description || "",
+            content: importedData.content,
+        };
+        this.resetVariableValues();
+        this.resetValidationState();
+        this.setMode("create");
+        this.syncData();
+        this.isDirty = true; // Mark as dirty since we have imported data
+
+        // Update variable panel before validation
+        this.updateVariablePanelFromCurrentData();
+        // Validate imported data
+        this.validateInitialState();
+
+        console.log("📥 Template imported and ready for review:", importedData.title);
     }
 
     private proceedWithCancel(): void {

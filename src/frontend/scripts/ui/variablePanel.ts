@@ -23,7 +23,7 @@ export class VariablePanel {
     // DOM elements
     private variableInputs: HTMLElement;
     private resetButton: HTMLButtonElement | null = null;
-    
+
     // Component instances
     private textFieldComponents: Map<string, OutlinedTextField> = new Map();
 
@@ -79,7 +79,7 @@ export class VariablePanel {
      */
     public updateVariableValues(values: VariableValues): void {
         this.currentValues = values;
-        
+
         // Update existing OutlinedTextField components
         this.textFieldComponents.forEach((component, variableName) => {
             const newValue = values[variableName] || "";
@@ -134,19 +134,22 @@ export class VariablePanel {
         group.className = "variable-input-group";
 
         // Create OutlinedTextField component
-        const textField = new OutlinedTextField({
-            label: variable.name,
-            multiline: true,  // Enable multiline for text variables
-            maxLines: 3,      // Cap at 3 lines with hidden scrollbar
-            value: this.currentValues[variable.name] || ""
-        }, {
-            onChange: (value: string) => {
-                this.callbacks.onVariableValueChange?.(variable.name, value);
+        const textField = new OutlinedTextField(
+            {
+                label: variable.name,
+                multiline: true, // Enable multiline for text variables
+                maxLines: 3, // Cap at 3 lines with hidden scrollbar
+                value: this.currentValues[variable.name] || "",
             },
-            onOptionSelect: (value: string) => {
-                this.callbacks.onVariableValueChange?.(variable.name, value);
+            {
+                onChange: (value: string) => {
+                    this.callbacks.onVariableValueChange?.(variable.name, value);
+                },
+                onOptionSelect: (value: string) => {
+                    this.callbacks.onVariableValueChange?.(variable.name, value);
+                },
             }
-        });
+        );
 
         // Convert to select mode if dropdown type
         if (variable.type === "dropdown" && variable.options) {
@@ -161,7 +164,7 @@ export class VariablePanel {
         return group;
     }
 
-    // Note: createTextInput and createDropdownInput methods have been replaced 
+    // Note: createTextInput and createDropdownInput methods have been replaced
     // with OutlinedTextField components in createInputGroup method above.
 
     /**
@@ -169,8 +172,8 @@ export class VariablePanel {
      */
     private createResetButton(): HTMLButtonElement {
         const button = document.createElement("button");
-        button.className = "btn btn-secondary btn-small reset-values-btn";
-        button.textContent = "Reset Values";
+        button.className = "btn btn-transparent btn-small reset-values-btn";
+        button.textContent = "Clear All";
         button.type = "button";
 
         // Add event listener
@@ -297,7 +300,8 @@ export class VariablePanel {
 
         const emptyMessage = document.createElement("p");
         emptyMessage.className = "no-variables";
-        emptyMessage.textContent = "No variables detected. Use {{variableName}} in your template.";
+        emptyMessage.textContent =
+            "No variables detected. Type {{variableName}} for a single text input variable or type {{dropdown:option one|option two}} for a dropdown input variable with options separated by the pipe operator ( | ).";
 
         this.variableInputs.appendChild(emptyMessage);
     }
@@ -307,9 +311,9 @@ export class VariablePanel {
      */
     private clearContent(): void {
         // Destroy all OutlinedTextField components
-        this.textFieldComponents.forEach(component => component.destroy());
+        this.textFieldComponents.forEach((component) => component.destroy());
         this.textFieldComponents.clear();
-        
+
         this.variableInputs.innerHTML = "";
         this.resetButton = null;
     }

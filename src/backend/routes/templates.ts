@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { TemplateService } from "../services/templateService";
 import { CreateTemplateInput, UpdateTemplateInput } from "../models/template";
 import BaseRoute, { ApiResponse, HTTP_STATUS } from "./baseRoute";
@@ -34,6 +34,21 @@ export class TemplateRoute extends BaseRoute<TemplateService> {
                     success: true,
                     data: template,
                 } as ApiResponse);
+            })
+        );
+
+        /**
+         * GET /api/templates/:id/export - Export template as JSON file
+         */
+        this.router.get(
+            "/templates/:id/export",
+            this.validateId.bind(this),
+            this.asyncHandler(async (req: Request, res: Response) => {
+                const { data, filename } = await this.service.getExportData(req.params.id);
+
+                res.setHeader("Content-Type", "application/json");
+                res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+                res.status(HTTP_STATUS.OK).send(JSON.stringify(data, null, 2));
             })
         );
 

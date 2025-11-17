@@ -12,6 +12,7 @@ import { TemplateEditor } from "./ui/templateEditor.js";
 import { DPICalculator } from "../utils/dpiCalculator.js";
 import { ThemeManager } from "./core/themeManager.js";
 import { ThemeSettingsDialog } from "./ui/themeSettingsDialog.js";
+import { FileUploadDialog } from "./ui/FileUploadDialog.js";
 
 /**
  * Application class - main coordinator
@@ -25,6 +26,7 @@ class App {
     private dpiCalculator: DPICalculator;
     private themeManager: ThemeManager;
     private themeDialog: ThemeSettingsDialog;
+    private fileUploadDialog: FileUploadDialog;
 
     constructor(dataManager: DataManager) {
         this.dataManager = dataManager;
@@ -51,6 +53,11 @@ class App {
         // Initialize theme management
         this.themeManager = ThemeManager.getInstance();
         this.themeDialog = new ThemeSettingsDialog();
+
+        // Initialize file upload dialog
+        this.fileUploadDialog = new FileUploadDialog((importedData) => {
+            this.templateEditor.populateFromImport(importedData);
+        });
     }
 
     /**
@@ -85,15 +92,16 @@ class App {
             console.log("🎨 Initializing theme settings...");
             this.initializeThemeSettings();
 
+            // Initialize Import Template Button
+            console.log("📥 Initializing import template button...");
+            this.initializeImportButton();
+
             // Setup window resize listener for DPI recalculation
             window.addEventListener("resize", () => {
                 this.dpiCalculator.recalculate();
             });
 
             console.log("✅ Application UI initialized successfully!");
-
-            // Show success notification
-            this.errorHandler.showSuccess("Application Ready", "Text Templates application loaded with new interface!");
         } catch (error) {
             console.error("❌ Failed to initialize application UI:", error);
             this.errorHandler.showError("Initialization Failed", "Failed to initialize the user interface. Please refresh the page.");
@@ -172,6 +180,23 @@ class App {
         });
 
         console.log("✅ Theme settings initialized");
+    }
+
+    /**
+     * Initialize import template button
+     */
+    private initializeImportButton(): void {
+        const importTemplateBtn = document.getElementById("importTemplateBtn") as HTMLButtonElement;
+        if (!importTemplateBtn) {
+            console.warn("Import template button not found");
+            return;
+        }
+
+        importTemplateBtn.addEventListener("click", () => {
+            this.fileUploadDialog.show();
+        });
+
+        console.log("✅ Import template button initialized");
     }
 }
 

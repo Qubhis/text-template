@@ -13,6 +13,7 @@ import {
     setElementDisplayed,
 } from "../../utils/domHelpers.js";
 import { FilledTextField } from "../../../components/text-fields/FilledTextField.js";
+import { ThreeDotMenuButton } from "../../../components/buttons/ThreeDotMenuButton.js";
 
 export interface TemplateHeaderCallbacks {
     onTitleChange?: (title: string) => void;
@@ -21,6 +22,7 @@ export interface TemplateHeaderCallbacks {
     onCancel?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
+    onExport?: () => void;
 }
 
 /**
@@ -45,7 +47,7 @@ export class TemplateHeader {
     // DOM Elements
     private titleElement: HTMLElement;
     private editButton: HTMLButtonElement;
-    private deleteButton: HTMLButtonElement;
+    private menuButton: ThreeDotMenuButton;
 
     // Inline editing elements (created dynamically)
     private titleField: FilledTextField | null = null;
@@ -61,7 +63,29 @@ export class TemplateHeader {
         // Get required DOM elements
         this.titleElement = getRequiredElement<HTMLElement>("templateTitle");
         this.editButton = getRequiredElement<HTMLButtonElement>("editTemplateBtn");
-        this.deleteButton = getRequiredElement<HTMLButtonElement>("deleteTemplateBtn");
+
+        // Create three-dot menu button
+        this.menuButton = new ThreeDotMenuButton({
+            items: [
+                {
+                    label: "Export to JSON",
+                    action: () => this.callbacks.onExport?.(),
+                },
+                {
+                    label: "Delete",
+                    action: () => this.callbacks.onDelete?.(),
+                    danger: true,
+                },
+            ],
+        });
+        // start in disabled state for initial app load without any template selected
+        this.menuButton.disable();
+
+        // Append menu button to actions container
+        const actionsContainer = this.editButton.parentElement;
+        if (actionsContainer) {
+            actionsContainer.appendChild(this.menuButton.getElement());
+        }
     }
 
     /**
@@ -81,12 +105,6 @@ export class TemplateHeader {
             this.callbacks.onEdit?.();
         });
         this.cleanupFunctions.push(editCleanup);
-
-        // Delete button
-        const deleteCleanup = addEventListenerWithCleanup(this.deleteButton, "click", () => {
-            this.callbacks.onDelete?.();
-        });
-        this.cleanupFunctions.push(deleteCleanup);
     }
 
     /**
@@ -217,12 +235,14 @@ export class TemplateHeader {
         // Create save button
         this.saveButton = document.createElement("button");
         this.saveButton.className = "btn btn-primary";
-        this.saveButton.innerHTML = '<span class="icon">💾</span>Save';
+        this.saveButton.innerHTML = "Save";
 
         // Create cancel button
         this.cancelButton = document.createElement("button");
-        this.cancelButton.className = "btn btn-secondary";
-        this.cancelButton.innerHTML = '<span class="icon">✖️</span>Cancel';
+        this.cancelButton.className = "btn btn-transparent secondary btn-action";
+        this.cancelButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" stroke="currentColor" stroke-width="1.3"/>
+</svg>`;
 
         // Add event listeners
         this.setupInlineEditingListeners();
@@ -266,7 +286,7 @@ export class TemplateHeader {
 
         // Hide view mode buttons
         setElementDisplayed(this.editButton, false);
-        setElementDisplayed(this.deleteButton, false);
+        setElementDisplayed(this.menuButton.getElement(), false);
 
         // Show edit mode buttons
         const actionsContainer = this.editButton.parentElement;
@@ -290,8 +310,8 @@ export class TemplateHeader {
         setElementDisplayed(this.titleElement, true);
 
         // Show view mode buttons
-        setElementDisplayed(this.deleteButton, true);
         setElementDisplayed(this.editButton, true);
+        setElementDisplayed(this.menuButton.getElement(), true);
 
         // Remove edit mode class from header
         const header = this.titleElement.closest(".content-header");
@@ -342,7 +362,11 @@ export class TemplateHeader {
      */
     private enableActionButtons(enabled: boolean): void {
         this.editButton.disabled = !enabled;
-        this.deleteButton.disabled = !enabled;
+        if (enabled) {
+            this.menuButton.enable();
+        } else {
+            this.menuButton.disable();
+        }
     }
 
     /**
@@ -350,6 +374,9 @@ export class TemplateHeader {
      */
     public destroy(): void {
         this.cleanupInlineEditingElements();
+
+        // Destroy menu button
+        this.menuButton.destroy();
 
         // Remove all event listeners
         this.cleanupFunctions.forEach((cleanup) => cleanup());
