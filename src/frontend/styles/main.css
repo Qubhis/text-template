@@ -859,6 +859,21 @@ body {
     box-shadow: var(--md-elevation-0);
 }
 
+.btn-transparent {
+    background-color: transparent;
+    color: var(--md-sys-color-primary);
+    box-shadow: var(--md-elevation-0);
+}
+
+.btn-transparent:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 8%, transparent);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.btn-transparent:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 12%, transparent);
+}
+
 /* Small Button Variant */
 .btn-small {
     padding: var(--md-dp-spacing-8) var(--md-dp-spacing-16);
@@ -872,7 +887,7 @@ body {
 }
 
 /* Icon Button Variant - MD3 specs */
-.btn-icon {
+.btn-global-utility {
     width: 40px;
     height: 40px;
     min-width: 40px;
@@ -886,13 +901,12 @@ body {
     justify-content: center;
 }
 
-.btn-icon:hover:not(:disabled) {
-    background-color: var(--md-sys-color-on-surface);
+.btn-global-utility:hover:not(:disabled) {
     background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
     color: var(--md-sys-color-on-surface);
 }
 
-.btn-icon:active:not(:disabled) {
+.btn-global-utility:active:not(:disabled) {
     background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
 }
 

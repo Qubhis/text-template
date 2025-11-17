@@ -80,8 +80,7 @@ export class Dialog {
 
         return buttons
             .map((button, index) => {
-                const buttonType = buttons.length === 1 ? "primary" : index === 0 ? "secondary" : "primary";
-                return `<button class="md-dialog-button md-dialog-button-${buttonType}" data-action="${index}">${button.text}</button>`;
+                return `<button class="md-dialog-button" data-action="${index}">${button.text}</button>`;
             })
             .join("");
     }

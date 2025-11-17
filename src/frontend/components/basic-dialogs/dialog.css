@@ -54,7 +54,7 @@
 
 /* Dialog Title - MD3 Headline Small */
 .md-dialog-title {
-    font-size: var(--type-scale-headline-small);
+    font-size: var(--type-scale-title-large);
     font-weight: 600;
     color: var(--md-sys-color-on-surface);
     margin: 0;
@@ -92,44 +92,18 @@
     transition: all 0.2s ease;
     min-height: 40px;
     outline-offset: 2px;
-}
-
-/* Primary button (confirming action) */
-.md-dialog-button-primary {
-    background-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-}
-
-.md-dialog-button-primary:hover:not(:disabled) {
-    background-color: var(--md-sys-color-primary);
-    box-shadow: var(--md-elevation-1);
-}
-
-.md-dialog-button-primary:focus-visible {
-    outline: 2px solid var(--md-sys-color-primary);
-}
-
-.md-dialog-button-primary:active:not(:disabled) {
+    position: relative;
+    background-color: transparent;
+    color: var(--md-sys-color-secondary);
     box-shadow: var(--md-elevation-0);
 }
 
-/* Secondary button (dismissive action) */
-.md-dialog-button-secondary {
-    background-color: var(--md-sys-color-secondary-container);
-    color: var(--md-sys-color-on-secondary-container);
+.md-dialog-button:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 8%, transparent);
 }
 
-.md-dialog-button-secondary:hover:not(:disabled) {
-    background-color: var(--md-sys-color-secondary-container);
-    box-shadow: var(--md-elevation-1);
-}
-
-.md-dialog-button-secondary:focus-visible {
-    outline: 2px solid var(--md-sys-color-secondary);
-}
-
-.md-dialog-button-secondary:active:not(:disabled) {
-    box-shadow: var(--md-elevation-0);
+.md-dialog-button:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 12%, transparent);
 }
 
 /* Disabled state */
@@ -137,11 +111,6 @@
     opacity: 0.38;
     cursor: not-allowed;
     box-shadow: none;
-}
-
-/* Simple state effects */
-.md-dialog-button {
-    position: relative;
 }
 
 /* Responsive behavior */
@@ -162,4 +131,3 @@
         justify-content: center;
     }
 }
-

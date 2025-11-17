@@ -3,7 +3,7 @@
 // Compatibility wrapper for the new Dialog component
 // Maintains the same interface as the old ModalSystem
 
-import { Dialog } from './Dialog.js';
+import { Dialog } from "./Dialog.js";
 
 /**
  * Dialog System Component
@@ -22,7 +22,7 @@ export class DialogSystem {
      */
     public initialize(): void {
         // No initialization needed for the new system
-        console.log('✅ Dialog system initialized');
+        console.log("✅ Dialog system initialized");
     }
 
     /**
@@ -30,9 +30,9 @@ export class DialogSystem {
      */
     public showUnsavedChangesModal(onConfirm: () => void): void {
         this.showConfirmationModal(
-            "Unsaved Changes",
-            "You have unsaved changes. Are you sure you want to continue? Your changes will be lost.",
-            "Continue",
+            "Discard unsaved changes?",
+            "You have changes that won't be saved if you close.",
+            "Discard",
             "Keep Editing",
             onConfirm
         );
@@ -43,8 +43,8 @@ export class DialogSystem {
      */
     public showDeleteConfirmationModal(templateTitle: string, onConfirm: () => void): void {
         this.showConfirmationModal(
-            "Delete Template",
-            `Are you sure you want to delete "${templateTitle}"? This action cannot be undone.`,
+            "Permanently delete?",
+            `Are you sure you want to permanently delete "${templateTitle}" ? This action cannot be undone.`,
             "Delete",
             "Cancel",
             onConfirm
@@ -62,8 +62,14 @@ export class DialogSystem {
             content: message,
             buttons: [
                 { text: cancelText, action: () => this.hideModal() },
-                { text: confirmText, action: () => { this.hideModal(); onConfirm(); } }
-            ]
+                {
+                    text: confirmText,
+                    action: () => {
+                        this.hideModal();
+                        onConfirm();
+                    },
+                },
+            ],
         });
 
         this.currentDialog.show();
