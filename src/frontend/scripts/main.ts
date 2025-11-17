@@ -102,9 +102,6 @@ class App {
             });
 
             console.log("✅ Application UI initialized successfully!");
-
-            // Show success notification
-            this.errorHandler.showSuccess("Application Ready", "Text Templates application loaded with new interface!");
         } catch (error) {
             console.error("❌ Failed to initialize application UI:", error);
             this.errorHandler.showError("Initialization Failed", "Failed to initialize the user interface. Please refresh the page.");
