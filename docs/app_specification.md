@@ -389,10 +389,9 @@ interface ApiResponse<T> {
     - [ ] sanitize user input for variable values
     - [ ] check owasp
 
-1. **Single processing**:
-    - [ ] Implement single template export (JSON download)
-    - [ ] Add single template import (JSON upload)
-    - [ ] Add import/export UI components
+1. **✅ Single processing (COMPLETED)**:
+    - [x] Implement single template export (JSON download)
+    - [x] Add single template import (JSON upload)
 
 2. **Bulk processing**:
     - [ ] Create bulk export (ZIP with all templates)
