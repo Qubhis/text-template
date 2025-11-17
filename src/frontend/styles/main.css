@@ -12,6 +12,7 @@
 @import url("../components/text-fields/textFields.css");
 /* Import Material Design 3 Dialog Component */
 @import url("../components/basic-dialogs/dialog.css");
+@import url("../components/buttons/menuButton.css");
 /* Import File Upload Dialog Styles */
 @import url("./file-upload-dialog.css");
 

@@ -13,6 +13,7 @@ import {
     setElementDisplayed,
 } from "../../utils/domHelpers.js";
 import { FilledTextField } from "../../../components/text-fields/FilledTextField.js";
+import { ThreeDotMenuButton } from "../../../components/buttons/ThreeDotMenuButton.js";
 
 export interface TemplateHeaderCallbacks {
     onTitleChange?: (title: string) => void;
@@ -46,8 +47,7 @@ export class TemplateHeader {
     // DOM Elements
     private titleElement: HTMLElement;
     private editButton: HTMLButtonElement;
-    private exportButton: HTMLButtonElement;
-    private deleteButton: HTMLButtonElement;
+    private menuButton: ThreeDotMenuButton;
 
     // Inline editing elements (created dynamically)
     private titleField: FilledTextField | null = null;
@@ -63,8 +63,29 @@ export class TemplateHeader {
         // Get required DOM elements
         this.titleElement = getRequiredElement<HTMLElement>("templateTitle");
         this.editButton = getRequiredElement<HTMLButtonElement>("editTemplateBtn");
-        this.exportButton = getRequiredElement<HTMLButtonElement>("exportTemplateBtn");
-        this.deleteButton = getRequiredElement<HTMLButtonElement>("deleteTemplateBtn");
+
+        // Create three-dot menu button
+        this.menuButton = new ThreeDotMenuButton({
+            items: [
+                {
+                    label: "Export to JSON",
+                    action: () => this.callbacks.onExport?.(),
+                },
+                {
+                    label: "Delete",
+                    action: () => this.callbacks.onDelete?.(),
+                    danger: true,
+                },
+            ],
+        });
+        // start in disabled state for initial app load without any template selected
+        this.menuButton.disable();
+
+        // Append menu button to actions container
+        const actionsContainer = this.editButton.parentElement;
+        if (actionsContainer) {
+            actionsContainer.appendChild(this.menuButton.getElement());
+        }
     }
 
     /**
@@ -84,18 +105,6 @@ export class TemplateHeader {
             this.callbacks.onEdit?.();
         });
         this.cleanupFunctions.push(editCleanup);
-
-        // Export button
-        const exportCleanup = addEventListenerWithCleanup(this.exportButton, "click", () => {
-            this.callbacks.onExport?.();
-        });
-        this.cleanupFunctions.push(exportCleanup);
-
-        // Delete button
-        const deleteCleanup = addEventListenerWithCleanup(this.deleteButton, "click", () => {
-            this.callbacks.onDelete?.();
-        });
-        this.cleanupFunctions.push(deleteCleanup);
     }
 
     /**
@@ -275,8 +284,7 @@ export class TemplateHeader {
 
         // Hide view mode buttons
         setElementDisplayed(this.editButton, false);
-        setElementDisplayed(this.exportButton, false);
-        setElementDisplayed(this.deleteButton, false);
+        setElementDisplayed(this.menuButton.getElement(), false);
 
         // Show edit mode buttons
         const actionsContainer = this.editButton.parentElement;
@@ -301,8 +309,7 @@ export class TemplateHeader {
 
         // Show view mode buttons
         setElementDisplayed(this.editButton, true);
-        setElementDisplayed(this.exportButton, true);
-        setElementDisplayed(this.deleteButton, true);
+        setElementDisplayed(this.menuButton.getElement(), true);
 
         // Remove edit mode class from header
         const header = this.titleElement.closest(".content-header");
@@ -353,8 +360,11 @@ export class TemplateHeader {
      */
     private enableActionButtons(enabled: boolean): void {
         this.editButton.disabled = !enabled;
-        this.exportButton.disabled = !enabled;
-        this.deleteButton.disabled = !enabled;
+        if (enabled) {
+            this.menuButton.enable();
+        } else {
+            this.menuButton.disable();
+        }
     }
 
     /**
@@ -362,6 +372,9 @@ export class TemplateHeader {
      */
     public destroy(): void {
         this.cleanupInlineEditingElements();
+
+        // Destroy menu button
+        this.menuButton.destroy();
 
         // Remove all event listeners
         this.cleanupFunctions.forEach((cleanup) => cleanup());
