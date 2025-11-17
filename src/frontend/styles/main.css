@@ -83,7 +83,7 @@ body {
     padding-bottom: var(--md-dp-spacing-24);
 }
 
-.sidebar .btn.btn-primary {
+.sidebar .btn.btn-tertiary {
     margin-bottom: var(--md-dp-spacing-24);
     box-shadow: var(--md-elevation-0);
     transition: all 0.2s ease;
@@ -91,7 +91,7 @@ body {
     align-self: flex-start;
 }
 
-.sidebar .btn.btn-primary:hover:not(:disabled) {
+.sidebar .btn.btn-tertiary:hover:not(:disabled) {
     box-shadow: var(--md-elevation-1);
     /* transition: all 0.2s ease; */
 }
@@ -846,6 +846,25 @@ body {
     box-shadow: var(--md-elevation-0);
 }
 
+/* Tertiary Button */
+.btn-tertiary {
+    background-color: var(--md-sys-color-tertiary-fixed-dim);
+    color: var(--md-sys-color-on-tertiary-fixed-variant);
+    box-shadow: var(--md-elevation-0);
+    transition: all 0.2s ease;
+}
+
+.btn-tertiary:hover:not(:disabled) {
+    background-color: var(--md-sys-color-tertiary-fixed-dim);
+    box-shadow: var(--md-elevation-1);
+    transition: all 0.2s ease;
+}
+
+.btn-tertiary:active:not(:disabled) {
+    /* transform: translateY(0); */
+    box-shadow: var(--md-elevation-0);
+}
+
 /* Danger Button */
 .btn-danger {
     background-color: var(--md-sys-color-tertiary-container);
@@ -870,7 +889,11 @@ body {
 }
 
 .btn-transparent:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 8%, transparent);
+    background-color: color-mix(in srgb, var(--md-sys-color-on-primary-container) 8%, transparent);
+}
+
+.btn-transparent:active:not(:disabled) {
+    background-color: color-mix(in srgb, var(--md-sys-color-on-primary-container) 12%, transparent);
 }
 
 .btn.btn-transparent.secondary {
