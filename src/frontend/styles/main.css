@@ -243,12 +243,13 @@ body {
     padding-top: var(--md-dp-spacing-32);
     display: flex;
     justify-content: space-between;
-    align-items: anchor-center;
+    align-items: flex-start;
     transition: all 0.3s ease;
+    margin-bottom: var(--md-dp-spacing-4);
 }
 
 .template-info {
-    margin-bottom: var(--md-dp-spacing-12);
+    margin-right: var(--md-dp-spacing-4);
 }
 
 .content-header.edit-mode .template-info {
@@ -868,11 +869,10 @@ body {
 
 .btn-transparent:hover:not(:disabled) {
     background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 8%, transparent);
-    color: var(--md-sys-color-on-primary-container);
 }
 
-.btn-transparent:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--md-sys-color-primary-container) 12%, transparent);
+.btn-action {
+    padding: var(--md-dp-spacing-8) var(--md-dp-spacing-12);
 }
 
 /* Small Button Variant */

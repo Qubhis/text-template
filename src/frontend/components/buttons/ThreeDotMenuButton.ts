@@ -60,7 +60,7 @@ export class ThreeDotMenuButton {
 
     private createButton(): HTMLButtonElement {
         const button = document.createElement("button");
-        button.className = this.config.buttonClassName || "btn btn-transparent";
+        button.className = this.config.buttonClassName || "btn btn-transparent btn-action";
         button.innerHTML = THREE_DOTS_ICON;
         button.setAttribute("aria-label", "Template actions");
         button.setAttribute("aria-haspopup", "true");
@@ -149,7 +149,7 @@ export class ThreeDotMenuButton {
         document.removeEventListener("keydown", this.escapeKeyHandler);
 
         // Remove other listeners
-        this.cleanupFunctions.forEach(cleanup => cleanup());
+        this.cleanupFunctions.forEach((cleanup) => cleanup());
         this.cleanupFunctions = [];
         this.container.remove();
     }
