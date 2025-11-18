@@ -22,7 +22,6 @@
     "test": "npm run build:dev && npm run test:frontend",
     "test:frontend": "node ./dist/frontend/tests/suite.test.js",
     "validate": "npm run type-check && npm run lint && npm run test",
-    "prebuild": "npm run validate",
     "docker:build": "docker build -t text-template ."
   },
   "author": "",
