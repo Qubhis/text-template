@@ -117,8 +117,39 @@ body {
 
 .template-list {
     flex: 1;
-    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox: hide by default */
 }
+
+.template-list::-webkit-scrollbar {
+    display: none; /* Chrome/Safari: hide by default */
+}
+
+/* NOTE: this styling makes the scroll bar visible on hover, but it shifts list elements, therefore it's disabled now */
+/* Firefox: show on hover */
+/* .template-list:hover {
+    scrollbar-width: thin; 
+} */
+/* Chrome/Safari: show on hover */
+/* .template-list:hover::-webkit-scrollbar {
+    display: block;
+    width: 6px; 
+} */
+
+/* .template-list:hover::-webkit-scrollbar-track {
+    background: var(--md-sys-color-surface-container-low);
+}
+
+.template-list:hover::-webkit-scrollbar-thumb {
+    background: var(--md-sys-color-outline);
+    border-radius: var(--radius-sm);
+}
+
+.template-list:hover::-webkit-scrollbar-thumb::hover {
+    background: var(--md-sys-color-outline-variant);
+} */
 
 /* Modern Template List Items */
 .template-item {
@@ -195,7 +226,7 @@ body {
 }
 
 /* Modern Resize Handle */
-.resize-handle {
+/* .resize-handle {
     position: absolute;
     top: 0;
     right: 0;
@@ -210,7 +241,7 @@ body {
 .resize-handle:hover {
     width: 4px;
     right: -1px;
-}
+} */
 
 /* Main Content */
 .main-content {
@@ -1255,9 +1286,9 @@ body {
         height: 60vh;
     }
 
-    .resize-handle {
+    /* .resize-handle {
         display: none;
-    }
+    } */
 
     .content-container {
         flex-direction: column;
