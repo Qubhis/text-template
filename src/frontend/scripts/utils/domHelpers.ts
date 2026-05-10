@@ -18,7 +18,7 @@ export function getRequiredElement<T extends HTMLElement>(id: string): T {
 /**
  * Set element text content safely
  */
-export function setTextContent(element: HTMLElement | null, text: string): void {
+export function setTextContent(element: HTMLElement | null, text: string | null): void {
     if (element) {
         element.textContent = text;
     }

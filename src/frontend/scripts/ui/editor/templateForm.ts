@@ -186,9 +186,9 @@ export class TemplateForm {
         }
     }
 
-    private getCategoryNameById(categoryId: string): string {
+    private getCategoryNameById(categoryId: string): string | null {
         const category = this.categories.find((c) => c.id === categoryId);
-        return category ? category.name : "Uncategorized";
+        return category ? category.name : null;
     }
 
     /**
@@ -403,7 +403,8 @@ export class TemplateForm {
             // Set current value by name if we have a categoryId
             if (this.currentData.categoryId) {
                 const categoryName = this.getCategoryNameById(this.currentData.categoryId);
-                this.categoryField.setValue(categoryName);
+                if (categoryName === null) console.error("[TemplateForm] Category name is null and cannot set value for category field.");
+                this.categoryField.setValue(categoryName ?? "");
             }
         }
 
@@ -468,10 +469,8 @@ export class TemplateForm {
         if (!this.categoryField || !this.descriptionField || !this.contentField) return;
 
         // Update category field
-        if (this.currentData.categoryId) {
-            const categoryName = this.getCategoryNameById(this.currentData.categoryId);
-            this.categoryField.setValue(categoryName);
-        }
+        const categoryName = this.getCategoryNameById(this.currentData.categoryId);
+        this.categoryField.setValue(categoryName ?? "");
 
         this.descriptionField.setValue(this.currentData.description);
         this.contentField.setValue(this.currentData.content);
